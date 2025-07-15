@@ -8,7 +8,8 @@ services:
     ports:
       - "6806:6806"
     volumes:
-      - siyuan-data:/siyuan/workspace
+      # 可配置的思源数据目录，默认使用 Docker volume
+      - ${SIYUAN_DATA_PATH:-siyuan-data}:/siyuan/workspace
     environment:
       # 思源云同步配置（可选）
       - SIYUAN_ACCESS_AUTH_CODE=${SIYUAN_ACCESS_AUTH_CODE:-}

@@ -34,63 +34,97 @@ siyuan-blog-backend/
 └── README.md            # 项目文档
 ```
 
-## 🛠️ 开发环境
+## 🛠️ 本地开发指南
 
 ### 系统要求
 
 - Node.js >= 16.0.0
 - MySQL >= 8.0
 - Yarn >= 1.22.0
+- Docker & Docker Compose（推荐）
 
-### 环境变量配置
+### 步骤 1：准备思源笔记服务
+
+#### 方法一：使用 Docker 启动思源笔记（推荐）
+
+```bash
+# 在项目根目录，启动思源笔记和 MySQL 服务
+cd ../  # 回到项目根目录
+docker-compose up -d siyuan mysql
+
+# 查看服务状态
+docker-compose ps
+
+# 访问思源笔记管理界面
+# http://localhost:6806
+```
+
+#### 方法二：本地安装思源笔记
+
+```bash
+# 下载并安装思源笔记客户端
+# https://github.com/siyuan-note/siyuan/releases
+
+# 启动时开启 API 服务
+./siyuan --port=6806 --api-server
+```
+
+### 步骤 2：配置环境变量
 
 复制环境变量模板：
 
 ```bash
-cp env.example .env
+cp env.example .env.development
 ```
 
-编辑 `.env` 文件：
+编辑 `.env.development` 文件：
 
 ```bash
 # 服务器配置
 PORT=8000
 NODE_ENV=development
 
-# 数据库配置
-DB_HOST=localhost
+# 数据库配置（连接到 Docker MySQL）
+DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_USER=root
-DB_PASSWORD=your_password
+DB_PASSWORD=123456
 DB_NAME=siyuan_blog
 
-# SiYuan 配置
-SIYUAN_API_URL=http://localhost:6806
+# SiYuan 配置（连接到 Docker SiYuan）
+SIYUAN_API_URL=http://127.0.0.1:6806
 SIYUAN_TOKEN=
 
-# CORS 配置
+# CORS 配置（允许前端访问）
 CORS_ORIGIN=http://localhost:3000,http://localhost:5173
 ```
 
-### 安装依赖
+**重要说明**：
+- `DB_HOST` 使用 `127.0.0.1` 而不是 `localhost`，避免 IPv6 连接问题
+- `SIYUAN_API_URL` 指向本地 Docker 的思源服务端口 6806
+- 如果 MySQL 端口冲突，可以修改 `docker-compose.yml` 中的端口映射
+
+### 步骤 3：安装依赖
 
 ```bash
 yarn install
 ```
 
-### 数据库设置
+### 步骤 4：配置数据库
 
-1. **创建数据库**
-   ```sql
-   CREATE DATABASE siyuan_blog CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-   ```
+```bash
+# 等待 MySQL 服务完全启动（约30秒）
+sleep 30
 
-2. **运行数据库迁移**
-   ```bash
-   yarn migration:run
-   ```
+# 创建数据库（如果使用 Docker MySQL，数据库会自动创建）
+# 如果需要手动创建：
+# mysql -h127.0.0.1 -uroot -p123456 -e "CREATE DATABASE siyuan_blog CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
-### 启动开发服务器
+# 运行数据库迁移
+yarn migration:run
+```
+
+### 步骤 5：启动开发服务器
 
 ```bash
 # TypeScript 开发模式（推荐）
@@ -98,132 +132,167 @@ yarn dev:ts
 
 # 或者编译后运行
 yarn dev
-
-# 访问 API
-# http://localhost:8000/api
-# 健康检查: http://localhost:8000/health
 ```
 
-### 构建生产版本
+服务启动后：
+- API 服务：http://localhost:8000/api
+- 健康检查：http://localhost:8000/health
+- API 文档：http://localhost:8000/docs
+
+### 步骤 6：验证思源连接
 
 ```bash
-# 编译 TypeScript
-yarn build
+# 测试思源 API 连接
+curl http://localhost:8000/api/siyuan/status
 
-# 启动生产服务器
-yarn start
+# 预期响应
+{
+  "success": true,
+  "data": {
+    "connected": true,
+    "version": "2.x.x"
+  }
+}
 ```
 
-## 🏗️ 项目架构
+### 步骤 7：初始化数据
 
-### API 架构
+```bash
+# 同步思源笔记数据到数据库
+curl -X POST http://localhost:8000/api/posts/sync
+
+# 获取笔记本列表
+curl http://localhost:8000/api/notebooks
+
+# 获取文章列表
+curl http://localhost:8000/api/posts
+```
+
+## 🔧 思源笔记配置详解
+
+### SiYuan API 访问配置
+
+1. **访问思源管理界面**：http://localhost:6806
+2. **设置 → 关于 → API token**，复制 token 到 `.env.development`：
+   ```bash
+   SIYUAN_TOKEN=your_api_token_here
+   ```
+3. **重启后端服务**使配置生效
+
+### 思源数据结构
+
+后端会从思源笔记中同步以下数据：
+
+```mermaid
+graph LR
+    A[思源笔记] --> B[笔记本 Notebooks]
+    A --> C[文档 Documents]
+    B --> D[后端数据库]
+    C --> D
+    
+    D --> E[notebooks 表]
+    D --> F[posts 表]
+```
+
+### 支持的思源功能
+
+- ✅ 笔记本列表获取
+- ✅ 文档内容获取
+- ✅ 文档属性读取（标签、创建时间等）
+- ✅ Markdown 内容解析
+- ✅ 块级引用解析
+- 🔄 实时数据同步（开发中）
+- 🔄 图片资源处理（开发中）
+
+### 常见配置问题
+
+**问题 1**：思源 API 连接失败
+```bash
+# 检查思源服务状态
+docker-compose logs siyuan
+
+# 检查端口是否开放
+curl http://localhost:6806/api/system/getConf
+```
+
+**问题 2**：数据库连接失败
+```bash
+# 检查 MySQL 服务状态
+docker-compose logs mysql
+
+# 测试数据库连接
+mysql -h127.0.0.1 -P3306 -uroot -p123456 -e "SELECT 1"
+```
+
+**问题 3**：环境变量不生效
+```bash
+# 确认环境文件存在
+ls -la .env.development
+
+# 检查应用是否正确加载环境变量
+DEBUG=config:* yarn dev:ts
+```
+
+## 🌐 开发环境架构
 
 ```mermaid
 graph TB
-    A[Client Request] --> B[Express Router]
-    B --> C[Middleware]
-    C --> D[Controller]
-    D --> E[Service Layer]
-    E --> F[Repository]
-    F --> G[TypeORM Entity]
-    G --> H[MySQL Database]
+    A[前端 Vue App<br/>localhost:3000] --> B[后端 Express API<br/>localhost:8000]
+    B --> C[MySQL 数据库<br/>localhost:3306]
+    B --> D[SiYuan Docker<br/>localhost:6806]
     
-    I[SiYuan API] --> E
-```
-
-### 数据库架构
-
-```mermaid
-erDiagram
-    notebooks {
-        id varchar(36) PK
-        name varchar(255)
-        icon varchar(50)
-        sort int
-        created_at timestamp
-        updated_at timestamp
-    }
+    subgraph "Docker Services"
+        C
+        D
+    end
     
-    posts {
-        id varchar(36) PK
-        title varchar(255)
-        content text
-        excerpt text
-        notebook_id varchar(36) FK
-        tags json
-        created_at timestamp
-        updated_at timestamp
-        published_at timestamp
-    }
-    
-    notebooks ||--o{ posts : contains
+    subgraph "Local Development"
+        A
+        B
+    end
 ```
 
-### 服务层设计
+## 📝 开发工作流
 
-```typescript
-// 示例服务层结构
-export class PostService {
-  async getPosts(params: GetPostsParams): Promise<PaginatedPosts> {
-    // 业务逻辑实现
-  }
-  
-  async syncFromSiYuan(): Promise<SyncResult> {
-    // SiYuan 数据同步逻辑
-  }
-}
-```
-
-## 🔌 API 接口
-
-### 基础响应格式
-
-```typescript
-interface ApiResponse<T> {
-  success: boolean
-  data?: T
-  error?: {
-    code: string
-    message: string
-    timestamp: string
-  }
-}
-```
-
-### 主要接口
-
-#### 文章管理
-
-| 接口 | 方法 | 说明 | 参数 |
-|------|------|------|------|
-| `/api/posts` | GET | 获取文章列表 | `page`, `limit`, `tag`, `notebook` |
-| `/api/posts/:id` | GET | 获取文章详情 | `id` |
-| `/api/posts/sync` | POST | 同步文章数据 | - |
-
-#### 笔记本管理
-
-| 接口 | 方法 | 说明 | 参数 |
-|------|------|------|------|
-| `/api/notebooks` | GET | 获取笔记本列表 | - |
-| `/api/notebooks/:id` | GET | 获取笔记本详情 | `id` |
-
-#### SiYuan 集成
-
-| 接口 | 方法 | 说明 | 参数 |
-|------|------|------|------|
-| `/api/siyuan/status` | GET | 检查连接状态 | - |
-
-### 示例请求
+### 1. 日常开发流程
 
 ```bash
-# 获取文章列表
-curl "http://localhost:8000/api/posts?page=1&limit=10"
+# 启动基础服务
+docker-compose up -d siyuan mysql
 
-# 获取文章详情
-curl "http://localhost:8000/api/posts/123"
+# 启动后端开发服务
+cd siyuan-blog-backend
+yarn dev:ts
 
-# 检查 SiYuan 状态
-curl "http://localhost:8000/api/siyuan/status"
+# 在新终端启动前端（可选）
+cd ../siyuan-blog-frontend
+yarn dev
+```
+
+### 2. 数据同步流程
+
+```bash
+# 在思源笔记中创建/修改内容
+# 访问：http://localhost:6806
+
+# 触发数据同步
+curl -X POST http://localhost:8000/api/posts/sync
+
+# 查看同步结果
+curl http://localhost:8000/api/posts
+```
+
+### 3. 调试技巧
+
+```bash
+# 开启详细日志
+DEBUG=app:*,siyuan:*,db:* yarn dev:ts
+
+# 查看数据库内容
+mysql -h127.0.0.1 -uroot -p123456 siyuan_blog -e "SELECT * FROM posts LIMIT 5"
+
+# 监控 API 请求
+tail -f logs/api.log
 ```
 
 ## 💾 数据库管理
