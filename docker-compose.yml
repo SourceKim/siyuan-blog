@@ -1,0 +1,123 @@
+version: '3.8'
+
+services:
+  # SiYuan 笔记服务
+  siyuan:
+    image: b3log/siyuan:latest
+    container_name: siyuan-blog-siyuan
+    ports:
+      - "6806:6806"
+    volumes:
+      - siyuan-data:/siyuan/workspace
+    environment:
+      # 思源云同步配置（可选）
+      - SIYUAN_ACCESS_AUTH_CODE=${SIYUAN_ACCESS_AUTH_CODE:-}
+      - SIYUAN_REPO_SYNC_CLOUD=${SIYUAN_REPO_SYNC_CLOUD:-}
+    command: >
+      --workspace=/siyuan/workspace
+      ${SIYUAN_ACCESS_AUTH_CODE:+--accessAuthCode=${SIYUAN_ACCESS_AUTH_CODE}}
+      ${SIYUAN_REPO_SYNC_CLOUD:+--repo=${SIYUAN_REPO_SYNC_CLOUD}}
+    restart: unless-stopped
+    networks:
+      - siyuan-blog-network
+
+  # MySQL 数据库
+  mysql:
+    image: mysql:8.0
+    container_name: siyuan-blog-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-siyuan123}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-siyuan_blog}
+      - MYSQL_USER=${MYSQL_USER:-siyuan}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-siyuan123}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+    networks:
+      - siyuan-blog-network
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+
+  # 后端 API 服务
+  backend:
+    build: 
+      context: ./siyuan-blog-backend
+      dockerfile: Dockerfile
+    container_name: siyuan-blog-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=8000
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=${MYSQL_USER:-siyuan}
+      - DB_PASSWORD=${MYSQL_PASSWORD:-siyuan123}
+      - DB_NAME=${MYSQL_DATABASE:-siyuan_blog}
+      - SIYUAN_API_URL=http://siyuan:6806
+      - SIYUAN_TOKEN=${SIYUAN_TOKEN:-}
+      - CORS_ORIGIN=http://localhost:3000,http://frontend:80
+    depends_on:
+      - mysql
+      - siyuan
+    restart: unless-stopped
+    networks:
+      - siyuan-blog-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 前端 Web 服务
+  frontend:
+    build:
+      context: ./siyuan-blog-frontend
+      dockerfile: Dockerfile
+    container_name: siyuan-blog-frontend
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000/api
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - siyuan-blog-network
+
+  # Nginx 反向代理（可选）
+  nginx:
+    image: nginx:alpine
+    container_name: siyuan-blog-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+    networks:
+      - siyuan-blog-network
+    profiles:
+      - production
+
+# 数据卷
+volumes:
+  siyuan-data:
+    driver: local
+  mysql-data:
+    driver: local
+
+# 网络配置
+networks:
+  siyuan-blog-network:
+    driver: bridge 
