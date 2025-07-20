@@ -12,7 +12,7 @@ export const AppDataSource = new DataSource({
   database: config.database.database,
   synchronize: config.nodeEnv === 'development',
   logging: config.nodeEnv === 'development',
-  entities: ['src/entities/**/*.ts'],
+  entities: [__dirname + '/../entities/**/*.ts'],
   migrations: ['src/migrations/**/*.ts'],
   subscribers: ['src/subscribers/**/*.ts'],
   charset: 'utf8mb4',
