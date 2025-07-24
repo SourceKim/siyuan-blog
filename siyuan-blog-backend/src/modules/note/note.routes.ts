@@ -13,4 +13,7 @@ router.post('/docs', (req, res) => noteController.getDocs(req, res))
 // 获取文档内容
 router.post('/doc', (req, res) => noteController.getDoc(req, res))
 
+// 获取推荐文章
+router.post('/recommended', (req, res) => noteController.getRecommendedDocs(req, res))
+
 export { router as noteRoutes }

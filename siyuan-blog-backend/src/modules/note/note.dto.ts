@@ -1,4 +1,4 @@
-import { IsString, IsOptional } from 'class-validator'
+import { IsString, IsOptional, IsNumber, Min, Max } from 'class-validator'
 
 // 笔记本 DTO
 export class NotebookDto {
@@ -21,6 +21,7 @@ export class DocDto {
   hMtime!: string
   hCtime!: string
   subFileCount!: number
+  notebookName?: string // 可选的笔记本名称字段
 }
 
 // 笔记内容 DTO
@@ -29,6 +30,8 @@ export class NoteDto {
   content!: string
   path!: string
 }
+
+
 
 // 请求参数 DTO
 export class GetDocsRequestDto {
@@ -43,6 +46,14 @@ export class GetDocsRequestDto {
 export class GetDocRequestDto {
   @IsString()
   id!: string
+}
+
+export class GetRecommendedRequestDto {
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(50)
+  count?: number = 10
 }
 
 // 标准响应格式

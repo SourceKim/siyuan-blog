@@ -10,12 +10,14 @@ export const useNoteStore = defineStore('note', () => {
   const docs = ref<Doc[]>([])
   const currentDoc = ref<Doc | null>(null)
   const currentNote = ref<Note | null>(null)
+  const recommendedDocs = ref<Doc[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
 
   // 计算属性
   const hasNotebooks = computed(() => notebooks.value.length > 0)
   const hasDocs = computed(() => docs.value.length > 0)
+  const hasRecommendedDocs = computed(() => recommendedDocs.value.length > 0)
 
   // 获取所有笔记本
   const fetchNotebooks = async () => {
@@ -90,6 +92,20 @@ export const useNoteStore = defineStore('note', () => {
     }
   }
 
+  // 获取推荐文章
+  const fetchRecommendedDocs = async (count: number = 10) => {
+    try {
+      loading.value = true
+      error.value = null
+      recommendedDocs.value = await noteApi.getRecommendedDocs({ count })
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '获取推荐文章失败'
+      console.error('获取推荐文章失败:', err)
+    } finally {
+      loading.value = false
+    }
+  }
+
   // 清空状态
   const clearState = () => {
     notebooks.value = []
@@ -97,6 +113,7 @@ export const useNoteStore = defineStore('note', () => {
     docs.value = []
     currentDoc.value = null
     currentNote.value = null
+    recommendedDocs.value = []
     error.value = null
   }
 
@@ -107,18 +124,21 @@ export const useNoteStore = defineStore('note', () => {
     docs,
     currentDoc,
     currentNote,
+    recommendedDocs,
     loading,
     error,
     
     // 计算属性
     hasNotebooks,
     hasDocs,
+    hasRecommendedDocs,
     
     // 方法
     fetchNotebooks,
     selectNotebook,
     fetchSubDocs,
     selectDoc,
+    fetchRecommendedDocs,
     clearState,
   }
 }) 

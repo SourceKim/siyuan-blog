@@ -1,322 +1,612 @@
 <template>
   <div class="home-view">
-    <!-- 英雄区域 -->
-    <div class="hero-section">
-      <div class="hero-content">
-        <h1 class="hero-title">将思源笔记转换为个人博客</h1>
-        <p class="hero-subtitle">轻松展示您的知识和思考，让您的笔记焕发新的生命力</p>
-        <div class="hero-actions">
-          <el-button type="primary" size="large" @click="$router.push('/notes')">
-            <el-icon><Document /></el-icon>
-            开始浏览笔记
-          </el-button>
-          <el-button size="large" @click="$router.push('/about')">
-            <el-icon><User /></el-icon>
-            了解更多
-          </el-button>
+    <!-- 左侧个人简介抽屉 -->
+    <div class="profile-drawer" :class="{ collapsed: drawerCollapsed }">
+      <div class="drawer-content">
+        <!-- 收缩按钮 -->
+        <div class="collapse-btn" @click="toggleDrawer">
+          <el-icon>
+            <ArrowLeft v-if="!drawerCollapsed" />
+            <ArrowRight v-else />
+          </el-icon>
+        </div>
+
+        <!-- 个人信息 -->
+        <div class="profile-info" v-if="!drawerCollapsed">
+          <div class="avatar-section">
+            <el-avatar 
+              :size="80" 
+              :src="aboutStore.aboutMe?.avatarUrl" 
+              icon="User"
+              class="profile-avatar"
+            />
+          </div>
+          
+          <div class="name-section">
+            <h3 class="profile-name">{{ aboutStore.aboutMe?.name || '加载中...' }}</h3>
+            <p class="profile-bio">{{ aboutStore.aboutMe?.bio || '这个人很懒，什么都没留下...' }}</p>
+          </div>
+
+          <!-- 社交链接 -->
+          <div class="social-links">
+            <el-button 
+              circle 
+              :icon="Message" 
+              title="邮箱"
+              @click="openEmail"
+            />
+            <el-button 
+              circle 
+              :icon="Link" 
+              title="GitHub"
+              @click="openGitHub"
+            />
+            <el-button 
+              circle 
+              :icon="Position" 
+              title="网站"
+              @click="openWebsite"
+            />
+          </div>
+
+          <!-- 关于我按钮 -->
+          <div class="about-action">
+            <el-button 
+              type="primary" 
+              :icon="User" 
+              @click="$router.push('/about')"
+              style="width: 100%"
+            >
+              了解更多
+            </el-button>
+          </div>
+
+          <!-- 统计信息 -->
+          <div class="stats-info">
+            <div class="stat-item">
+              <div class="stat-value">{{ notebooks.length }}</div>
+              <div class="stat-label">笔记本</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">{{ recommendedDocs.length }}</div>
+              <div class="stat-label">文章</div>
+            </div>
+          </div>
         </div>
       </div>
-      
-      <!-- 装饰性图标 -->
-      <div class="hero-decoration">
-        <el-icon size="120" color="var(--el-color-primary-light-5)">
-          <Document />
-        </el-icon>
-      </div>
     </div>
 
-    <!-- 功能特色 -->
-    <div class="features-section">
-      <h2 class="section-title">功能特色</h2>
-      <el-row :gutter="32">
-        <el-col :xs="24" :sm="12" :md="8" v-for="feature in features" :key="feature.title">
-          <el-card class="feature-card" shadow="hover">
-            <div class="feature-icon">
-              <el-icon size="48" :color="feature.color">
-                <component :is="feature.icon" />
-              </el-icon>
+    <!-- 右侧推荐文章区域 -->
+    <div class="main-content" :class="{ expanded: drawerCollapsed }">
+      <div class="content-container">
+        <!-- 标题区域 -->
+        <div class="content-header">
+          <h1 class="content-title">
+            <el-icon><Star /></el-icon>
+            推荐文章
+          </h1>
+          <p class="content-subtitle">探索精选内容，发现有趣的思考</p>
+        </div>
+
+        <!-- 加载状态 -->
+        <div v-if="loading" class="loading-container">
+          <el-skeleton :rows="6" animated />
+        </div>
+
+        <!-- 错误状态 -->
+        <div v-else-if="error" class="error-container">
+          <el-empty 
+            description="加载失败"
+            :image-size="100"
+          >
+            <el-button type="primary" @click="loadRecommendedDocs">
+              重新加载
+            </el-button>
+          </el-empty>
+        </div>
+
+        <!-- 推荐文章列表 -->
+        <div v-else-if="hasRecommendedDocs" class="articles-grid">
+          <el-card 
+            v-for="doc in recommendedDocs" 
+            :key="doc.id"
+            class="article-card"
+            shadow="hover"
+            @click="goToArticle(doc)"
+          >
+            <div class="article-content">
+                             <div class="article-header">
+                 <h3 class="article-title">{{ removeFileExtension(doc.name) }}</h3>
+                                 <div class="article-meta">
+                   <el-tag size="small" type="info">
+                     <el-icon><FolderOpened /></el-icon>
+                     {{ getNotebookName(doc) }}
+                   </el-tag>
+                 </div>
+              </div>
+
+              <div class="article-summary">
+                <p>{{ generateSummary(doc) }}</p>
+              </div>
+
+              <!-- 标签区域 -->
+              <div class="article-tags" v-if="getArticleTags(doc).length > 0">
+                <el-tag 
+                  v-for="tag in getArticleTags(doc)" 
+                  :key="tag" 
+                  size="small"
+                  effect="plain"
+                >
+                  {{ tag }}
+                </el-tag>
+              </div>
+
+              <div class="article-footer">
+                <div class="article-time">
+                  <div class="time-item">
+                    <el-icon><Clock /></el-icon>
+                    <span>{{ doc.hCtime }}</span>
+                  </div>
+                  <div class="time-item" v-if="doc.mtime !== doc.ctime">
+                    <el-icon><Edit /></el-icon>
+                    <span>{{ doc.hMtime }}</span>
+                  </div>
+                </div>
+                <div class="article-stats">
+                  <div class="stat-item">
+                    <el-icon><View /></el-icon>
+                    <span>0</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <h3 class="feature-title">{{ feature.title }}</h3>
-            <p class="feature-description">{{ feature.description }}</p>
           </el-card>
-        </el-col>
-      </el-row>
-    </div>
+        </div>
 
-    <!-- 使用统计 -->
-    <div class="stats-section">
-      <h2 class="section-title">实时数据</h2>
-      <el-row :gutter="24">
-        <el-col :xs="12" :sm="6" v-for="stat in stats" :key="stat.label">
-          <div class="stat-item">
-            <div class="stat-value">{{ stat.value }}</div>
-            <div class="stat-label">{{ stat.label }}</div>
-          </div>
-        </el-col>
-      </el-row>
+        <!-- 空状态 -->
+        <div v-else class="empty-container">
+          <el-empty 
+            description="暂无推荐文章"
+            :image-size="100"
+          >
+            <el-button type="primary" @click="loadRecommendedDocs">
+              刷新推荐
+            </el-button>
+          </el-empty>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useNoteStore } from '@/stores/note'
 import { useAboutStore } from '@/stores/about'
 import { storeToRefs } from 'pinia'
 import {
-  Document,
   User,
-  FolderOpened,
-  Reading,
+  Document,
   Star,
-  TrendCharts
+  FolderOpened,
+  Clock,
+  Edit,
+  View,
+  Message,
+  Link,
+  Position,
+  ArrowLeft,
+  ArrowRight
 } from '@element-plus/icons-vue'
+import type { Doc } from '@/api/types'
+
+const router = useRouter()
 
 // 状态管理
 const noteStore = useNoteStore()
 const aboutStore = useAboutStore()
-const { notebooks, docs } = storeToRefs(noteStore)
+const { notebooks, recommendedDocs, loading, error, hasRecommendedDocs } = storeToRefs(noteStore)
 
-// 功能特色
-const features = ref([
-  {
-    title: '思源笔记集成',
-    description: '直接连接思源笔记，实时同步您的笔记内容',
-    icon: 'FolderOpened',
-    color: 'var(--el-color-primary)'
-  },
-  {
-    title: '响应式设计',
-    description: '完美适配桌面端和移动端，随时随地浏览笔记',
-    icon: 'Reading',
-    color: 'var(--el-color-success)'
-  },
-  {
-    title: '暗黑模式',
-    description: '支持明暗主题切换，保护您的眼睛',
-    icon: 'Star',
-    color: 'var(--el-color-warning)'
-  }
-])
+// 抽屉状态
+const drawerCollapsed = ref(false)
 
-// 统计数据
-const stats = ref([
-  { label: '笔记本', value: '0' },
-  { label: '文档', value: '0' },
-  { label: '今日访问', value: '1' },
-  { label: '总访问量', value: '1' }
-])
+// 切换抽屉状态
+const toggleDrawer = () => {
+  drawerCollapsed.value = !drawerCollapsed.value
+}
 
-// 更新统计数据
-const updateStats = () => {
-  stats.value[0].value = notebooks.value.length.toString()
-  stats.value[1].value = docs.value.length.toString()
+// 加载推荐文章
+const loadRecommendedDocs = async () => {
+  await noteStore.fetchRecommendedDocs(12)
+}
+
+// 移除文件扩展名
+const removeFileExtension = (filename: string): string => {
+  // 移除 .sy 后缀
+  return filename.replace(/\.sy$/, '')
+}
+
+// 获取笔记本名称
+const getNotebookName = (doc: Doc): string => {
+  // 直接使用后端返回的笔记本名称
+  return doc.notebookName || '未知笔记本'
+}
+
+// 生成文章摘要
+const generateSummary = (doc: Doc): string => {
+  // 这里可以根据实际情况生成摘要，目前使用简单的描述
+  const title = removeFileExtension(doc.name)
+  return `这是一篇关于"${title}"的文章，包含了深入的思考和有价值的内容。点击查看完整内容...`
+}
+
+// 获取文章标签（临时实现）
+const getArticleTags = (doc: Doc): string[] => {
+  // 这里可以根据文档内容或路径生成标签，目前返回空数组
+  const tags: string[] = []
+  
+  // 简单的标签生成逻辑（基于文档名称）
+  const name = removeFileExtension(doc.name)
+  if (name.includes('技术')) tags.push('技术')
+  if (name.includes('思考')) tags.push('思考')
+  if (name.includes('总结')) tags.push('总结')
+  if (name.includes('笔记')) tags.push('笔记')
+  
+  return tags
+}
+
+// 跳转到文章详情
+const goToArticle = (doc: Doc) => {
+  // 这里可以跳转到文章详情页面
+  router.push(`/notes?docId=${doc.id}`)
+}
+
+// 社交链接操作
+const openEmail = () => {
+  window.open('mailto:contact@example.com')
+}
+
+const openGitHub = () => {
+  window.open('https://github.com')
+}
+
+const openWebsite = () => {
+  window.open('https://example.com')
 }
 
 // 初始化
 onMounted(async () => {
-  // 获取笔记本数据以更新统计
-  if (notebooks.value.length === 0) {
-    await noteStore.fetchNotebooks()
-  }
-  updateStats()
-  
   // 获取个人信息
   if (!aboutStore.aboutMe) {
     await aboutStore.fetchAboutMe()
   }
+  
+  // 获取笔记本数据
+  if (notebooks.value.length === 0) {
+    await noteStore.fetchNotebooks()
+  }
+  
+  // 获取推荐文章
+  await loadRecommendedDocs()
 })
 </script>
 
 <style scoped>
 .home-view {
-  min-height: 100%;
-}
-
-/* 英雄区域 */
-.hero-section {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 60vh;
-  padding: 60px 0;
-  background: linear-gradient(135deg, 
-    var(--el-color-primary-light-9) 0%, 
-    var(--el-bg-color) 100%);
-  position: relative;
-  overflow: hidden;
-}
-
-.hero-content {
-  flex: 1;
-  max-width: 600px;
-}
-
-.hero-title {
-  font-size: 48px;
-  font-weight: 700;
-  line-height: 1.2;
-  margin-bottom: 24px;
-  color: var(--el-text-color-primary);
-  background: linear-gradient(135deg, 
-    var(--el-color-primary), 
-    var(--el-color-primary-light-3));
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.hero-subtitle {
-  font-size: 20px;
-  line-height: 1.6;
-  margin-bottom: 32px;
-  color: var(--el-text-color-regular);
-}
-
-.hero-actions {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.hero-decoration {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.3;
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(5deg); }
-}
-
-/* 功能特色 */
-.features-section {
-  padding: 80px 0;
+  height: 100vh;
   background: var(--el-bg-color);
 }
 
-.section-title {
-  text-align: center;
-  font-size: 36px;
-  font-weight: 600;
-  margin-bottom: 48px;
-  color: var(--el-text-color-primary);
+/* 左侧个人简介抽屉 */
+.profile-drawer {
+  width: 280px;
+  background: var(--el-bg-color-page);
+  border-right: 1px solid var(--el-border-color-lighter);
+  transition: width 0.3s ease;
+  position: relative;
+  z-index: 1000;
 }
 
-.feature-card {
-  text-align: center;
-  padding: 32px 24px;
+.profile-drawer.collapsed {
+  width: 60px;
+}
+
+.drawer-content {
   height: 100%;
-  border-radius: 12px;
-  transition: all 0.3s ease;
+  padding: 20px;
+  overflow: hidden;
 }
 
-.feature-card:hover {
-  transform: translateY(-8px);
+.collapse-btn {
+  position: absolute;
+  right: -12px;
+  top: 20px;
+  width: 24px;
+  height: 24px;
+  background: var(--el-color-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  font-size: 12px;
   box-shadow: var(--el-box-shadow-light);
+  transition: transform 0.2s ease;
 }
 
-.feature-icon {
-  margin-bottom: 24px;
+.collapse-btn:hover {
+  transform: scale(1.1);
 }
 
-.feature-title {
-  font-size: 20px;
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.avatar-section {
+  margin-bottom: 10px;
+}
+
+.profile-avatar {
+  border: 3px solid var(--el-color-primary-light-8);
+}
+
+.name-section {
+  text-align: center;
+}
+
+.profile-name {
+  font-size: 18px;
   font-weight: 600;
-  margin-bottom: 16px;
+  margin: 0 0 8px 0;
   color: var(--el-text-color-primary);
 }
 
-.feature-description {
+.profile-bio {
+  font-size: 14px;
   color: var(--el-text-color-regular);
-  line-height: 1.6;
+  margin: 0;
+  line-height: 1.5;
 }
 
-/* 统计数据 */
-.stats-section {
-  padding: 60px 0;
+.social-links {
+  display: flex;
+  gap: 8px;
+}
+
+.about-action {
+  width: 100%;
+}
+
+.stats-info {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  padding: 16px;
   background: var(--el-fill-color-lighter);
+  border-radius: 8px;
 }
 
 .stat-item {
   text-align: center;
-  padding: 24px;
 }
 
 .stat-value {
-  font-size: 36px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 600;
   color: var(--el-color-primary);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .stat-label {
+  font-size: 12px;
+  color: var(--el-text-color-regular);
+}
+
+/* 右侧主要内容区域 */
+.main-content {
+  flex: 1;
+  transition: margin-left 0.3s ease;
+  overflow: auto;
+}
+
+.content-container {
+  padding: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.content-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.content-title {
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.content-subtitle {
+  font-size: 16px;
+  color: var(--el-text-color-regular);
+  margin: 0;
+}
+
+/* 文章网格 */
+.articles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
+}
+
+.article-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 12px;
+}
+
+.article-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--el-box-shadow);
+}
+
+.article-content {
+  padding: 4px;
+}
+
+.article-header {
+  margin-bottom: 12px;
+}
+
+.article-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: var(--el-text-color-primary);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.article-meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.article-summary {
+  margin-bottom: 16px;
+}
+
+.article-summary p {
   font-size: 14px;
   color: var(--el-text-color-regular);
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  line-height: 1.6;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.article-tags {
+  margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.article-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+
+.article-time {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.time-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--el-text-color-regular);
+}
+
+.article-stats {
+  display: flex;
+  gap: 12px;
+}
+
+.article-stats .stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--el-text-color-regular);
+}
+
+/* 状态容器 */
+.loading-container,
+.error-container,
+.empty-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .hero-section {
+  .home-view {
     flex-direction: column;
-    text-align: center;
-    padding: 40px 0;
-    min-height: 50vh;
   }
   
-  .hero-title {
-    font-size: 32px;
+  .profile-drawer {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--el-border-color-lighter);
   }
   
-  .hero-subtitle {
-    font-size: 16px;
+  .profile-drawer.collapsed {
+    height: 60px;
+    width: 100%;
   }
   
-  .hero-decoration {
-    order: -1;
-    margin-bottom: 24px;
+  .drawer-content {
+    padding: 16px;
   }
   
-  .hero-decoration .el-icon {
-    width: 80px !important;
-    height: 80px !important;
+  .collapse-btn {
+    right: 20px;
+    top: 20px;
   }
   
-  .section-title {
-    font-size: 28px;
+  .main-content {
+    flex: none;
   }
   
-  .features-section {
-    padding: 60px 0;
+  .content-container {
+    padding: 20px 16px;
   }
   
-  .stats-section {
-    padding: 40px 0;
+  .content-title {
+    font-size: 24px;
   }
   
-  .stat-value {
-    font-size: 28px;
+  .articles-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 }
 
 @media (max-width: 480px) {
-  .hero-actions {
+  .articles-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .article-footer {
     flex-direction: column;
-    align-items: center;
-  }
-  
-  .hero-actions .el-button {
-    width: 100%;
-    max-width: 280px;
-  }
-  
-  .feature-card {
-    padding: 24px 16px;
+    align-items: flex-start;
+    gap: 8px;
   }
 }
 </style> 

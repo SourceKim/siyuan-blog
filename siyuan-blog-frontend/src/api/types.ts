@@ -26,6 +26,7 @@ export interface Doc {
   hMtime: string
   hCtime: string
   subFileCount: number
+  notebookName?: string // 可选的笔记本名称字段
 }
 
 // 笔记内容类型
@@ -50,4 +51,8 @@ export interface GetDocsRequest {
 
 export interface GetDocRequest {
   id: string
+}
+
+export interface GetRecommendedRequest {
+  count?: number
 } 

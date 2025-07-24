@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import { validate } from 'class-validator'
 import { plainToClass } from 'class-transformer'
 import { NoteService } from './note.service'
-import { GetDocsRequestDto, GetDocRequestDto, ApiResponse } from './note.dto'
+import { GetDocsRequestDto, GetDocRequestDto, GetRecommendedRequestDto, ApiResponse } from './note.dto'
 
 export class NoteController {
   private noteService: NoteService
@@ -63,6 +63,27 @@ export class NoteController {
     } catch (error) {
       console.error('获取文档内容失败:', error)
       res.status(500).json(ApiResponse.error(1, '获取文档内容失败'))
+    }
+  }
+
+  /**
+   * 获取推荐文章
+   */
+  async getRecommendedDocs(req: Request, res: Response): Promise<void> {
+    try {
+      const dto = plainToClass(GetRecommendedRequestDto, req.body)
+      const errors = await validate(dto)
+      
+      if (errors.length > 0) {
+        res.status(400).json(ApiResponse.error(1, '参数验证失败'))
+        return
+      }
+
+      const recommendedDocs = await this.noteService.getRecommendedDocs(dto.count)
+      res.json(ApiResponse.success(recommendedDocs, '获取推荐文章成功'))
+    } catch (error) {
+      console.error('获取推荐文章失败:', error)
+      res.status(500).json(ApiResponse.error(1, '获取推荐文章失败'))
     }
   }
 }

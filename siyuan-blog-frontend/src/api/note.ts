@@ -1,5 +1,5 @@
 import api from './index'
-import type { Notebook, Doc, Note, GetDocsRequest, GetDocRequest } from './types'
+import type { Notebook, Doc, Note, GetDocsRequest, GetDocRequest, GetRecommendedRequest } from './types'
 
 // 笔记相关API
 export const noteApi = {
@@ -16,5 +16,10 @@ export const noteApi = {
   // 获取文档内容
   async getDoc(params: GetDocRequest): Promise<Note> {
     return api.post('/doc', params)
+  },
+
+  // 获取推荐文章
+  async getRecommendedDocs(params: GetRecommendedRequest = {}): Promise<Doc[]> {
+    return api.post('/recommended', params)
   },
 } 
