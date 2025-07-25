@@ -1,10 +1,18 @@
 <template>
   <div class="home-view">
     <!-- 左侧个人简介抽屉 -->
-    <div class="profile-drawer" :class="{ collapsed: drawerCollapsed }">
+    <div 
+      v-if="configStore.homeSettings.showProfile"
+      class="profile-drawer" 
+      :class="{ collapsed: drawerCollapsed }"
+    >
       <div class="drawer-content">
         <!-- 收缩按钮 -->
-        <div class="collapse-btn" @click="toggleDrawer">
+        <div 
+          v-if="configStore.homeSettings.profileCollapsible"
+          class="collapse-btn" 
+          @click="toggleDrawer"
+        >
           <el-icon>
             <ArrowLeft v-if="!drawerCollapsed" />
             <ArrowRight v-else />
@@ -16,19 +24,22 @@
           <div class="avatar-section">
             <el-avatar 
               :size="80" 
-              :src="aboutStore.aboutMe?.avatarUrl" 
+              :src="configStore.aboutMe.avatarUrl" 
               icon="User"
               class="profile-avatar"
             />
           </div>
           
           <div class="name-section">
-            <h3 class="profile-name">{{ aboutStore.aboutMe?.name || '加载中...' }}</h3>
-            <p class="profile-bio">{{ aboutStore.aboutMe?.bio || '这个人很懒，什么都没留下...' }}</p>
+            <h3 class="profile-name">{{ configStore.aboutMe.name || '加载中...' }}</h3>
+            <p class="profile-bio">{{ configStore.aboutMe.bio || '这个人很懒，什么都没留下...' }}</p>
           </div>
 
           <!-- 社交链接 -->
-          <div class="social-links">
+          <div 
+            v-if="configStore.homeSettings.showSocialLinks"
+            class="social-links"
+          >
             <el-button 
               circle 
               :icon="Message" 
@@ -62,7 +73,10 @@
           </div>
 
           <!-- 统计信息 -->
-          <div class="stats-info">
+          <div 
+            v-if="configStore.homeSettings.showStats"
+            class="stats-info"
+          >
             <div class="stat-item">
               <div class="stat-value">{{ notebooks.length }}</div>
               <div class="stat-label">笔记本</div>
@@ -77,7 +91,9 @@
     </div>
 
     <!-- 右侧推荐文章区域 -->
-    <div class="main-content" :class="{ expanded: drawerCollapsed }">
+    <div class="main-content" :class="{ 
+      expanded: drawerCollapsed || !configStore.homeSettings.showProfile 
+    }">
       <div class="content-container">
         <!-- 标题区域 -->
         <div class="content-header">
@@ -183,7 +199,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useNoteStore } from '@/stores/note'
-import { useAboutStore } from '@/stores/about'
+import { useConfigStore } from '@/stores/config'
 import { storeToRefs } from 'pinia'
 import {
   User,
@@ -205,7 +221,7 @@ const router = useRouter()
 
 // 状态管理
 const noteStore = useNoteStore()
-const aboutStore = useAboutStore()
+const configStore = useConfigStore()
 const { notebooks, recommendedDocs, loading, error, hasRecommendedDocs } = storeToRefs(noteStore)
 
 // 抽屉状态
@@ -218,7 +234,8 @@ const toggleDrawer = () => {
 
 // 加载推荐文章
 const loadRecommendedDocs = async () => {
-  await noteStore.fetchRecommendedDocs(12)
+  const maxArticles = configStore.homeSettings.maxRecommendedArticles || 12
+  await noteStore.fetchRecommendedDocs(maxArticles)
 }
 
 // 移除文件扩展名
@@ -263,22 +280,25 @@ const goToArticle = (doc: Doc) => {
 
 // 社交链接操作
 const openEmail = () => {
-  window.open('mailto:contact@example.com')
+  const email = configStore.socialLinks.email || 'contact@example.com'
+  window.open(`mailto:${email}`)
 }
 
 const openGitHub = () => {
-  window.open('https://github.com')
+  const github = configStore.socialLinks.github || 'https://github.com'
+  window.open(github)
 }
 
 const openWebsite = () => {
-  window.open('https://example.com')
+  const website = configStore.socialLinks.website || 'https://example.com'
+  window.open(website)
 }
 
 // 初始化
 onMounted(async () => {
-  // 获取个人信息
-  if (!aboutStore.aboutMe) {
-    await aboutStore.fetchAboutMe()
+  // 获取配置信息
+  if (Object.keys(configStore.configs).length === 0) {
+    await configStore.fetchActiveConfigs()
   }
   
   // 获取笔记本数据

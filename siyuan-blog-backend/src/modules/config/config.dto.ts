@@ -1,11 +1,19 @@
-// 关于我 DTO
-export class AboutMeDto {
-  name!: string
-  avatarUrl!: string
-  bio!: string
+// 配置项DTO
+export class ConfigDto {
+  configKey!: string
+  configValue!: any
+  description?: string
+  isActive!: boolean
 }
 
-// 标准响应格式 (复用 Note 模块的)
+// 更新配置请求DTO
+export class UpdateConfigDto {
+  configValue!: any
+  description?: string
+  isActive?: boolean
+}
+
+// 标准响应格式
 export class ApiResponse<T = any> {
   code: number
   msg: string
@@ -24,4 +32,4 @@ export class ApiResponse<T = any> {
   static error(code: number = 1, msg: string = 'error'): ApiResponse {
     return new ApiResponse(code, msg, null)
   }
-}
+} 

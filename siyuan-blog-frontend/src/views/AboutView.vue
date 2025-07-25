@@ -28,6 +28,7 @@
         <el-card class="profile-card" shadow="never">
           <div class="profile-header">
             <el-avatar 
+              v-if="aboutMe.config.about.showAvatar"
               :src="aboutMe.avatarUrl" 
               :size="120"
               class="profile-avatar"
@@ -53,15 +54,32 @@
           <div class="intro-content">
             <p>{{ aboutMe.bio }}</p>
             
-            <div class="contact-info">
+            <div 
+              v-if="aboutMe.config.about.showContactInfo"
+              class="contact-info"
+            >
               <h3>联系方式</h3>
               <div class="contact-links">
                 <el-link 
-                  href="mailto:your-email@example.com" 
+                  :href="`mailto:${aboutMe.config.social.email}`" 
                   :icon="Message"
                   target="_blank"
                 >
                   发送邮件
+                </el-link>
+                <el-link 
+                  :href="aboutMe.config.social.github" 
+                  :icon="Link"
+                  target="_blank"
+                >
+                  GitHub
+                </el-link>
+                <el-link 
+                  :href="aboutMe.config.social.website" 
+                  :icon="Position"
+                  target="_blank"
+                >
+                  个人网站
                 </el-link>
               </div>
             </div>
@@ -69,7 +87,11 @@
         </el-card>
 
         <!-- 博客统计 -->
-        <el-card class="stats-card" shadow="never">
+        <el-card 
+          v-if="aboutMe.config.about.showBlogStats"
+          class="stats-card" 
+          shadow="never"
+        >
           <template #header>
             <div class="card-header">
               <el-icon><TrendCharts /></el-icon>
@@ -88,7 +110,11 @@
         </el-card>
 
         <!-- 技术栈 -->
-        <el-card class="tech-card" shadow="never">
+        <el-card 
+          v-if="aboutMe.config.about.showTechStack"
+          class="tech-card" 
+          shadow="never"
+        >
           <template #header>
             <div class="card-header">
               <el-icon><Tools /></el-icon>
@@ -98,9 +124,9 @@
           
           <div class="tech-stack">
             <el-tag 
-              v-for="tech in techStack" 
+              v-for="tech in aboutMe.config.techStack" 
               :key="tech.name"
-              :type="tech.type"
+              :type="tech.type || undefined"
               class="tech-tag"
               size="large"
             >
@@ -131,6 +157,8 @@ import {
   User,
   InfoFilled,
   Message,
+  Link,
+  Position,
   TrendCharts,
   Tools
 } from '@element-plus/icons-vue'
@@ -147,16 +175,6 @@ const blogStats = ref([
   { label: '文档', value: '0' },
   { label: '访问量', value: '1' },
   { label: '运行天数', value: '1' }
-])
-
-// 技术栈
-const techStack = ref([
-  { name: 'Vue 3', type: 'primary' as const },
-  { name: 'TypeScript', type: 'success' as const },
-  { name: 'Element Plus', type: 'warning' as const },
-  { name: 'SiYuan', type: 'info' as const },
-  { name: 'Pinia', type: 'danger' as const },
-  { name: 'Vite', type: undefined }
 ])
 
 // 更新统计数据

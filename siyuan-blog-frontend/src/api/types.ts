@@ -36,11 +36,41 @@ export interface Note {
   path: string
 }
 
+// 技术栈项目类型
+export interface TechStackItem {
+  name: string
+  type: 'primary' | 'success' | 'warning' | 'info' | 'danger' | ''
+}
+
+// 配置类型
+export interface AboutMeConfig {
+  home: {
+    showProfile: boolean
+    showSocialLinks: boolean
+    showStats: boolean
+    maxRecommendedArticles: number
+    profileCollapsible: boolean
+  }
+  about: {
+    showContactInfo: boolean
+    showTechStack: boolean
+    showBlogStats: boolean
+    showAvatar: boolean
+  }
+  social: {
+    email: string
+    github: string
+    website: string
+  }
+  techStack: TechStackItem[]
+}
+
 // 个人信息类型
 export interface AboutMe {
   name: string
   avatarUrl: string
   bio: string
+  config: AboutMeConfig
 }
 
 // 请求参数类型

@@ -7,9 +7,4 @@ export const aboutApi = {
   async getAboutMe(): Promise<AboutMe> {
     return api.get('/about/info')
   },
-
-  // 更新个人信息
-  async updateAboutMe(data: Partial<AboutMe>): Promise<AboutMe> {
-    return api.put('/about/info', data)
-  },
 } 

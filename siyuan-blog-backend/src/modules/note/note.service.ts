@@ -13,12 +13,20 @@ export class NoteService {
   }
 
   /**
+   * 获取统一的请求头
+   */
+  private getHeaders(): Record<string, string> {
+    return this.siyuanToken ? { 'Authorization': `Token ${this.siyuanToken}` } : {}
+  }
+
+  /**
    * 获取所有笔记本
    */
   async getNotebooks(): Promise<NotebookDto[]> {
     try {
-      const headers = this.siyuanToken ? { 'Authorization': `Token ${this.siyuanToken}` } : {}
-      const response = await axios.post(`${this.siyuanBaseUrl}/api/notebook/lsNotebooks`, {}, { headers })
+      const response = await axios.post(`${this.siyuanBaseUrl}/api/notebook/lsNotebooks`, {}, { 
+        headers: this.getHeaders() 
+      })
       
       if (response.data.code !== 0) {
         throw new Error(response.data.msg || '获取笔记本失败')
@@ -36,11 +44,10 @@ export class NoteService {
    */
   async getDocs(notebook: string, path: string = '/'): Promise<DocDto[]> {
     try {
-      const headers = this.siyuanToken ? { 'Authorization': `Token ${this.siyuanToken}` } : {}
       const response = await axios.post(`${this.siyuanBaseUrl}/api/filetree/listDocsByPath`, {
         notebook,
         path
-      }, { headers })
+      }, { headers: this.getHeaders() })
 
       if (response.data.code !== 0) {
         throw new Error(response.data.msg || '获取文档列表失败')
@@ -58,10 +65,9 @@ export class NoteService {
    */
   async getNotebookInfo(notebook: string): Promise<{ name: string }> {
     try {
-      const headers = this.siyuanToken ? { 'Authorization': `Token ${this.siyuanToken}` } : {}
       const response = await axios.post(`${this.siyuanBaseUrl}/api/notebook/getNotebookInfo`, {
         notebook
-      }, { headers })
+      }, { headers: this.getHeaders() })
 
       if (response.data.code !== 0) {
         throw new Error(response.data.msg || '获取笔记本信息失败')
@@ -81,10 +87,9 @@ export class NoteService {
    */
   async getDoc(id: string): Promise<NoteDto> {
     try {
-      const headers = this.siyuanToken ? { 'Authorization': `Token ${this.siyuanToken}` } : {}
       const response = await axios.post(`${this.siyuanBaseUrl}/api/filetree/getDoc`, {
         id
-      }, { headers })
+      }, { headers: this.getHeaders() })
 
       if (response.data.code !== 0) {
         throw new Error(response.data.msg || '获取文档内容失败')

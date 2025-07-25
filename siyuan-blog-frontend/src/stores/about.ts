@@ -23,21 +23,6 @@ export const useAboutStore = defineStore('about', () => {
     }
   }
 
-  // 更新个人信息
-  const updateAboutMe = async (data: Partial<AboutMe>) => {
-    try {
-      loading.value = true
-      error.value = null
-      aboutMe.value = await aboutApi.updateAboutMe(data)
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : '更新个人信息失败'
-      console.error('更新个人信息失败:', err)
-      throw err
-    } finally {
-      loading.value = false
-    }
-  }
-
   return {
     // 状态
     aboutMe,
@@ -46,6 +31,5 @@ export const useAboutStore = defineStore('about', () => {
     
     // 方法
     fetchAboutMe,
-    updateAboutMe,
   }
 }) 

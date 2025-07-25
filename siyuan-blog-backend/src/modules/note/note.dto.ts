@@ -1,5 +1,3 @@
-import { IsString, IsOptional, IsNumber, Min, Max } from 'class-validator'
-
 // 笔记本 DTO
 export class NotebookDto {
   id!: string
@@ -31,29 +29,18 @@ export class NoteDto {
   path!: string
 }
 
-
-
 // 请求参数 DTO
 export class GetDocsRequestDto {
-  @IsString()
-  notebook!: string
-
-  @IsString()
-  @IsOptional()
-  path?: string = '/'
+  notebook?: string
+  path?: string
 }
 
 export class GetDocRequestDto {
-  @IsString()
   id!: string
 }
 
 export class GetRecommendedRequestDto {
-  @IsOptional()
-  @IsNumber()
-  @Min(1)
-  @Max(50)
-  count?: number = 10
+  count?: number
 }
 
 // 标准响应格式

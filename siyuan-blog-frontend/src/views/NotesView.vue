@@ -56,18 +56,70 @@
                     class="nav-item doc-item"
                     :class="{ 'active': currentDoc?.id === doc.id }"
                   >
-                    <div 
-                      class="nav-link doc-link"
-                      @click="selectDoc(doc)"
-                    >
-                      <div class="nav-content">
+                    <!-- 文档节点 -->
+                    <div class="nav-link doc-link">
+                      <div 
+                        class="nav-content"
+                        @click="doc.subFileCount > 0 ? toggleDoc(doc, notebook) : selectDoc(doc)"
+                      >
+                        <el-icon 
+                          v-if="doc.subFileCount > 0"
+                          class="expand-icon" 
+                          :class="{ 'expanded': expandedDocs.has(doc.id) }"
+                        >
+                          <ArrowRight />
+                        </el-icon>
                         <span class="nav-number">{{ index + 1 }}.{{ docIndex + 1 }}</span>
                         <span class="nav-text">{{ removeFileExtension(doc.name) }}</span>
                       </div>
-                      <el-tag v-if="doc.subFileCount > 0" size="small" type="warning" round>
-                        {{ doc.subFileCount }}
-                      </el-tag>
+                      <div class="nav-actions">
+                        <el-tag v-if="doc.subFileCount > 0" size="small" type="warning" round>
+                          {{ doc.subFileCount }}
+                        </el-tag>
+                        <el-button 
+                          v-if="doc.subFileCount === 0"
+                          @click.stop="selectDoc(doc)"
+                          size="small"
+                          text
+                          type="primary"
+                        >
+                          阅读
+                        </el-button>
+                      </div>
                     </div>
+                    
+                    <!-- 子文档节点 -->
+                    <ul 
+                      v-if="expandedDocs.has(doc.id)" 
+                      class="nav-list sub-sub-nav-list"
+                      v-loading="loadingDocs.has(doc.id)"
+                    >
+                      <li 
+                        v-for="(subDoc, subDocIndex) in getDocSubDocs(doc.id)" 
+                        :key="subDoc.id"
+                        class="nav-item sub-doc-item"
+                        :class="{ 'active': currentDoc?.id === subDoc.id }"
+                      >
+                        <div 
+                          class="nav-link sub-doc-link"
+                          @click="selectDoc(subDoc)"
+                        >
+                          <div class="nav-content">
+                            <span class="nav-number">{{ index + 1 }}.{{ docIndex + 1 }}.{{ subDocIndex + 1 }}</span>
+                            <span class="nav-text">{{ removeFileExtension(subDoc.name) }}</span>
+                          </div>
+                          <el-tag v-if="subDoc.subFileCount > 0" size="small" type="info" round>
+                            {{ subDoc.subFileCount }}
+                          </el-tag>
+                        </div>
+                      </li>
+                      
+                      <li v-if="getDocSubDocs(doc.id).length === 0" class="nav-item empty-item">
+                        <div class="nav-link empty-link">
+                          <span class="nav-text empty-text">该文档暂无子文档</span>
+                        </div>
+                      </li>
+                    </ul>
                   </li>
                   
                   <li v-if="getNotebookDocs(notebook.id).length === 0" class="nav-item empty-item">
@@ -227,8 +279,11 @@ const {
 const sidebarOpen = ref(true) // 默认展开
 const searchText = ref('')
 const expandedNotebooks = ref(new Set<string>())
+const expandedDocs = ref(new Set<string>()) // 新增：已展开的文档
 const loadingNotebooks = ref(new Set<string>())
+const loadingDocs = ref(new Set<string>()) // 新增：正在加载的文档
 const notebookDocs = ref(new Map<string, Doc[]>())
+const docSubDocs = ref(new Map<string, Doc[]>()) // 新增：文档的子文档映射
 const notebookDocCounts = ref<Record<string, number>>({})
 
 // 计算属性
@@ -310,6 +365,39 @@ const toggleNotebook = async (notebook: Notebook) => {
       }
     }
   }
+}
+
+// 新增：切换文档的子文档展开状态
+const toggleDoc = async (doc: Doc, notebook: Notebook) => {
+  if (expandedDocs.value.has(doc.id)) {
+    // 收起文档
+    expandedDocs.value.delete(doc.id)
+  } else {
+    // 展开文档
+    expandedDocs.value.add(doc.id)
+    
+    // 如果还没有加载过子文档，则加载
+    if (!docSubDocs.value.has(doc.id)) {
+      loadingDocs.value.add(doc.id)
+      try {
+        const subDocs = await noteApi.getDocs({ 
+          notebook: notebook.id, 
+          path: doc.path 
+        })
+        docSubDocs.value.set(doc.id, subDocs || [])
+      } catch (error) {
+        console.error('加载子文档失败:', error)
+        docSubDocs.value.set(doc.id, [])
+      } finally {
+        loadingDocs.value.delete(doc.id)
+      }
+    }
+  }
+}
+
+// 新增：获取文档的子文档
+const getDocSubDocs = (docId: string): Doc[] => {
+  return docSubDocs.value.get(docId) || []
 }
 
 const getNotebookDocs = (notebookId: string): Doc[] => {
@@ -457,6 +545,12 @@ onMounted(() => {
   position: relative;
 }
 
+.sub-sub-nav-list {
+  margin-left: 16px;
+  border-left: 1px solid var(--vp-c-gray-3);
+  position: relative;
+}
+
 .nav-item {
   margin: 0;
 }
@@ -473,6 +567,12 @@ onMounted(() => {
   transition: all 0.2s;
   cursor: pointer;
   border-left: 2px solid transparent;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .nav-link:hover {
@@ -527,6 +627,25 @@ onMounted(() => {
 }
 
 .doc-item.active .doc-link {
+  color: var(--vp-c-brand-1);
+  background: var(--vp-c-bg);
+  border-left-color: var(--vp-c-brand-1);
+  font-weight: 500;
+}
+
+/* 子文档样式 */
+.sub-doc-item .sub-doc-link {
+  padding-left: 12px;
+  font-size: 12px;
+  color: var(--vp-c-text-3);
+}
+
+.sub-doc-item .sub-doc-link:hover {
+  color: var(--vp-c-brand-2);
+  background: var(--vp-c-bg-alt);
+}
+
+.sub-doc-item.active .sub-doc-link {
   color: var(--vp-c-brand-1);
   background: var(--vp-c-bg);
   border-left-color: var(--vp-c-brand-1);
