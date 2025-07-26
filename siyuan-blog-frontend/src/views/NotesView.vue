@@ -23,218 +23,19 @@
             />
           </div>
 
-          <nav class="tree-nav" v-loading="loading">
-            <ul class="nav-list">
-              <li 
-                v-for="(notebook, index) in filteredNotebooks" 
-                :key="notebook.id"
-                class="nav-item notebook-item"
-              >
-                <!-- 笔记本节点 -->
-                <div class="nav-link notebook-link" @click="toggleNotebook(notebook)">
-                  <div class="nav-content">
-                    <el-icon class="expand-icon" :class="{ 'expanded': expandedNotebooks.has(notebook.id) }">
-                      <ArrowRight />
-                    </el-icon>
-                    <span class="nav-number">{{ index + 1 }}.</span>
-                    <span class="nav-text">{{ notebook.name }}</span>
-                  </div>
-                  <el-tag v-if="notebookDocCounts[notebook.id]" size="small" type="info" round>
-                    {{ notebookDocCounts[notebook.id] }}
-                  </el-tag>
-                </div>
-                
-                <!-- 文档子节点 -->
-                <ul 
-                  v-if="expandedNotebooks.has(notebook.id)" 
-                  class="nav-list sub-nav-list"
-                  v-loading="loadingNotebooks.has(notebook.id)"
-                >
-                  <li 
-                    v-for="(doc, docIndex) in getNotebookDocs(notebook.id)" 
-                    :key="doc.id"
-                    class="nav-item doc-item"
-                    :class="{ 'active': currentDoc?.id === doc.id }"
-                  >
-                    <!-- 文档节点 -->
-                    <div class="nav-link doc-link">
-                      <div 
-                        class="nav-content"
-                        @click="doc.subFileCount > 0 ? toggleDoc(doc, notebook) : selectDoc(doc)"
-                      >
-                        <el-icon 
-                          v-if="doc.subFileCount > 0"
-                          class="expand-icon" 
-                          :class="{ 'expanded': expandedDocs.has(doc.id) }"
-                        >
-                          <ArrowRight />
-                        </el-icon>
-                        <span class="nav-number">{{ index + 1 }}.{{ docIndex + 1 }}</span>
-                        <span class="nav-text">{{ removeFileExtension(doc.name) }}</span>
-                      </div>
-                      <div class="nav-actions">
-                        <el-tag v-if="doc.subFileCount > 0" size="small" type="warning" round>
-                          {{ doc.subFileCount }}
-                        </el-tag>
-                        <el-button 
-                          v-if="doc.subFileCount === 0"
-                          @click.stop="selectDoc(doc)"
-                          size="small"
-                          text
-                          type="primary"
-                        >
-                          阅读
-                        </el-button>
-                      </div>
-                    </div>
-                    
-                    <!-- 子文档节点 -->
-                    <ul 
-                      v-if="expandedDocs.has(doc.id)" 
-                      class="nav-list sub-sub-nav-list"
-                      v-loading="loadingDocs.has(doc.id)"
-                    >
-                      <li 
-                        v-for="(subDoc, subDocIndex) in getDocSubDocs(doc.id)" 
-                        :key="subDoc.id"
-                        class="nav-item sub-doc-item"
-                        :class="{ 'active': currentDoc?.id === subDoc.id }"
-                      >
-                        <div 
-                          class="nav-link sub-doc-link"
-                          @click="selectDoc(subDoc)"
-                        >
-                          <div class="nav-content">
-                            <span class="nav-number">{{ index + 1 }}.{{ docIndex + 1 }}.{{ subDocIndex + 1 }}</span>
-                            <span class="nav-text">{{ removeFileExtension(subDoc.name) }}</span>
-                          </div>
-                          <el-tag v-if="subDoc.subFileCount > 0" size="small" type="info" round>
-                            {{ subDoc.subFileCount }}
-                          </el-tag>
-                        </div>
-                      </li>
-                      
-                      <li v-if="getDocSubDocs(doc.id).length === 0" class="nav-item empty-item">
-                        <div class="nav-link empty-link">
-                          <span class="nav-text empty-text">该文档暂无子文档</span>
-                        </div>
-                      </li>
-                    </ul>
-                  </li>
-                  
-                  <li v-if="getNotebookDocs(notebook.id).length === 0" class="nav-item empty-item">
-                    <div class="nav-link empty-link">
-                      <span class="nav-text empty-text">该笔记本暂无文档</span>
-                    </div>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-            
-            <div v-if="!hasNotebooks && !loading" class="empty-state">
-              <p>暂无笔记本</p>
-              <el-button @click="refreshNotebooks" type="primary" size="small">重新加载</el-button>
-            </div>
-          </nav>
+          <!-- 使用 NoteTree 组件 -->
+          <NoteTree 
+            v-loading="loading"
+            :search-text="searchText"
+            @doc-selected="handleDocSelected"
+          />
         </div>
       </aside>
 
       <!-- 右侧内容区域 -->
       <main class="content">
-        <div class="content-container">
-          <!-- 欢迎页面 -->
-          <div v-if="!currentDoc" class="welcome-page">
-            <div class="hero-section">
-              <h1 class="hero-title">笔记浏览器</h1>
-              <p class="hero-subtitle">浏览和阅读你的思源笔记</p>
-              <div class="hero-actions">
-                <el-button @click="fetchNotebooks" type="primary" :icon="Refresh">
-                  加载笔记本
-                </el-button>
-                <el-button @click="$router.push('/')" :icon="House">
-                  返回首页
-                </el-button>
-              </div>
-            </div>
-          </div>
-
-          <!-- 文档内容 -->
-          <article v-else-if="currentNote" class="article">
-            <!-- 文档头部 -->
-            <header class="article-header">
-              <div class="breadcrumb">
-                <span class="breadcrumb-item">{{ currentNotebook?.name }}</span>
-                <span class="breadcrumb-separator">/</span>
-                <span class="breadcrumb-item current">{{ removeFileExtension(currentDoc.name) }}</span>
-              </div>
-              
-              <h1 class="article-title">{{ removeFileExtension(currentDoc.name) }}</h1>
-              
-              <div class="article-meta">
-                <span class="meta-item">
-                  <el-icon><Clock /></el-icon>
-                  更新时间：{{ formatTime(currentDoc.hMtime) }}
-                </span>
-                <span v-if="currentDoc.subFileCount > 0" class="meta-item">
-                  <el-icon><FolderOpened /></el-icon>
-                  {{ currentDoc.subFileCount }} 个子文档
-                </span>
-              </div>
-            </header>
-
-            <!-- 文档内容 -->
-            <div class="article-content">
-              <div class="content-wrapper" v-html="sanitizedContent"></div>
-            </div>
-
-            <!-- 文档底部 -->
-            <footer class="article-footer">
-              <div class="article-nav">
-                <div class="nav-prev">
-                  <a v-if="prevDoc" @click="selectDoc(prevDoc)" class="nav-link">
-                    <span class="nav-direction">← 上一篇</span>
-                    <span class="nav-title">{{ removeFileExtension(prevDoc.name) }}</span>
-                  </a>
-                </div>
-                <div class="nav-next">
-                  <a v-if="nextDoc" @click="selectDoc(nextDoc)" class="nav-link">
-                    <span class="nav-direction">下一篇 →</span>
-                    <span class="nav-title">{{ removeFileExtension(nextDoc.name) }}</span>
-                  </a>
-                </div>
-              </div>
-            </footer>
-          </article>
-
-          <!-- 加载状态 -->
-          <div v-else-if="loading" class="loading-state">
-            <div class="loading-content">
-              <el-skeleton :rows="6" animated />
-            </div>
-          </div>
-
-          <!-- 错误状态 -->
-          <div v-else-if="error" class="error-state">
-            <el-alert
-              :title="error"
-              type="error"
-              show-icon
-              center
-              class="error-alert"
-            >
-              <el-button @click="refreshContent" type="primary" size="small">
-                重新加载
-              </el-button>
-            </el-alert>
-          </div>
-
-          <!-- 空状态 -->
-          <div v-else class="empty-state">
-            <el-empty description="该文档暂无内容" :image-size="100">
-              <el-button @click="refreshContent" type="primary">重新加载</el-button>
-            </el-empty>
-          </div>
-        </div>
+        <!-- 使用 NoteContent 组件 -->
+        <NoteContent />
       </main>
     </div>
 
@@ -248,73 +49,28 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useNoteStore } from '@/stores/note'
 import { storeToRefs } from 'pinia'
-import { noteApi } from '@/api/note'
-import type { Doc, Notebook } from '@/api/types'
+import NoteTree from '@/components/Note/NoteTree.vue'
+import NoteContent from '@/components/Note/NoteContent.vue'
+import type { Doc } from '@/api/types'
 import {
   Menu,
   Search,
-  Refresh,
-  ArrowRight,
-  Clock,
-  FolderOpened,
-  House
+  Refresh
 } from '@element-plus/icons-vue'
 
 // 状态管理
 const noteStore = useNoteStore()
 const {
-  notebooks,
-  currentNotebook,
-  currentDoc,
-  currentNote,
   loading,
-  error,
-  hasNotebooks
+  currentDoc
 } = storeToRefs(noteStore)
 
 // 响应式状态
 const sidebarOpen = ref(true) // 默认展开
 const searchText = ref('')
-const expandedNotebooks = ref(new Set<string>())
-const expandedDocs = ref(new Set<string>()) // 新增：已展开的文档
-const loadingNotebooks = ref(new Set<string>())
-const loadingDocs = ref(new Set<string>()) // 新增：正在加载的文档
-const notebookDocs = ref(new Map<string, Doc[]>())
-const docSubDocs = ref(new Map<string, Doc[]>()) // 新增：文档的子文档映射
-const notebookDocCounts = ref<Record<string, number>>({})
-
-// 计算属性
-const filteredNotebooks = computed(() => {
-  if (!searchText.value) return notebooks.value
-  return notebooks.value.filter(notebook => 
-    notebook.name.toLowerCase().includes(searchText.value.toLowerCase()) ||
-    getNotebookDocs(notebook.id).some(doc => 
-      doc.name.toLowerCase().includes(searchText.value.toLowerCase())
-    )
-  )
-})
-
-const sanitizedContent = computed(() => {
-  if (!currentNote.value?.content) return ''
-  return currentNote.value.content
-})
-
-const prevDoc = computed(() => {
-  if (!currentDoc.value || !currentNotebook.value) return null
-  const docs = getNotebookDocs(currentNotebook.value.id)
-  const currentIndex = docs.findIndex(doc => doc.id === currentDoc.value?.id)
-  return currentIndex > 0 ? docs[currentIndex - 1] : null
-})
-
-const nextDoc = computed(() => {
-  if (!currentDoc.value || !currentNotebook.value) return null
-  const docs = getNotebookDocs(currentNotebook.value.id)
-  const currentIndex = docs.findIndex(doc => doc.id === currentDoc.value?.id)
-  return currentIndex < docs.length - 1 ? docs[currentIndex + 1] : null
-})
 
 // 方法
 const toggleSidebar = () => {
@@ -325,110 +81,15 @@ const closeSidebar = () => {
   sidebarOpen.value = false
 }
 
-const fetchNotebooks = async () => {
-  await noteStore.fetchNotebooks()
-  // 获取每个笔记本的文档数量
-  for (const notebook of notebooks.value) {
-    try {
-      const docs = await noteApi.getDocs({ notebook: notebook.id })
-      notebookDocCounts.value[notebook.id] = docs?.length || 0
-    } catch (error) {
-      console.error(`获取笔记本 ${notebook.name} 文档数量失败:`, error)
-      notebookDocCounts.value[notebook.id] = 0
-    }
-  }
-}
-
 const refreshNotebooks = async () => {
-  await fetchNotebooks()
+  await noteStore.fetchNotebooks()
 }
 
-const toggleNotebook = async (notebook: Notebook) => {
-  if (expandedNotebooks.value.has(notebook.id)) {
-    // 收起笔记本
-    expandedNotebooks.value.delete(notebook.id)
-  } else {
-    // 展开笔记本
-    expandedNotebooks.value.add(notebook.id)
-    
-    // 如果还没有加载过文档，则加载
-    if (!notebookDocs.value.has(notebook.id)) {
-      loadingNotebooks.value.add(notebook.id)
-      try {
-        const docs = await noteApi.getDocs({ notebook: notebook.id })
-        notebookDocs.value.set(notebook.id, docs || [])
-      } catch (error) {
-        console.error('加载文档失败:', error)
-        notebookDocs.value.set(notebook.id, [])
-      } finally {
-        loadingNotebooks.value.delete(notebook.id)
-      }
-    }
+const handleDocSelected = (doc: Doc) => {
+  // 在移动端选择文档后关闭侧边栏
+  if (window.innerWidth <= 768) {
+    closeSidebar()
   }
-}
-
-// 新增：切换文档的子文档展开状态
-const toggleDoc = async (doc: Doc, notebook: Notebook) => {
-  if (expandedDocs.value.has(doc.id)) {
-    // 收起文档
-    expandedDocs.value.delete(doc.id)
-  } else {
-    // 展开文档
-    expandedDocs.value.add(doc.id)
-    
-    // 如果还没有加载过子文档，则加载
-    if (!docSubDocs.value.has(doc.id)) {
-      loadingDocs.value.add(doc.id)
-      try {
-        const subDocs = await noteApi.getDocs({ 
-          notebook: notebook.id, 
-          path: doc.path 
-        })
-        docSubDocs.value.set(doc.id, subDocs || [])
-      } catch (error) {
-        console.error('加载子文档失败:', error)
-        docSubDocs.value.set(doc.id, [])
-      } finally {
-        loadingDocs.value.delete(doc.id)
-      }
-    }
-  }
-}
-
-// 新增：获取文档的子文档
-const getDocSubDocs = (docId: string): Doc[] => {
-  return docSubDocs.value.get(docId) || []
-}
-
-const getNotebookDocs = (notebookId: string): Doc[] => {
-  return notebookDocs.value.get(notebookId) || []
-}
-
-const selectDoc = async (doc: Doc) => {
-  // 设置当前笔记本
-  const notebook = notebooks.value.find(nb => 
-    getNotebookDocs(nb.id).some(d => d.id === doc.id)
-  )
-  if (notebook) {
-    noteStore.currentNotebook = notebook
-  }
-  
-  await noteStore.selectDoc(doc)
-  closeSidebar()
-}
-
-const refreshContent = async () => {
-  if (currentDoc.value) {
-    await noteStore.selectDoc(currentDoc.value)
-  }
-}
-
-const removeFileExtension = (filename: string): string => {
-  return filename.replace(/\.sy$/, '')
-}
-
-const formatTime = (timeStr: string): string => {
-  return timeStr.split(',')[0] || timeStr
 }
 
 // 监听路由变化，在移动端关闭侧边栏
@@ -440,7 +101,7 @@ watch(() => currentDoc.value, () => {
 
 // 生命周期
 onMounted(() => {
-  fetchNotebooks()
+  refreshNotebooks()
 })
 </script>
 
@@ -528,413 +189,11 @@ onMounted(() => {
   padding: 0 24px 16px;
 }
 
-/* 树形导航 */
-.tree-nav {
-  flex: 1;
-}
-
-.nav-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.sub-nav-list {
-  margin-left: 20px;
-  border-left: 1px solid var(--vp-c-gray-2);
-  position: relative;
-}
-
-.sub-sub-nav-list {
-  margin-left: 16px;
-  border-left: 1px solid var(--vp-c-gray-3);
-  position: relative;
-}
-
-.nav-item {
-  margin: 0;
-}
-
-.nav-link {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 24px;
-  color: var(--vp-c-text-2);
-  text-decoration: none;
-  font-size: 14px;
-  line-height: 1.5;
-  transition: all 0.2s;
-  cursor: pointer;
-  border-left: 2px solid transparent;
-}
-
-.nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.nav-link:hover {
-  color: var(--vp-c-brand-1);
-  background: var(--vp-c-bg);
-}
-
-.nav-content {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  min-width: 0;
-}
-
-.expand-icon {
-  transition: transform 0.2s;
-  color: var(--vp-c-text-3);
-}
-
-.expand-icon.expanded {
-  transform: rotate(90deg);
-}
-
-.nav-number {
-  color: var(--vp-c-text-3);
-  font-weight: 500;
-  min-width: 30px;
-}
-
-.nav-text {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* 笔记本样式 */
-.notebook-item .notebook-link {
-  font-weight: 500;
-  background: var(--vp-c-bg);
-}
-
-.notebook-item .notebook-link:hover {
-  background: var(--vp-c-bg-elv);
-}
-
-/* 文档样式 */
-.doc-item .doc-link {
-  padding-left: 16px;
-  font-size: 13px;
-}
-
-.doc-item.active .doc-link {
-  color: var(--vp-c-brand-1);
-  background: var(--vp-c-bg);
-  border-left-color: var(--vp-c-brand-1);
-  font-weight: 500;
-}
-
-/* 子文档样式 */
-.sub-doc-item .sub-doc-link {
-  padding-left: 12px;
-  font-size: 12px;
-  color: var(--vp-c-text-3);
-}
-
-.sub-doc-item .sub-doc-link:hover {
-  color: var(--vp-c-brand-2);
-  background: var(--vp-c-bg-alt);
-}
-
-.sub-doc-item.active .sub-doc-link {
-  color: var(--vp-c-brand-1);
-  background: var(--vp-c-bg);
-  border-left-color: var(--vp-c-brand-1);
-  font-weight: 500;
-}
-
-.empty-item .empty-link {
-  padding-left: 16px;
-  font-size: 13px;
-  cursor: default;
-}
-
-.empty-text {
-  color: var(--vp-c-text-3);
-  font-style: italic;
-}
-
 /* 主内容区域 */
 .content {
   flex: 1;
   margin-left: var(--vp-sidebar-width);
   background: var(--vp-c-bg);
-}
-
-.content-container {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 32px 24px;
-}
-
-/* 欢迎页面 */
-.welcome-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 60vh;
-}
-
-.hero-section {
-  text-align: center;
-  max-width: 640px;
-}
-
-.hero-title {
-  font-size: 48px;
-  font-weight: 900;
-  color: var(--vp-c-text-1);
-  margin: 0 0 16px;
-  line-height: 1.2;
-}
-
-.hero-subtitle {
-  font-size: 20px;
-  color: var(--vp-c-text-2);
-  margin: 0 0 32px;
-  line-height: 1.6;
-}
-
-.hero-actions {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-}
-
-/* 文章样式 */
-.article {
-  max-width: 768px;
-  margin: 0 auto;
-}
-
-.article-header {
-  margin-bottom: 32px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--vp-c-gray-2);
-}
-
-.breadcrumb {
-  font-size: 14px;
-  color: var(--vp-c-text-3);
-  margin-bottom: 16px;
-}
-
-.breadcrumb-item {
-  color: var(--vp-c-text-3);
-}
-
-.breadcrumb-item.current {
-  color: var(--vp-c-brand-1);
-}
-
-.breadcrumb-separator {
-  margin: 0 8px;
-}
-
-.article-title {
-  font-size: 36px;
-  font-weight: 700;
-  color: var(--vp-c-text-1);
-  margin: 0 0 16px;
-  line-height: 1.2;
-}
-
-.article-meta {
-  display: flex;
-  gap: 24px;
-  flex-wrap: wrap;
-  font-size: 14px;
-  color: var(--vp-c-text-3);
-}
-
-.meta-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* 文章内容 */
-.article-content {
-  font-size: 16px;
-  line-height: 1.75;
-  color: var(--vp-c-text-1);
-}
-
-.content-wrapper :deep(h1),
-.content-wrapper :deep(h2),
-.content-wrapper :deep(h3),
-.content-wrapper :deep(h4),
-.content-wrapper :deep(h5),
-.content-wrapper :deep(h6) {
-  margin: 32px 0 16px;
-  font-weight: 600;
-  line-height: 1.3;
-  color: var(--vp-c-text-1);
-}
-
-.content-wrapper :deep(h1) {
-  font-size: 28px;
-  border-bottom: 1px solid var(--vp-c-gray-2);
-  padding-bottom: 8px;
-}
-
-.content-wrapper :deep(h2) {
-  font-size: 24px;
-}
-
-.content-wrapper :deep(h3) {
-  font-size: 20px;
-}
-
-.content-wrapper :deep(p) {
-  margin: 16px 0;
-}
-
-.content-wrapper :deep(ul),
-.content-wrapper :deep(ol) {
-  margin: 16px 0;
-  padding-left: 28px;
-}
-
-.content-wrapper :deep(li) {
-  margin: 8px 0;
-}
-
-.content-wrapper :deep(blockquote) {
-  margin: 20px 0;
-  padding: 16px 20px;
-  background: var(--vp-c-bg-alt);
-  border-left: 4px solid var(--vp-c-brand-1);
-  border-radius: 0 4px 4px 0;
-}
-
-.content-wrapper :deep(pre) {
-  margin: 20px 0;
-  padding: 20px;
-  background: var(--vp-c-bg-alt);
-  border-radius: 6px;
-  overflow-x: auto;
-  font-family: 'Fira Code', Consolas, 'Monaco', monospace;
-}
-
-.content-wrapper :deep(code) {
-  padding: 3px 6px;
-  background: var(--vp-c-bg-alt);
-  border-radius: 3px;
-  font-family: 'Fira Code', Consolas, 'Monaco', monospace;
-  font-size: 0.9em;
-}
-
-.content-wrapper :deep(pre code) {
-  padding: 0;
-  background: transparent;
-}
-
-.content-wrapper :deep(img) {
-  max-width: 100%;
-  height: auto;
-  border-radius: 6px;
-  margin: 16px 0;
-}
-
-.content-wrapper :deep(table) {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 20px 0;
-}
-
-.content-wrapper :deep(th),
-.content-wrapper :deep(td) {
-  padding: 12px 16px;
-  border: 1px solid var(--vp-c-gray-2);
-  text-align: left;
-}
-
-.content-wrapper :deep(th) {
-  background: var(--vp-c-bg-alt);
-  font-weight: 600;
-}
-
-/* 文章导航 */
-.article-footer {
-  margin-top: 48px;
-  padding-top: 24px;
-  border-top: 1px solid var(--vp-c-gray-2);
-}
-
-.article-nav {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.nav-prev,
-.nav-next {
-  flex: 1;
-}
-
-.nav-next {
-  text-align: right;
-}
-
-.article-nav .nav-link {
-  display: block;
-  padding: 16px;
-  background: var(--vp-c-bg-alt);
-  border-radius: 6px;
-  text-decoration: none;
-  color: var(--vp-c-text-2);
-  transition: all 0.2s;
-  cursor: pointer;
-}
-
-.article-nav .nav-link:hover {
-  color: var(--vp-c-brand-1);
-  background: var(--vp-c-bg-elv);
-}
-
-.nav-direction {
-  display: block;
-  font-size: 12px;
-  color: var(--vp-c-text-3);
-  margin-bottom: 4px;
-}
-
-.nav-title {
-  display: block;
-  font-weight: 500;
-}
-
-/* 状态页面 */
-.loading-state,
-.error-state,
-.empty-state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 60vh;
-}
-
-.loading-content {
-  max-width: 600px;
-  width: 100%;
-}
-
-.error-alert {
-  max-width: 600px;
-}
-
-.empty-state {
-  text-align: center;
 }
 
 /* 侧边栏遮罩 */
@@ -980,28 +239,17 @@ onMounted(() => {
 }
 
 @media (max-width: 768px) {
-  .content-container {
-    padding: 24px 16px;
+  .sidebar-content {
+    padding: 16px 0;
   }
   
-  .hero-title {
-    font-size: 32px;
+  .section-header {
+    padding: 0 16px 12px;
+    margin-bottom: 12px;
   }
   
-  .hero-subtitle {
-    font-size: 16px;
-  }
-  
-  .article-title {
-    font-size: 28px;
-  }
-  
-  .article-nav {
-    flex-direction: column;
-  }
-  
-  .nav-next {
-    text-align: left;
+  .search-box {
+    padding: 0 16px 12px;
   }
 }
 

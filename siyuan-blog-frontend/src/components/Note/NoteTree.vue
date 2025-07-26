@@ -1,17 +1,5 @@
 <template>
   <div class="note-tree">
-    <!-- 头部：笔记本选择 -->
-    <div class="tree-header">
-      <h3>笔记本</h3>
-      <el-button 
-        @click="fetchNotebooks" 
-        :loading="loading"
-        :icon="Refresh"
-        size="small"
-        circle
-      />
-    </div>
-
     <!-- 笔记本列表 -->
     <div class="notebooks-section" v-if="!currentNotebook">
       <el-empty 
@@ -26,7 +14,7 @@
       
       <div v-else class="notebook-list">
         <div 
-          v-for="notebook in notebooks" 
+          v-for="notebook in filteredNotebooks" 
           :key="notebook.id"
           class="notebook-item"
           @click="selectNotebook(notebook)"
@@ -58,12 +46,16 @@
       <!-- 文档树 -->
       <el-tree
         ref="docTreeRef"
-        :data="treeData"
+        :data="filteredTreeData"
         :props="treeProps"
         node-key="id"
         :highlight-current="true"
         :expand-on-click-node="false"
+        :lazy="true"
+        :load="loadSubDocs"
         @node-click="handleNodeClick"
+        @node-expand="handleNodeExpand"
+        @node-collapse="handleNodeCollapse"
         class="doc-tree"
       >
         <template #default="{ node, data }">
@@ -71,7 +63,7 @@
             <el-icon class="node-icon">
               <component :is="getNodeIcon(data)" />
             </el-icon>
-            <span class="node-label">{{ node.label }}</span>
+            <span class="node-label">{{ removeFileExtension(node.label) }}</span>
             <div class="node-info" v-if="data.subFileCount > 0">
               <el-tag size="small" type="info">{{ data.subFileCount }}</el-tag>
             </div>
@@ -112,9 +104,18 @@ import {
   Document,
   ArrowRight,
   ArrowLeft,
-  Refresh,
   FolderOpened
 } from '@element-plus/icons-vue'
+
+// Props
+const props = defineProps<{
+  searchText?: string
+}>()
+
+// Emits
+const emit = defineEmits<{
+  'doc-selected': [doc: Doc]
+}>()
 
 // 状态管理
 const noteStore = useNoteStore()
@@ -132,20 +133,47 @@ const {
 // 树组件引用
 const docTreeRef = ref()
 
+// 计算属性：过滤的笔记本
+const filteredNotebooks = computed(() => {
+  const searchText = props.searchText || ''
+  if (!searchText) return notebooks.value
+  return notebooks.value.filter(notebook => 
+    notebook.name.toLowerCase().includes(searchText.toLowerCase())
+  )
+})
+
+// 计算属性：过滤的树数据
+const filteredTreeData = computed(() => {
+  let data = docs.value.map(doc => ({
+    ...doc,
+    children: []
+  }))
+  
+  const searchText = props.searchText || ''
+  if (searchText) {
+    data = data.filter(doc => 
+      removeFileExtension(doc.name).toLowerCase().includes(searchText.toLowerCase())
+    )
+  }
+  
+  console.log('🌳 filteredTreeData 计算属性更新:')
+  console.log('📋 原始docs数据:', docs.value)
+  console.log('🔍 搜索文本:', searchText)
+  console.log('🌲 转换后的树数据:', data)
+  
+  return data
+})
+
 // 树配置
 const treeProps = {
   children: 'children',
   label: 'name',
-  isLeaf: (data: any) => data.subFileCount === 0
+  isLeaf: (data: any) => {
+    const isLeaf = data.subFileCount === 0
+    console.log(`🍃 isLeaf 检查 - 文档: ${data.name}, subFileCount: ${data.subFileCount}, isLeaf: ${isLeaf}`)
+    return isLeaf
+  }
 }
-
-// 转换文档为树形数据
-const treeData = computed(() => {
-  return docs.value.map(doc => ({
-    ...doc,
-    children: []
-  }))
-})
 
 // 方法
 const fetchNotebooks = async () => {
@@ -153,18 +181,71 @@ const fetchNotebooks = async () => {
 }
 
 const selectNotebook = async (notebook: Notebook) => {
+  console.log('📚 选择笔记本:', notebook)
   await noteStore.selectNotebook(notebook)
 }
 
 const backToNotebooks = () => {
+  console.log('⬅️ 返回笔记本列表')
   noteStore.currentNotebook = null
   noteStore.currentDoc = null
   noteStore.currentNote = null
   noteStore.docs = []
 }
 
+// 懒加载子文档
+const loadSubDocs = async (node: any, resolve: (data: any[]) => void) => {
+  console.log('🌲 loadSubDocs 被调用')
+  console.log('📁 node:', node)
+  console.log('📄 node.data:', node.data)
+  console.log('📊 subFileCount:', node.data?.subFileCount)
+  
+  try {
+    if (!currentNotebook.value) {
+      console.warn('❌ 没有当前笔记本')
+      resolve([])
+      return
+    }
+
+    console.log('📚 当前笔记本:', currentNotebook.value)
+    console.log('🔍 开始获取子文档，父文档路径:', node.data.path)
+    
+    const subDocs = await noteStore.fetchSubDocs(node.data)
+    
+    console.log('📋 获取到的子文档原始数据:', subDocs)
+    console.log('📈 子文档数量:', subDocs?.length || 0)
+    
+    // 转换数据格式，确保每个子文档也有children数组
+    const formattedSubDocs = (subDocs || []).map(doc => ({
+      ...doc,
+      children: []
+    }))
+    
+    console.log('✨ 格式化后的子文档:', formattedSubDocs)
+    
+    resolve(formattedSubDocs)
+  } catch (error) {
+    console.error('💥 加载子文档失败:', error)
+    resolve([])
+  }
+}
+
 const handleNodeClick = async (data: Doc) => {
+  console.log('👆 用户点击节点:', data.name, 'subFileCount:', data.subFileCount)
   await noteStore.selectDoc(data)
+  emit('doc-selected', data)
+}
+
+const handleNodeExpand = (data: any, node: any) => {
+  console.log('📂 节点展开事件触发')
+  console.log('📄 展开的数据:', data)
+  console.log('🌲 展开的节点:', node)
+}
+
+const handleNodeCollapse = (data: any, node: any) => {
+  console.log('📁 节点折叠事件触发')
+  console.log('📄 折叠的数据:', data)
+  console.log('🌲 折叠的节点:', node)
 }
 
 const getNodeIcon = (data: Doc) => {
@@ -172,6 +253,10 @@ const getNodeIcon = (data: Doc) => {
     return 'FolderOpened'
   }
   return 'Document'
+}
+
+const removeFileExtension = (filename: string): string => {
+  return filename.replace(/\.sy$/, '')
 }
 
 const clearError = () => {
@@ -185,8 +270,25 @@ watch(currentDoc, (newDoc) => {
   }
 })
 
+// 监听当前笔记本变化
+watch(currentNotebook, (newNotebook) => {
+  console.log('📚 当前笔记本变化:', newNotebook)
+  if (newNotebook) {
+    console.log('📋 当前文档列表:', docs.value)
+  }
+})
+
+// 监听docs变化
+watch(docs, (newDocs) => {
+  console.log('📄 文档列表变化:', newDocs)
+  newDocs.forEach(doc => {
+    console.log(`  - ${doc.name} (subFileCount: ${doc.subFileCount})`)
+  })
+})
+
 // 初始化
 onMounted(() => {
+  console.log('🚀 NoteTree 组件挂载完成')
   fetchNotebooks()
 })
 </script>
@@ -195,23 +297,7 @@ onMounted(() => {
 .note-tree {
   height: 100%;
   overflow-y: auto;
-  border-right: 1px solid var(--el-border-color);
-  background: var(--el-bg-color);
-}
-
-.tree-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px;
-  border-bottom: 1px solid var(--el-border-color-lighter);
-  background: var(--el-fill-color-lighter);
-}
-
-.tree-header h3 {
-  margin: 0;
-  font-size: 16px;
-  color: var(--el-text-color-primary);
+  background: transparent;
 }
 
 .notebooks-section,
@@ -232,26 +318,28 @@ onMounted(() => {
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
-  border: 1px solid var(--el-border-color-lighter);
+  border: 1px solid var(--vp-c-gray-2);
+  background: var(--vp-c-bg);
 }
 
 .notebook-item:hover {
-  background: var(--el-fill-color-light);
-  border-color: var(--el-border-color);
+  background: var(--vp-c-bg-alt);
+  border-color: var(--vp-c-brand-1);
 }
 
 .notebook-icon {
   margin-right: 8px;
-  color: var(--el-color-primary);
+  color: var(--vp-c-brand-1);
 }
 
 .notebook-name {
   flex: 1;
   font-weight: 500;
+  color: var(--vp-c-text-1);
 }
 
 .arrow-icon {
-  color: var(--el-text-color-secondary);
+  color: var(--vp-c-text-3);
 }
 
 .docs-header {
@@ -260,13 +348,13 @@ onMounted(() => {
   justify-content: space-between;
   margin-bottom: 16px;
   padding-bottom: 8px;
-  border-bottom: 1px solid var(--el-border-color-lighter);
+  border-bottom: 1px solid var(--vp-c-gray-2);
 }
 
 .docs-header h4 {
   margin: 0;
   font-size: 14px;
-  color: var(--el-text-color-primary);
+  color: var(--vp-c-text-1);
 }
 
 .doc-tree {
@@ -283,12 +371,13 @@ onMounted(() => {
 
 .node-icon {
   margin-right: 8px;
-  color: var(--el-color-primary);
+  color: var(--vp-c-brand-1);
 }
 
 .node-label {
   flex: 1;
   font-size: 14px;
+  color: var(--vp-c-text-1);
 }
 
 .node-info {
@@ -301,13 +390,22 @@ onMounted(() => {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .tree-header {
-    padding: 12px;
-  }
-  
   .notebooks-section,
   .docs-section {
     padding: 8px;
+  }
+}
+
+/* 暗色模式支持 */
+@media (prefers-color-scheme: dark) {
+  .notebook-item {
+    background: var(--vp-c-bg-elv);
+    border-color: var(--vp-c-gray-3);
+  }
+  
+  .notebook-item:hover {
+    background: var(--vp-c-bg-alt);
+    border-color: var(--vp-c-brand-2);
   }
 }
 </style> 

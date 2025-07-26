@@ -53,22 +53,34 @@ export const useNoteStore = defineStore('note', () => {
   }
 
   // 获取子文档
-  const fetchSubDocs = async (parentDoc: Doc) => {
+  const fetchSubDocs = async (parentDoc: Doc): Promise<Doc[]> => {
+    console.log('🏪 store.fetchSubDocs 被调用')
+    console.log('📁 父文档:', parentDoc)
+    
     try {
       loading.value = true
       error.value = null
       
-      if (!currentNotebook.value) return
+      if (!currentNotebook.value) {
+        console.warn('❌ store: 没有当前笔记本')
+        return []
+      }
+      
+      console.log('📚 store: 当前笔记本ID:', currentNotebook.value.id)
+      console.log('📂 store: 请求路径:', parentDoc.path)
       
       const subDocs = await noteApi.getDocs({
         notebook: currentNotebook.value.id,
         path: parentDoc.path
       })
       
+      console.log('🎯 store: API返回的子文档:', subDocs)
+      console.log('📊 store: 返回的子文档数量:', subDocs?.length || 0)
+      
       return subDocs
     } catch (err) {
       error.value = err instanceof Error ? err.message : '获取子文档失败'
-      console.error('获取子文档失败:', err)
+      console.error('💥 store: 获取子文档失败:', err)
       return []
     } finally {
       loading.value = false
