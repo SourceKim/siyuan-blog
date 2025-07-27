@@ -92,13 +92,29 @@ export const useNoteStore = defineStore('note', () => {
     try {
       loading.value = true
       error.value = null
-      currentDoc.value = doc
+      
+      // 先清空当前状态，避免触发不必要的大纲请求
+      currentDoc.value = null
+      currentNote.value = null
+      
+      console.log('🎯 开始获取文档内容:', doc.id, doc.name)
       
       // 获取文档内容
-      currentNote.value = await noteApi.getDoc({ id: doc.id })
+      const noteContent = await noteApi.getDoc({ id: doc.id })
+      
+      console.log('✅ 文档内容获取成功，设置当前文档')
+      
+      // 只有文档内容获取成功后，才设置 currentDoc，这样可以避免并发的大纲请求
+      currentNote.value = noteContent
+      currentDoc.value = doc
+      
     } catch (err) {
       error.value = err instanceof Error ? err.message : '获取文档内容失败'
-      console.error('获取文档内容失败:', err)
+      console.error('❌ 获取文档内容失败:', err)
+      
+      // 出错时清空状态
+      currentDoc.value = null
+      currentNote.value = null
     } finally {
       loading.value = false
     }

@@ -20,120 +20,149 @@
       </div>
 
       <!-- 文档内容 -->
-      <article v-else class="article">
-        <!-- 文档头部 -->
-        <header class="article-header" v-if="currentDoc">
-          <div class="breadcrumb">
-            <span class="breadcrumb-item">{{ currentNotebook?.name || '笔记本' }}</span>
-            <span class="breadcrumb-separator">/</span>
-            <span class="breadcrumb-item current">{{ removeFileExtension(currentDoc.name) }}</span>
-          </div>
-          
-          <h1 class="article-title">{{ removeFileExtension(currentDoc.name) }}</h1>
-          
-          <div class="article-meta">
-            <span class="meta-item">
-              <el-icon><Clock /></el-icon>
-              更新时间：{{ formatTime(currentDoc.hMtime) }}
-            </span>
-            <span v-if="currentDoc.subFileCount > 0" class="meta-item">
-              <el-icon><FolderOpened /></el-icon>
-              {{ currentDoc.subFileCount }} 个子文档
-            </span>
-          </div>
-          
-          <div class="content-actions">
-            <el-tooltip content="刷新内容">
-              <el-button 
-                @click="refreshContent"
-                :loading="loading"
-                :icon="Refresh"
-                circle
-              />
-            </el-tooltip>
-          </div>
-        </header>
-
-        <!-- 内容区域 -->
-        <div class="content-body">
-          <!-- 加载状态 -->
-          <div v-if="loading" class="loading-section">
-            <div class="loading-content">
-              <el-skeleton :rows="6" animated />
+      <div v-else class="document-layout">
+        <!-- 左侧：文档内容 -->
+        <article class="article">
+          <!-- 文档头部 -->
+          <header class="article-header" v-if="currentDoc">
+            <div class="breadcrumb">
+              <span class="breadcrumb-item">{{ currentNotebook?.name || '笔记本' }}</span>
+              <span class="breadcrumb-separator">/</span>
+              <span class="breadcrumb-item current">{{ removeFileExtension(currentDoc.name) }}</span>
             </div>
-          </div>
+            
+            <h1 class="article-title">{{ removeFileExtension(currentDoc.name) }}</h1>
+            
+            <div class="article-meta">
+              <span class="meta-item">
+                <el-icon><Clock /></el-icon>
+                更新时间：{{ formatTime(currentDoc.hMtime) }}
+              </span>
+              <span v-if="currentDoc.subFileCount > 0" class="meta-item">
+                <el-icon><FolderOpened /></el-icon>
+                {{ currentDoc.subFileCount }} 个子文档
+              </span>
+            </div>
+            
+            <div class="content-actions">
+              <el-tooltip content="显示/隐藏目录">
+                <el-button 
+                  @click="toggleOutline"
+                  :type="showOutline ? 'primary' : 'default'"
+                  :icon="Menu"
+                  circle
+                />
+              </el-tooltip>
+              <el-tooltip content="刷新内容">
+                <el-button 
+                  @click="refreshContent"
+                  :loading="loading"
+                  :icon="Refresh"
+                  circle
+                />
+              </el-tooltip>
+            </div>
+          </header>
 
-          <!-- 错误状态 -->
-          <div v-else-if="error" class="error-section">
-            <el-alert
-              :title="error"
-              type="error"
-              show-icon
-              center
-              class="error-alert"
-            >
-              <el-button @click="refreshContent" type="primary" size="small">
-                重新加载
-              </el-button>
-            </el-alert>
-          </div>
-
-          <!-- 文档内容 -->
-          <div v-else-if="currentNote" class="document-content">
-            <!-- 渲染HTML内容 -->
-            <div 
-              class="html-content"
-              v-html="sanitizedContent"
-            ></div>
-          </div>
-
-          <!-- 空内容 -->
-          <div v-else class="empty-section">
-            <el-empty 
-              description="该文档暂无内容"
-              :image-size="100"
-            >
-              <el-button @click="refreshContent" type="primary">
-                重新加载
-              </el-button>
-            </el-empty>
-          </div>
-        </div>
-
-        <!-- 文档底部导航 -->
-        <footer class="article-footer" v-if="currentNote">
-          <div class="article-nav">
-            <div class="nav-prev">
-              <div v-if="prevDoc" @click="selectDoc(prevDoc)" class="nav-link">
-                <span class="nav-direction">← 上一篇</span>
-                <span class="nav-title">{{ removeFileExtension(prevDoc.name) }}</span>
+          <!-- 内容区域 -->
+          <div class="content-body">
+            <!-- 加载状态 -->
+            <div v-if="loading" class="loading-section">
+              <div class="loading-content">
+                <el-skeleton :rows="6" animated />
               </div>
             </div>
-            <div class="nav-next">
-              <div v-if="nextDoc" @click="selectDoc(nextDoc)" class="nav-link">
-                <span class="nav-direction">下一篇 →</span>
-                <span class="nav-title">{{ removeFileExtension(nextDoc.name) }}</span>
-              </div>
+
+            <!-- 错误状态 -->
+            <div v-else-if="error" class="error-section">
+              <el-alert
+                :title="error"
+                type="error"
+                show-icon
+                center
+                class="error-alert"
+              >
+                <el-button @click="refreshContent" type="primary" size="small">
+                  重新加载
+                </el-button>
+              </el-alert>
+            </div>
+
+            <!-- 文档内容 -->
+            <div v-else-if="currentNote" class="document-content">
+              <!-- 渲染HTML内容 -->
+              <div 
+                class="html-content"
+                v-html="sanitizedContent"
+              ></div>
+            </div>
+
+            <!-- 空内容 -->
+            <div v-else class="empty-section">
+              <el-empty 
+                description="该文档暂无内容"
+                :image-size="100"
+              >
+                <el-button @click="refreshContent" type="primary">
+                  重新加载
+                </el-button>
+              </el-empty>
             </div>
           </div>
-        </footer>
-      </article>
+
+          <!-- 文档底部导航 -->
+          <footer class="article-footer" v-if="currentNote">
+            <div class="article-nav">
+              <div class="nav-prev">
+                <div v-if="prevDoc" @click="selectDoc(prevDoc)" class="nav-link">
+                  <span class="nav-direction">← 上一篇</span>
+                  <span class="nav-title">{{ removeFileExtension(prevDoc.name) }}</span>
+                </div>
+              </div>
+              <div class="nav-next">
+                <div v-if="nextDoc" @click="selectDoc(nextDoc)" class="nav-link">
+                  <span class="nav-direction">下一篇 →</span>
+                  <span class="nav-title">{{ removeFileExtension(nextDoc.name) }}</span>
+                </div>
+              </div>
+            </div>
+          </footer>
+        </article>
+
+        <!-- 右侧：大纲 -->
+        <aside 
+          class="outline-sidebar" 
+          :class="{ 'outline-visible': showOutline }"
+          v-if="currentDoc"
+        >
+          <NoteOutline :doc-id="currentDoc.id" />
+        </aside>
+      </div>
     </div>
+
+    <!-- 大纲遮罩层（移动端） -->
+    <div 
+      v-if="showOutline && isMobile" 
+      class="outline-mask"
+      @click="hideOutline"
+    ></div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useNoteStore } from '@/stores/note'
 import { storeToRefs } from 'pinia'
 import type { Doc } from '@/api/types'
+import NoteOutline from './NoteOutline.vue'
 import { 
   Document, 
   Refresh, 
   House, 
   Clock, 
-  FolderOpened 
+  FolderOpened,
+  Menu
 } from '@element-plus/icons-vue'
 
 // Router
@@ -149,6 +178,10 @@ const {
   loading,
   error
 } = storeToRefs(noteStore)
+
+// 响应式状态
+const showOutline = ref(false)
+const isMobile = ref(false)
 
 // 清理HTML内容（暂时直接返回内容，后续可添加DOMPurify）
 const sanitizedContent = computed(() => {
@@ -186,6 +219,14 @@ const goHome = () => {
   router.push('/')
 }
 
+const toggleOutline = () => {
+  showOutline.value = !showOutline.value
+}
+
+const hideOutline = () => {
+  showOutline.value = false
+}
+
 const removeFileExtension = (filename: string): string => {
   return filename.replace(/\.sy$/, '')
 }
@@ -193,6 +234,29 @@ const removeFileExtension = (filename: string): string => {
 const formatTime = (timeStr: string): string => {
   return timeStr.split(',')[0] || timeStr
 }
+
+// 检测屏幕尺寸
+const checkMobile = () => {
+  isMobile.value = window.innerWidth <= 768
+  if (!isMobile.value) {
+    showOutline.value = true // 桌面端默认显示大纲
+  }
+}
+
+// 监听窗口尺寸变化
+const handleResize = () => {
+  checkMobile()
+}
+
+// 生命周期
+onMounted(() => {
+  checkMobile()
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+})
 </script>
 
 <style scoped>
@@ -202,10 +266,8 @@ const formatTime = (timeStr: string): string => {
 }
 
 .content-container {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 32px 24px;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* 欢迎页面 */
@@ -213,7 +275,10 @@ const formatTime = (timeStr: string): string => {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
+  min-height: 100vh;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 24px;
 }
 
 .hero-section {
@@ -246,9 +311,19 @@ const formatTime = (timeStr: string): string => {
   justify-content: center;
 }
 
+/* 文档布局 */
+.document-layout {
+  display: flex;
+  height: 100vh;
+  position: relative;
+}
+
 /* 文章样式 */
 .article {
-  max-width: 768px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 24px;
+  max-width: calc(100% - 300px);
   margin: 0 auto;
 }
 
@@ -263,6 +338,8 @@ const formatTime = (timeStr: string): string => {
   position: absolute;
   top: 0;
   right: 0;
+  display: flex;
+  gap: 8px;
 }
 
 .breadcrumb {
@@ -289,7 +366,7 @@ const formatTime = (timeStr: string): string => {
   color: var(--vp-c-text-1);
   margin: 0 0 16px;
   line-height: 1.2;
-  padding-right: 60px; /* 为右侧按钮留空间 */
+  padding-right: 120px; /* 为右侧按钮留更多空间 */
 }
 
 .article-meta {
@@ -485,9 +562,52 @@ const formatTime = (timeStr: string): string => {
   font-weight: 500;
 }
 
+/* 大纲侧边栏 */
+.outline-sidebar {
+  width: 300px;
+  background: var(--vp-c-bg-alt);
+  border-left: 1px solid var(--vp-c-gray-2);
+  position: fixed;
+  top: 0;
+  right: -300px;
+  height: 100vh;
+  transition: right 0.3s ease;
+  z-index: 100;
+}
+
+.outline-sidebar.outline-visible {
+  right: 0;
+}
+
+/* 大纲遮罩 */
+.outline-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+}
+
 /* 响应式设计 */
+@media (min-width: 1200px) {
+  .outline-sidebar {
+    position: static;
+    right: auto;
+  }
+  
+  .outline-sidebar.outline-visible {
+    right: auto;
+  }
+  
+  .article {
+    max-width: calc(100% - 300px);
+  }
+}
+
 @media (max-width: 768px) {
-  .content-container {
+  .welcome-page {
     padding: 24px 16px;
   }
   
@@ -499,6 +619,11 @@ const formatTime = (timeStr: string): string => {
     font-size: 16px;
   }
   
+  .article {
+    padding: 24px 16px;
+    max-width: 100%;
+  }
+  
   .article-title {
     font-size: 28px;
     padding-right: 0;
@@ -507,7 +632,7 @@ const formatTime = (timeStr: string): string => {
   .content-actions {
     position: static;
     margin-top: 16px;
-    text-align: right;
+    text-align: left;
   }
   
   .article-nav {
@@ -521,6 +646,11 @@ const formatTime = (timeStr: string): string => {
   .html-content :deep(h1) { font-size: 24px; }
   .html-content :deep(h2) { font-size: 20px; }
   .html-content :deep(h3) { font-size: 18px; }
+  
+  .outline-sidebar {
+    width: 280px;
+    right: -280px;
+  }
 }
 
 /* 暗色模式支持 */
@@ -531,6 +661,11 @@ const formatTime = (timeStr: string): string => {
   
   .nav-link:hover {
     background: var(--vp-c-bg-alt);
+  }
+  
+  .outline-sidebar {
+    background: var(--vp-c-bg-elv);
+    border-left-color: var(--vp-c-gray-3);
   }
 }
 </style> 

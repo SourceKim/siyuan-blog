@@ -29,6 +29,55 @@ export class NoteDto {
   path!: string
 }
 
+// 大纲块 DTO
+export class OutlineBlockDto {
+  box!: string
+  path!: string
+  hPath!: string
+  id!: string
+  rootID!: string
+  parentID!: string
+  name!: string
+  alias!: string
+  memo!: string
+  tag!: string
+  content!: string
+  fcontent!: string
+  markdown!: string
+  folded!: boolean
+  type!: string
+  subType!: string // h1, h2, h3, h4, h5, h6
+  refText!: string
+  refs!: any
+  defID!: string
+  defPath!: string
+  ial!: any
+  children!: OutlineBlockDto[] | null
+  depth!: number
+  count!: number
+  sort!: number
+  created!: string
+  updated!: string
+  riffCardID!: string
+  riffCard!: any
+}
+
+// 大纲项 DTO
+export class OutlineItemDto {
+  id!: string
+  box!: string
+  name!: string
+  hPath!: string
+  type!: string
+  nodeType!: string
+  subType!: string // h1, h2, h3, h4, h5, h6
+  blocks?: OutlineBlockDto[]
+  depth!: number
+  count!: number
+  updated!: string
+  created!: string
+}
+
 // 请求参数 DTO
 export class GetDocsRequestDto {
   notebook?: string
@@ -41,6 +90,11 @@ export class GetDocRequestDto {
 
 export class GetRecommendedRequestDto {
   count?: number
+}
+
+export class GetOutlineRequestDto {
+  id!: string
+  preview?: boolean
 }
 
 // 标准响应格式

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { NoteService } from './note.service'
-import { GetDocsRequestDto, GetDocRequestDto, GetRecommendedRequestDto, ApiResponse } from './note.dto'
+import { GetDocsRequestDto, GetDocRequestDto, GetRecommendedRequestDto, GetOutlineRequestDto, ApiResponse } from './note.dto'
 
 export class NoteController {
   private noteService: NoteService
@@ -17,7 +17,6 @@ export class NoteController {
       const notebooks = await this.noteService.getNotebooks()
       res.json(ApiResponse.success(notebooks, '获取笔记本列表成功'))
     } catch (error) {
-      console.error('获取笔记本列表失败:', error)
       res.status(500).json(ApiResponse.error(1, '获取笔记本列表失败'))
     }
   }
@@ -27,7 +26,6 @@ export class NoteController {
    */
   async getDocs(req: Request, res: Response): Promise<void> {
     try {
-      // 简单的参数验证
       const { notebook, path = '/' } = req.body as GetDocsRequestDto
       
       if (!notebook || typeof notebook !== 'string') {
@@ -38,7 +36,6 @@ export class NoteController {
       const docs = await this.noteService.getDocs(notebook, path)
       res.json(ApiResponse.success(docs, '获取文档列表成功'))
     } catch (error) {
-      console.error('获取文档列表失败:', error)
       res.status(500).json(ApiResponse.error(1, '获取文档列表失败'))
     }
   }
@@ -48,7 +45,6 @@ export class NoteController {
    */
   async getDoc(req: Request, res: Response): Promise<void> {
     try {
-      // 简单的参数验证
       const { id } = req.body as GetDocRequestDto
       
       if (!id || typeof id !== 'string') {
@@ -59,8 +55,26 @@ export class NoteController {
       const doc = await this.noteService.getDoc(id)
       res.json(ApiResponse.success(doc, '获取文档内容成功'))
     } catch (error) {
-      console.error('获取文档内容失败:', error)
       res.status(500).json(ApiResponse.error(1, '获取文档内容失败'))
+    }
+  }
+
+  /**
+   * 获取文档大纲
+   */
+  async getDocOutline(req: Request, res: Response): Promise<void> {
+    try {
+      const { id, preview = false } = req.body as GetOutlineRequestDto
+      
+      if (!id || typeof id !== 'string') {
+        res.status(400).json(ApiResponse.error(400, 'id参数必填且必须为字符串'))
+        return
+      }
+
+      const outline = await this.noteService.getDocOutline(id, preview)
+      res.json(ApiResponse.success(outline, '获取文档大纲成功'))
+    } catch (error) {
+      res.status(500).json(ApiResponse.error(1, '获取文档大纲失败'))
     }
   }
 
@@ -69,7 +83,6 @@ export class NoteController {
    */
   async getRecommendedDocs(req: Request, res: Response): Promise<void> {
     try {
-      // 简单的参数验证
       const { count = 10 } = req.body as GetRecommendedRequestDto
       
       // 验证count参数
@@ -78,7 +91,6 @@ export class NoteController {
       const docs = await this.noteService.getRecommendedDocs(validCount)
       res.json(ApiResponse.success(docs, '获取推荐文档成功'))
     } catch (error) {
-      console.error('获取推荐文档失败:', error)
       res.status(500).json(ApiResponse.error(1, '获取推荐文档失败'))
     }
   }

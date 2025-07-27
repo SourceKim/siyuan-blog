@@ -4,12 +4,19 @@
     <div class="main-container">
       <!-- 左侧导航栏 -->
       <aside class="sidebar" :class="{ 'sidebar-open': sidebarOpen }">
+        <!-- 折叠按钮 -->
+        <div class="collapse-btn" @click="toggleSidebar">
+          <el-icon>
+            <ArrowLeft v-if="sidebarOpen" />
+            <ArrowRight v-else />
+          </el-icon>
+        </div>
+
         <div class="sidebar-content">
           <div class="section-header">
             <h2 class="section-title">笔记导航</h2>
             <div class="header-actions">
               <el-button @click="refreshNotebooks" :loading="loading" :icon="Refresh" size="small" text />
-              <el-button @click="toggleSidebar" :icon="Menu" text class="sidebar-toggle" />
             </div>
           </div>
           
@@ -33,7 +40,7 @@
       </aside>
 
       <!-- 右侧内容区域 -->
-      <main class="content">
+      <main class="content" :class="{ 'sidebar-collapsed': !sidebarOpen }">
         <!-- 使用 NoteContent 组件 -->
         <NoteContent />
       </main>
@@ -56,9 +63,10 @@ import NoteTree from '@/components/Note/NoteTree.vue'
 import NoteContent from '@/components/Note/NoteContent.vue'
 import type { Doc } from '@/api/types'
 import {
-  Menu,
   Search,
-  Refresh
+  Refresh,
+  ArrowLeft,
+  ArrowRight
 } from '@element-plus/icons-vue'
 
 // 状态管理
@@ -69,7 +77,8 @@ const {
 } = storeToRefs(noteStore)
 
 // 响应式状态
-const sidebarOpen = ref(true) // 默认展开
+// 桌面端默认展开，移动端默认收起
+const sidebarOpen = ref(window.innerWidth > 960)
 const searchText = ref('')
 
 // 方法
@@ -121,7 +130,8 @@ onMounted(() => {
   --vp-c-bg: #ffffff;
   --vp-c-bg-alt: #f6f6f7;
   --vp-c-bg-elv: #ffffff;
-  --vp-sidebar-width: 300px;
+  --vp-sidebar-width: 280px;
+  --vp-sidebar-collapsed-width: 60px;
 }
 
 /* 全局布局 */
@@ -129,6 +139,7 @@ onMounted(() => {
   min-height: 100vh;
   background: var(--vp-c-bg);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  position: relative;
 }
 
 /* 主容器 */
@@ -146,18 +157,76 @@ onMounted(() => {
   top: 0;
   bottom: 0;
   left: 0;
-  overflow-y: auto;
   z-index: 50;
-  transform: translateX(-100%);
-  transition: transform 0.3s ease;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
 }
 
-.sidebar.sidebar-open {
-  transform: translateX(0);
+/* 桌面端折叠状态 */
+.sidebar:not(.sidebar-open) {
+  width: 60px;
+  border-right: 1px solid var(--vp-c-gray-2);
+}
+
+/* 折叠按钮 */
+.collapse-btn {
+  position: absolute;
+  right: -12px;
+  top: 20px;
+  width: 24px;
+  height: 24px;
+  background: var(--el-color-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  font-size: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+  z-index: 60;
+}
+
+.collapse-btn:hover {
+  transform: scale(1.1);
+}
+
+/* 移动端的transform逻辑 */
+@media (max-width: 960px) {
+  .sidebar {
+    width: var(--vp-sidebar-width) !important;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+  
+  /* 移动端折叠状态下也要重置宽度 */
+  .sidebar:not(.sidebar-open) {
+    width: var(--vp-sidebar-width) !important;
+  }
+  
+  /* 移动端隐藏折叠按钮 */
+  .collapse-btn {
+    display: none;
+  }
 }
 
 .sidebar-content {
   padding: 24px 0;
+  white-space: nowrap;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  overflow: hidden;
+}
+
+/* 折叠时隐藏内容 */
+.sidebar:not(.sidebar-open) .sidebar-content {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .section-header {
@@ -181,10 +250,6 @@ onMounted(() => {
   gap: 4px;
 }
 
-.sidebar-toggle {
-  display: none;
-}
-
 .search-box {
   padding: 0 24px 16px;
 }
@@ -194,6 +259,24 @@ onMounted(() => {
   flex: 1;
   margin-left: var(--vp-sidebar-width);
   background: var(--vp-c-bg);
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 100vh;
+}
+
+/* 侧边栏折叠时，内容区域调整 */
+.content.sidebar-collapsed {
+  margin-left: var(--vp-sidebar-collapsed-width);
+}
+
+/* 桌面端内容区域确保正确的margin */
+@media (min-width: 961px) {
+  .content {
+    margin-left: var(--vp-sidebar-width);
+  }
+  
+  .content.sidebar-collapsed {
+    margin-left: var(--vp-sidebar-collapsed-width);
+  }
 }
 
 /* 侧边栏遮罩 */
@@ -210,20 +293,28 @@ onMounted(() => {
 
 /* 响应式设计 */
 @media (max-width: 960px) {
-  .content {
-    margin-left: 0;
-  }
-  
-  .sidebar {
-    width: 280px;
-  }
-  
-  .sidebar-toggle {
-    display: block;
+  .content,
+  .content.sidebar-collapsed {
+    margin-left: 0 !important;
   }
   
   .sidebar-mask {
     display: block;
+  }
+}
+
+/* 暗色模式支持 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --vp-c-bg: #1a1a1a;
+    --vp-c-bg-alt: #2d2d2d;
+    --vp-c-bg-elv: #262626;
+    --vp-c-text-1: #ffffff;
+    --vp-c-text-2: #c9c9c9;
+    --vp-c-text-3: #8e8e8e;
+    --vp-c-gray-1: #3d3d3d;
+    --vp-c-gray-2: #4d4d4d;
+    --vp-c-gray-3: #5d5d5d;
   }
 }
 

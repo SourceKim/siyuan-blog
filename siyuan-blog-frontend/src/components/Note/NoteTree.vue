@@ -1,5 +1,7 @@
 <template>
   <div class="note-tree">
+
+
     <!-- 笔记本列表 -->
     <div class="notebooks-section" v-if="!currentNotebook">
       <el-empty 
@@ -22,7 +24,14 @@
           <el-icon class="notebook-icon">
             <component :is="notebook.icon || 'Folder'" />
           </el-icon>
-          <span class="notebook-name">{{ notebook.name }}</span>
+          <el-tooltip 
+            :content="notebook.name" 
+            placement="right"
+            :disabled="!isTextOverflow(notebook.name)"
+            :show-after="500"
+          >
+            <span class="notebook-name">{{ notebook.name }}</span>
+          </el-tooltip>
           <el-icon class="arrow-icon"><ArrowRight /></el-icon>
         </div>
       </div>
@@ -63,7 +72,14 @@
             <el-icon class="node-icon">
               <component :is="getNodeIcon(data)" />
             </el-icon>
-            <span class="node-label">{{ removeFileExtension(node.label) }}</span>
+            <el-tooltip 
+              :content="removeFileExtension(node.label)" 
+              placement="right"
+              :disabled="!isTextOverflow(removeFileExtension(node.label))"
+              :show-after="500"
+            >
+              <span class="node-label">{{ removeFileExtension(node.label) }}</span>
+            </el-tooltip>
             <div class="node-info" v-if="data.subFileCount > 0">
               <el-tag size="small" type="info">{{ data.subFileCount }}</el-tag>
             </div>
@@ -175,7 +191,6 @@ const treeProps = {
   }
 }
 
-// 方法
 const fetchNotebooks = async () => {
   await noteStore.fetchNotebooks()
 }
@@ -259,6 +274,17 @@ const removeFileExtension = (filename: string): string => {
   return filename.replace(/\.sy$/, '')
 }
 
+const isTextOverflow = (text: string): boolean => {
+  // 根据侧边栏宽度和字体大小估算，超过一定长度就显示tooltip
+  // 中文字符按2个字符宽度计算，英文字符按1个字符计算
+  const chineseChars = (text.match(/[\u4e00-\u9fa5]/g) || []).length
+  const otherChars = text.length - chineseChars
+  const estimatedWidth = chineseChars * 2 + otherChars
+  
+  // 大约20个字符宽度就会溢出
+  return estimatedWidth > 20
+}
+
 const clearError = () => {
   noteStore.error = null
 }
@@ -298,6 +324,7 @@ onMounted(() => {
   height: 100%;
   overflow-y: auto;
   background: transparent;
+  position: relative;
 }
 
 .notebooks-section,
@@ -336,6 +363,10 @@ onMounted(() => {
   flex: 1;
   font-weight: 500;
   color: var(--vp-c-text-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .arrow-icon {
@@ -378,6 +409,10 @@ onMounted(() => {
   flex: 1;
   font-size: 14px;
   color: var(--vp-c-text-1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .node-info {

@@ -36,6 +36,55 @@ export interface Note {
   path: string
 }
 
+// 大纲块类型
+export interface OutlineBlock {
+  box: string
+  path: string
+  hPath: string
+  id: string
+  rootID: string
+  parentID: string
+  name: string
+  alias: string
+  memo: string
+  tag: string
+  content: string
+  fcontent: string
+  markdown: string
+  folded: boolean
+  type: string
+  subType: string // h1, h2, h3, h4, h5, h6
+  refText: string
+  refs: any
+  defID: string
+  defPath: string
+  ial: any
+  children: OutlineBlock[] | null
+  depth: number
+  count: number
+  sort: number
+  created: string
+  updated: string
+  riffCardID: string
+  riffCard: any
+}
+
+// 大纲项类型
+export interface OutlineItem {
+  id: string
+  box: string
+  name: string
+  hPath: string
+  type: string
+  nodeType: string
+  subType: string // h1, h2, h3, h4, h5, h6
+  blocks?: OutlineBlock[]
+  depth: number
+  count: number
+  updated: string
+  created: string
+}
+
 // 技术栈项目类型
 export interface TechStackItem {
   name: string
@@ -85,4 +134,9 @@ export interface GetDocRequest {
 
 export interface GetRecommendedRequest {
   count?: number
+}
+
+export interface GetOutlineRequest {
+  id: string
+  preview?: boolean
 } 

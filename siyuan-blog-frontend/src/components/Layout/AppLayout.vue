@@ -44,9 +44,7 @@ onMounted(() => {
 
 .main-content {
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  padding: 0px;
 }
 
 /* 响应式设计 */

@@ -4,6 +4,7 @@ import compression from 'compression'
 import { config } from './config'
 import { setupRoutes } from './routes'
 import { errorHandler } from './middleware/error-handler'
+import { requestLogger, errorLogger } from './middleware/logger'
 import { FileConfigService } from './config/file-config.service'
 
 const app = express()
@@ -20,6 +21,9 @@ app.use(compression() as any)
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
+// 开发环境日志中间件
+app.use(requestLogger)
+
 // 健康检查
 app.get('/health', (req: Request, res: Response) => {
   res.json({
@@ -32,6 +36,9 @@ app.get('/health', (req: Request, res: Response) => {
 
 // 路由设置
 setupRoutes(app)
+
+// 错误日志中间件
+app.use(errorLogger)
 
 // 错误处理中间件
 app.use(errorHandler)
@@ -57,6 +64,9 @@ async function bootstrap() {
     console.log(`🌐 API 基础路径: http://localhost:${port}/api`)
     console.log(`🔗 前端地址: http://localhost:3000`)
     console.log(`📁 配置文件: 使用多文件JSON配置`)
+    if (config.nodeEnv === 'development') {
+      console.log(`🔍 开发模式: 已启用详细API日志`)
+    }
   })
 }
 

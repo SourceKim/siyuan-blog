@@ -1,5 +1,5 @@
 import api from './index'
-import type { Notebook, Doc, Note, GetDocsRequest, GetDocRequest, GetRecommendedRequest } from './types'
+import type { Notebook, Doc, Note, OutlineItem, GetDocsRequest, GetDocRequest, GetRecommendedRequest, GetOutlineRequest } from './types'
 
 // 笔记相关API
 export const noteApi = {
@@ -24,6 +24,14 @@ export const noteApi = {
     console.log('🌐 API: 调用 getDoc, 参数:', params)
     const result = await api.post('/doc', params) as Note
     console.log('📊 API: getDoc 返回结果:', result)
+    return result
+  },
+
+  // 获取文档大纲
+  async getDocOutline(params: GetOutlineRequest): Promise<OutlineItem[]> {
+    console.log('🌐 API: 调用 getDocOutline, 参数:', params)
+    const result = await api.post('/outline', params) as OutlineItem[]
+    console.log('📊 API: getDocOutline 返回结果:', result)
     return result
   },
 
