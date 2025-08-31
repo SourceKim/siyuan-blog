@@ -104,8 +104,6 @@ export class ConfigService {
   private getConfigDescription(configKey: string): string {
     const descriptions: { [key: string]: string } = {
       'about_me': '个人基本信息',
-      'home_settings': '首页显示配置',
-      'about_settings': '关于页面显示配置',
       'social_links': '社交链接配置',
       'tech_stack': '技术栈配置'
     }

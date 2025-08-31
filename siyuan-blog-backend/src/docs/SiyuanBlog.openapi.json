@@ -1,0 +1,1330 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SiyuanBlog",
+    "description": "",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "siyuan-kernel"
+    },
+    {
+      "name": "backend"
+    },
+    {
+      "name": "backend/config"
+    },
+    {
+      "name": "backend/notebook"
+    },
+    {
+      "name": "backend/home"
+    },
+    {
+      "name": "backend/about"
+    }
+  ],
+  "paths": {
+    "/api/notebook/lsNotebooks": {
+      "post": {
+        "summary": "获取所有笔记本",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "siyuan-kernel"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "x-apifox-ignore-properties": [],
+                  "x-apifox-orders": []
+                }
+              }
+            },
+            "headers": {},
+            "x-apifox-name": "成功"
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "siyuan-kernel",
+        "x-apifox-status": "developing",
+        "x-run-in-apifox": "https://app.apifox.com/web/project/6799717/apis/api-324104877-run"
+      }
+    },
+    "/api/filetree/getDoc": {
+      "post": {
+        "summary": "获取 doc 内容",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "siyuan-kernel"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "ID 编号"
+                  },
+                  "mode": {
+                    "type": "string"
+                  }
+                },
+                "x-apifox-orders": [
+                  "id",
+                  "mode"
+                ],
+                "required": [
+                  "id",
+                  "mode"
+                ],
+                "x-apifox-ignore-properties": []
+              },
+              "examples": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "x-apifox-ignore-properties": [],
+                  "x-apifox-orders": []
+                }
+              }
+            },
+            "headers": {},
+            "x-apifox-name": "成功"
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "siyuan-kernel",
+        "x-apifox-status": "developing",
+        "x-run-in-apifox": "https://app.apifox.com/web/project/6799717/apis/api-324105024-run"
+      }
+    },
+    "/api/filetree/listDocsByPath": {
+      "post": {
+        "summary": "获取子 doc",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "siyuan-kernel"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "notebook": {
+                    "type": "string"
+                  },
+                  "path": {
+                    "type": "string"
+                  }
+                },
+                "x-apifox-orders": [
+                  "notebook",
+                  "path"
+                ],
+                "required": [
+                  "notebook",
+                  "path"
+                ],
+                "x-apifox-ignore-properties": []
+              },
+              "examples": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "x-apifox-ignore-properties": [],
+                  "x-apifox-orders": []
+                }
+              }
+            },
+            "headers": {},
+            "x-apifox-name": "成功"
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "siyuan-kernel",
+        "x-apifox-status": "developing",
+        "x-run-in-apifox": "https://app.apifox.com/web/project/6799717/apis/api-324312577-run"
+      }
+    },
+    "/api/notebook/getNotebookInfo": {
+      "post": {
+        "summary": "未命名接口",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "siyuan-kernel"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "notebook": {
+                    "type": "string"
+                  }
+                },
+                "x-apifox-orders": [
+                  "notebook"
+                ],
+                "required": [
+                  "notebook"
+                ],
+                "x-apifox-ignore-properties": []
+              },
+              "examples": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "x-apifox-ignore-properties": [],
+                  "x-apifox-orders": []
+                }
+              }
+            },
+            "headers": {},
+            "x-apifox-name": "成功"
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "siyuan-kernel",
+        "x-apifox-status": "developing",
+        "x-run-in-apifox": "https://app.apifox.com/web/project/6799717/apis/api-326735842-run"
+      }
+    },
+    "/config": {
+      "get": {
+        "summary": "获取所有配置",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "backend/config"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "x-apifox-ignore-properties": [],
+                  "x-apifox-orders": []
+                }
+              }
+            },
+            "headers": {},
+            "x-apifox-name": "成功"
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "backend/config",
+        "x-apifox-status": "developing",
+        "x-run-in-apifox": "https://app.apifox.com/web/project/6799717/apis/api-326740221-run"
+      }
+    },
+    "/config/active": {
+      "get": {
+        "summary": "获取所有活跃的配置",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "backend/config"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "x-apifox-ignore-properties": [],
+                  "x-apifox-orders": []
+                }
+              }
+            },
+            "headers": {},
+            "x-apifox-name": "成功"
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "backend/config",
+        "x-apifox-status": "developing",
+        "x-run-in-apifox": "https://app.apifox.com/web/project/6799717/apis/api-326740226-run"
+      }
+    },
+    "/config/{configKey}": {
+      "get": {
+        "summary": "获取单个配置",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "backend/config"
+        ],
+        "parameters": [
+          {
+            "name": "configKey",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "x-apifox-ignore-properties": [],
+                  "x-apifox-orders": []
+                }
+              }
+            },
+            "headers": {},
+            "x-apifox-name": "成功"
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "backend/config",
+        "x-apifox-status": "developing",
+        "x-run-in-apifox": "https://app.apifox.com/web/project/6799717/apis/api-326740228-run"
+      },
+      "put": {
+        "summary": "修改单个配置",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "backend/config"
+        ],
+        "parameters": [
+          {
+            "name": "configKey",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "x-apifox-ignore-properties": [],
+                  "x-apifox-orders": []
+                }
+              }
+            },
+            "headers": {},
+            "x-apifox-name": "成功"
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "backend/config",
+        "x-apifox-status": "developing",
+        "x-run-in-apifox": "https://app.apifox.com/web/project/6799717/apis/api-326740230-run"
+      }
+    },
+    "/notebooks": {
+      "post": {
+        "summary": "获取所有笔记本",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "backend/notebook"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "x-apifox-ignore-properties": [],
+                  "x-apifox-orders": []
+                }
+              }
+            },
+            "headers": {},
+            "x-apifox-name": "成功"
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "backend/notebook",
+        "x-apifox-status": "developing",
+        "x-run-in-apifox": "https://app.apifox.com/web/project/6799717/apis/api-324317654-run"
+      }
+    },
+    "/docs": {
+      "post": {
+        "summary": "获取子 doc",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "backend/notebook"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "notebook": {
+                    "type": "string"
+                  },
+                  "path": {
+                    "type": "string"
+                  }
+                },
+                "x-apifox-orders": [
+                  "notebook",
+                  "path"
+                ],
+                "required": [
+                  "notebook",
+                  "path"
+                ],
+                "x-apifox-ignore-properties": []
+              },
+              "examples": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "x-apifox-ignore-properties": [],
+                  "x-apifox-orders": []
+                }
+              }
+            },
+            "headers": {},
+            "x-apifox-name": "成功"
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "backend/notebook",
+        "x-apifox-status": "developing",
+        "x-run-in-apifox": "https://app.apifox.com/web/project/6799717/apis/api-324317656-run"
+      }
+    },
+    "/doc": {
+      "post": {
+        "summary": "获取 doc 内容",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "backend/notebook"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "description": "ID 编号"
+                  },
+                  "mode": {
+                    "type": "string"
+                  }
+                },
+                "x-apifox-orders": [
+                  "id",
+                  "mode"
+                ],
+                "required": [
+                  "id",
+                  "mode"
+                ],
+                "x-apifox-ignore-properties": []
+              },
+              "examples": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "x-apifox-ignore-properties": [],
+                  "x-apifox-orders": []
+                }
+              }
+            },
+            "headers": {},
+            "x-apifox-name": "成功"
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "backend/notebook",
+        "x-apifox-status": "developing",
+        "x-run-in-apifox": "https://app.apifox.com/web/project/6799717/apis/api-324317655-run"
+      }
+    },
+    "/recommended": {
+      "post": {
+        "summary": "获取随机文章",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "backend/notebook"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "count": {
+                    "type": "integer"
+                  }
+                },
+                "x-apifox-orders": [
+                  "count"
+                ],
+                "required": [
+                  "count"
+                ],
+                "x-apifox-ignore-properties": []
+              },
+              "examples": {}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "x-apifox-ignore-properties": [],
+                  "x-apifox-orders": []
+                }
+              }
+            },
+            "headers": {},
+            "x-apifox-name": "成功"
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "backend/notebook",
+        "x-apifox-status": "developing",
+        "x-run-in-apifox": "https://app.apifox.com/web/project/6799717/apis/api-326169315-run"
+      }
+    },
+    "/home/data": {
+      "get": {
+        "summary": "获取首页完整数据",
+        "deprecated": false,
+        "description": "获取首页所需的所有数据，包括个人信息、设置、统计、推荐文档等",
+        "tags": [
+          "backend/home"
+        ],
+        "parameters": [
+          {
+            "name": "count",
+            "in": "query",
+            "description": "推荐文档数量",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 12
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer", "example": 0 },
+                    "msg": { "type": "string", "example": "获取首页数据成功" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "profile": {
+                          "type": "object",
+                          "properties": {
+                            "name": { "type": "string" },
+                            "avatarUrl": { "type": "string" },
+                            "bio": { "type": "string" }
+                          }
+                        },
+                        "homeSettings": {
+                          "type": "object",
+                          "properties": {
+                            "showProfile": { "type": "boolean" },
+                            "showSocialLinks": { "type": "boolean" },
+                            "showStats": { "type": "boolean" },
+                            "maxRecommendedArticles": { "type": "integer" },
+                            "profileCollapsible": { "type": "boolean" }
+                          }
+                        },
+                        "socialLinks": {
+                          "type": "object",
+                          "properties": {
+                            "email": { "type": "string" },
+                            "github": { "type": "string" },
+                            "website": { "type": "string" }
+                          }
+                        },
+                        "blogStats": {
+                          "type": "object",
+                          "properties": {
+                            "notebookCount": { "type": "integer" },
+                            "documentCount": { "type": "integer" },
+                            "visitCount": { "type": "integer" },
+                            "runningDays": { "type": "integer" }
+                          }
+                        },
+                        "recommendedDocs": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": { "type": "string" },
+                              "name": { "type": "string" },
+                              "notebookName": { "type": "string" },
+                              "hCtime": { "type": "string" },
+                              "hMtime": { "type": "string" },
+                              "summary": { "type": "string" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "backend/home",
+        "x-apifox-status": "developing"
+      }
+    },
+    "/home/profile": {
+      "get": {
+        "summary": "获取个人信息",
+        "deprecated": false,
+        "description": "获取用于首页显示的个人基本信息",
+        "tags": [
+          "backend/home"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer", "example": 0 },
+                    "msg": { "type": "string", "example": "获取个人信息成功" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "name": { "type": "string" },
+                        "avatarUrl": { "type": "string" },
+                        "bio": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "backend/home",
+        "x-apifox-status": "developing"
+      }
+    },
+    "/home/settings": {
+      "get": {
+        "summary": "获取首页设置",
+        "deprecated": false,
+        "description": "获取首页显示相关的设置配置",
+        "tags": [
+          "backend/home"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer", "example": 0 },
+                    "msg": { "type": "string", "example": "获取首页设置成功" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "showProfile": { "type": "boolean" },
+                        "showSocialLinks": { "type": "boolean" },
+                        "showStats": { "type": "boolean" },
+                        "maxRecommendedArticles": { "type": "integer" },
+                        "profileCollapsible": { "type": "boolean" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "backend/home",
+        "x-apifox-status": "developing"
+      }
+    },
+    "/home/social": {
+      "get": {
+        "summary": "获取社交链接",
+        "deprecated": false,
+        "description": "获取首页使用的社交链接配置",
+        "tags": [
+          "backend/home"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer", "example": 0 },
+                    "msg": { "type": "string", "example": "获取社交链接成功" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "email": { "type": "string" },
+                        "github": { "type": "string" },
+                        "website": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "backend/home",
+        "x-apifox-status": "developing"
+      }
+    },
+    "/home/stats": {
+      "get": {
+        "summary": "获取博客统计",
+        "deprecated": false,
+        "description": "获取博客的统计信息，如文章数量、访问量等",
+        "tags": [
+          "backend/home"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer", "example": 0 },
+                    "msg": { "type": "string", "example": "获取博客统计成功" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "notebookCount": { "type": "integer" },
+                        "documentCount": { "type": "integer" },
+                        "visitCount": { "type": "integer" },
+                        "runningDays": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "backend/home",
+        "x-apifox-status": "developing"
+      }
+    },
+    "/home/recommended": {
+      "post": {
+        "summary": "获取推荐文档",
+        "deprecated": false,
+        "description": "获取用于首页展示的推荐文档列表",
+        "tags": [
+          "backend/home"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "count": {
+                    "type": "integer",
+                    "description": "推荐文档数量",
+                    "default": 12
+                  }
+                },
+                "x-apifox-orders": ["count"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer", "example": 0 },
+                    "msg": { "type": "string", "example": "获取推荐文档成功" },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "name": { "type": "string" },
+                          "notebookName": { "type": "string" },
+                          "hCtime": { "type": "string" },
+                          "hMtime": { "type": "string" },
+                          "summary": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "backend/home",
+        "x-apifox-status": "developing"
+      }
+    },
+    "/about/info": {
+      "get": {
+        "summary": "获取关于页面完整信息",
+        "deprecated": false,
+        "description": "获取关于页面所需的完整信息，包括个人信息、配置、统计等",
+        "tags": [
+          "backend/about"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer", "example": 0 },
+                    "msg": { "type": "string", "example": "获取关于页面信息成功" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "name": { "type": "string" },
+                        "avatarUrl": { "type": "string" },
+                        "bio": { "type": "string" },
+                        "config": {
+                          "type": "object",
+                          "properties": {
+
+                            "social": {
+                              "type": "object",
+                              "properties": {
+                                "email": { "type": "string" },
+                                "github": { "type": "string" },
+                                "website": { "type": "string" }
+                              }
+                            },
+                            "techStack": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "name": { "type": "string" },
+                                  "type": { "type": "string" }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "blogStats": {
+                          "type": "object",
+                          "properties": {
+                            "notebookCount": { "type": "integer" },
+                            "documentCount": { "type": "integer" },
+                            "visitCount": { "type": "integer" },
+                            "runningDays": { "type": "integer" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "backend/about",
+        "x-apifox-status": "developing"
+      }
+    },
+    "/about/me": {
+      "get": {
+        "summary": "获取个人基本信息",
+        "deprecated": false,
+        "description": "获取个人的基本信息",
+        "tags": [
+          "backend/about"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer", "example": 0 },
+                    "msg": { "type": "string", "example": "获取个人基本信息成功" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "name": { "type": "string" },
+                        "avatarUrl": { "type": "string" },
+                        "bio": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "backend/about",
+        "x-apifox-status": "developing"
+      }
+    },
+    "/about/config": {
+      "get": {
+        "summary": "获取关于页面配置",
+        "deprecated": false,
+        "description": "获取关于页面的配置信息",
+        "tags": [
+          "backend/about"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer", "example": 0 },
+                    "msg": { "type": "string", "example": "获取关于页面配置成功" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+
+                        "social": {
+                          "type": "object",
+                          "properties": {
+                            "email": { "type": "string" },
+                            "github": { "type": "string" },
+                            "website": { "type": "string" }
+                          }
+                        },
+                        "techStack": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": { "type": "string" },
+                              "type": { "type": "string" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "backend/about",
+        "x-apifox-status": "developing"
+      }
+    },
+    "/about/settings": {
+      "get": {
+        "summary": "获取关于页面设置",
+        "deprecated": false,
+        "description": "获取关于页面的显示设置",
+        "tags": [
+          "backend/about"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer", "example": 0 },
+                    "msg": { "type": "string", "example": "获取关于页面设置成功" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "backend/about",
+        "x-apifox-status": "developing"
+      }
+    },
+    "/about/social": {
+      "get": {
+        "summary": "获取社交链接",
+        "deprecated": false,
+        "description": "获取关于页面使用的社交链接",
+        "tags": [
+          "backend/about"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer", "example": 0 },
+                    "msg": { "type": "string", "example": "获取社交链接成功" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "email": { "type": "string" },
+                        "github": { "type": "string" },
+                        "website": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "backend/about",
+        "x-apifox-status": "developing"
+      }
+    },
+    "/about/tech-stack": {
+      "get": {
+        "summary": "获取技术栈",
+        "deprecated": false,
+        "description": "获取技术栈配置信息",
+        "tags": [
+          "backend/about"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer", "example": 0 },
+                    "msg": { "type": "string", "example": "获取技术栈成功" },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": { "type": "string" },
+                          "type": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "backend/about",
+        "x-apifox-status": "developing"
+      }
+    },
+    "/about/stats": {
+      "get": {
+        "summary": "获取博客统计",
+        "deprecated": false,
+        "description": "获取关于页面使用的博客统计信息",
+        "tags": [
+          "backend/about"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": { "type": "integer", "example": 0 },
+                    "msg": { "type": "string", "example": "获取博客统计成功" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "notebookCount": { "type": "integer" },
+                        "documentCount": { "type": "integer" },
+                        "visitCount": { "type": "integer" },
+                        "runningDays": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apikey-header-Authorization": []
+          }
+        ],
+        "x-apifox-folder": "backend/about",
+        "x-apifox-status": "developing"
+      }
+    }
+  },
+  "webhooks": {},
+  "components": {
+    "schemas": {},
+    "securitySchemes": {
+      "apikey-header-Authorization": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:8000/api/",
+      "description": "backend开发环境"
+    }
+  ],
+  "security": []
+}
