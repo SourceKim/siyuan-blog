@@ -25,7 +25,6 @@
           <div class="profile-section">
             <div class="avatar-container">
               <div 
-                v-if="aboutMe.config.about.showAvatar"
                 class="profile-avatar neon-border"
                 :style="`background-image: url(${aboutMe.avatarUrl || '/default-avatar.png'})`"
               >
@@ -46,7 +45,7 @@
           <h2 class="section-title">联系方式 & 技能</h2>
           <div class="contact-skills-grid">
             <!-- 联系方式 -->
-            <div v-if="aboutMe.config.about.showContactInfo" class="social-links">
+            <div class="social-links">
               <a 
                 :href="`mailto:${aboutMe.config.social.email}`"
                 class="social-link hover-glow"
@@ -77,7 +76,7 @@
             <div class="divider"></div>
 
             <!-- 技能标签 -->
-            <div v-if="aboutMe.config.about.showTechStack" class="tech-skills">
+            <div class="tech-skills">
               <span 
                 v-for="tech in aboutMe.config.techStack" 
                 :key="tech.name"
@@ -96,36 +95,22 @@
         <div class="section-content">
           <h2 class="section-title">经历</h2>
           <div class="timeline">
-            <div class="timeline-item">
+            <div 
+              v-for="(exp, index) in aboutMe?.config?.experience || []" 
+              :key="index"
+              class="timeline-item"
+            >
               <div class="timeline-marker"></div>
-              <h3 class="timeline-title">全栈开发工程师</h3>
-              <p class="timeline-period">2021 - 至今</p>
-              <p class="timeline-description">负责开发和维护可扩展的Web应用程序，使用现代前端技术栈。</p>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-marker"></div>
-              <h3 class="timeline-title">自由职业开发者</h3>
-              <p class="timeline-period">2019 - 2021</p>
-              <p class="timeline-description">为各种客户构建定制网站和应用程序，专注于性能和用户体验。</p>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-marker"></div>
-              <h3 class="timeline-title">计算机科学学士</h3>
-              <p class="timeline-period">2015 - 2019</p>
-              <p class="timeline-description">优等生毕业，专注于软件工程和人机交互。</p>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-marker"></div>
-              <h3 class="timeline-title">技术博客</h3>
-              <p class="timeline-period">2018 - 至今</p>
-              <p class="timeline-description">分享关于Web开发、新技术和生产力工具的见解。</p>
+              <h3 class="timeline-title">{{ exp.title }}</h3>
+              <p class="timeline-period">{{ exp.period }}</p>
+              <p class="timeline-description">{{ exp.description }}</p>
             </div>
           </div>
         </div>
       </div>
 
       <!-- 博客统计 -->
-      <div v-if="aboutMe.config.about.showBlogStats" class="stats-section">
+      <div class="stats-section">
         <div class="section-content">
           <h2 class="section-title">博客统计</h2>
           <div class="stats-grid">

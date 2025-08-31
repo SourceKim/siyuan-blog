@@ -91,27 +91,51 @@ export interface TechStackItem {
   type: 'primary' | 'success' | 'warning' | 'info' | 'danger' | ''
 }
 
+// 工作经历项目类型
+export interface ExperienceItem {
+  title: string
+  period: string
+  description: string
+}
+
+// 内容模板类型
+export interface ContentTemplates {
+  summaryTemplates: {
+    default: string[]
+    frontend: string
+    backend: string
+    thinking: string
+    tutorial: string
+  }
+  tagRules: {
+    tech: { [key: string]: { keywords: string[], tag: string } }
+    content: { [key: string]: { keywords: string[], tag: string } }
+    category: { [key: string]: { keywords: string[], tag: string } }
+  }
+  summaryKeywords: {
+    frontend: string[]
+    backend: string[]
+    thinking: string[]
+    tutorial: string[]
+  }
+  defaults: {
+    fallbackName: string
+    fallbackTitle: string
+    fallbackBio: string
+    maxTags: number
+    unknownNotebook: string
+  }
+}
+
 // 配置类型
 export interface AboutMeConfig {
-  home: {
-    showProfile: boolean
-    showSocialLinks: boolean
-    showStats: boolean
-    maxRecommendedArticles: number
-    profileCollapsible: boolean
-  }
-  about: {
-    showContactInfo: boolean
-    showTechStack: boolean
-    showBlogStats: boolean
-    showAvatar: boolean
-  }
   social: {
     email: string
     github: string
     website: string
   }
   techStack: TechStackItem[]
+  experience: ExperienceItem[]
 }
 
 // 个人信息类型

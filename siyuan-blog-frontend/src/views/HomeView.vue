@@ -4,14 +4,12 @@
     <TechBackground />
     <!-- 左侧个人信息侧边栏 -->
     <aside 
-      v-if="configStore.homeSettings.showProfile"
       class="profile-sidebar" 
       :class="{ collapsed: drawerCollapsed }"
     >
       <div class="sidebar-content">
         <!-- 收缩按钮 -->
         <div 
-          v-if="configStore.homeSettings.profileCollapsible"
           class="collapse-btn" 
           @click="toggleDrawer"
         >
@@ -28,7 +26,7 @@
             <div class="avatar-wrapper">
               <el-avatar 
                 :size="120" 
-                :src="configStore.aboutMe.avatarUrl" 
+                :src="homeData?.profile?.avatarUrl" 
                 icon="User"
                 class="profile-avatar"
               />
@@ -39,27 +37,26 @@
           
           <!-- 姓名和标题 -->
           <div class="profile-header">
-            <h3 class="profile-name">{{ configStore.aboutMe.name || 'Alexia' }}</h3>
-            <p class="profile-title">Software Engineer</p>
+            <h3 class="profile-name">{{ homeData?.profile?.name || homeData?.contentTemplates?.defaults?.fallbackName || '博主' }}</h3>
+            <p class="profile-title">{{ homeData?.profile?.title || homeData?.contentTemplates?.defaults?.fallbackTitle || '开发者' }}</p>
           </div>
 
           <!-- 个人简介 -->
           <div class="profile-bio">
-            <p>{{ configStore.aboutMe.bio || '这是我的数字花园，分享技术思考与成长历程。热爱编程，专注于现代前端技术和用户体验设计。' }}</p>
+            <p>{{ homeData?.profile?.bio || homeData?.contentTemplates?.defaults?.fallbackBio || '这是我的数字花园，分享技术思考与成长历程。' }}</p>
           </div>
 
           <!-- 统计信息 -->
           <div 
-            v-if="configStore.homeSettings.showStats"
             class="stats-container"
           >
             <div class="stats-grid">
               <div class="stat-card">
-                <div class="stat-value">{{ notebooks.length }}</div>
+                <div class="stat-value">{{ homeData?.blogStats?.notebookCount || 0 }}</div>
                 <div class="stat-label">笔记本</div>
               </div>
               <div class="stat-card">
-                <div class="stat-value">{{ recommendedDocs.length }}</div>
+                <div class="stat-value">{{ homeData?.blogStats?.documentCount || 0 }}</div>
                 <div class="stat-label">文章</div>
               </div>
             </div>
@@ -67,7 +64,6 @@
 
           <!-- 社交链接 -->
           <div 
-            v-if="configStore.homeSettings.showSocialLinks"
             class="social-links"
           >
             <button 
@@ -101,7 +97,7 @@
 
     <!-- 主内容区域 -->
     <main class="main-content" :class="{ 
-      expanded: drawerCollapsed || !configStore.homeSettings.showProfile 
+      expanded: drawerCollapsed 
     }">
       <div class="content-container">
         <!-- 推荐文章区域 -->
@@ -215,7 +211,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useNoteStore } from '@/stores/note'
-import { useConfigStore } from '@/stores/config'
+import { useHomeStore } from '@/stores/home'
 import { storeToRefs } from 'pinia'
 import {
   User,
@@ -231,15 +227,16 @@ import {
   ArrowLeft,
   ArrowRight
 } from '@element-plus/icons-vue'
-import type { Doc } from '@/api/types'
+import type { Doc, ContentTemplates } from '@/api/types'
 import TechBackground from '@/components/TechBackground.vue'
 
 const router = useRouter()
 
 // 状态管理
 const noteStore = useNoteStore()
-const configStore = useConfigStore()
-const { notebooks, recommendedDocs, loading, error, hasRecommendedDocs } = storeToRefs(noteStore)
+const homeStore = useHomeStore()
+const { notebooks } = storeToRefs(noteStore)
+const { homeData, loading, error } = storeToRefs(homeStore)
 
 // 抽屉状态
 const drawerCollapsed = ref(false)
@@ -248,6 +245,11 @@ const drawerCollapsed = ref(false)
 const toggleDrawer = () => {
   drawerCollapsed.value = !drawerCollapsed.value
 }
+
+// 从 homeData 中获取推荐文档
+const recommendedDocs = computed(() => {
+  return homeData.value?.recommendedDocs || []
+})
 
 // 计算推荐文章（第一篇作为特色文章）
 const featuredArticle = computed(() => {
@@ -259,10 +261,10 @@ const recentArticles = computed(() => {
   return recommendedDocs.value?.slice(1, 6) || []
 })
 
-// 加载推荐文章
+// 加载推荐文章（现在从完整首页数据获取）
 const loadRecommendedDocs = async () => {
-  const maxArticles = configStore.homeSettings.maxRecommendedArticles || 12
-  await noteStore.fetchRecommendedDocs(maxArticles)
+  const maxArticles = 12 // 硬编码最大推荐文章数
+  await homeStore.fetchHomeData(maxArticles)
 }
 
 // 移除文件扩展名
@@ -273,98 +275,93 @@ const removeFileExtension = (filename: string): string => {
 
 // 获取笔记本名称
 const getNotebookName = (doc: Doc): string => {
-  // 直接使用后端返回的笔记本名称
-  return doc.notebookName || '未知笔记本'
+  // 使用配置的默认值
+  return doc.notebookName || homeData.value?.contentTemplates?.defaults?.unknownNotebook || '未知笔记本'
 }
 
-// 生成文章摘要
+// 生成文章摘要（使用配置化模板）
 const generateSummary = (doc: Doc): string => {
   const title = removeFileExtension(doc.name)
+  const templates = homeData.value?.contentTemplates?.summaryTemplates
+  const keywords = homeData.value?.contentTemplates?.summaryKeywords
   
-  // 根据标题关键词生成更智能的摘要
-  const summaries = [
-    `探索${title}的深层机制，揭示技术背后的核心原理与实践方法。`,
-    `深入分析${title}，分享实战经验与最佳实践，助你快速掌握关键技能。`,
-    `从理论到实践，全面解析${title}的应用场景与解决方案。`,
-    `${title}的完整指南，包含前沿技术分享与深度思考。`,
-    `关于${title}的技术洞察，结合实际案例的深度分析。`
-  ]
-  
-  // 根据标题内容智能选择摘要模板
-  if (title.includes('Vue') || title.includes('React') || title.includes('前端')) {
-    return `深入探讨${title}的现代前端开发实践，分享高效开发技巧与架构设计思路。`
-  } else if (title.includes('Node') || title.includes('后端') || title.includes('服务器')) {
-    return `解析${title}的后端技术架构，从基础概念到生产环境的完整实践指南。`
-  } else if (title.includes('思考') || title.includes('总结') || title.includes('感悟')) {
-    return `关于${title}的深度思考与总结，分享个人见解与成长心得。`
-  } else if (title.includes('教程') || title.includes('入门') || title.includes('指南')) {
-    return `${title}完整教程，从零基础到进阶应用的系统性学习路径。`
+  if (!templates) {
+    return `关于${title}的精彩内容，值得一读。`
   }
   
-  // 默认随机选择一个摘要
-  const randomIndex = Math.floor(Math.random() * summaries.length)
-  return summaries[randomIndex]
+  // 根据关键词智能选择模板
+  const titleLower = title.toLowerCase()
+  
+  // 检查前端关键词
+  if (keywords?.frontend?.some((keyword: string) => titleLower.includes(keyword.toLowerCase()))) {
+    return templates.frontend.replace('{title}', title)
+  }
+  
+  // 检查后端关键词  
+  if (keywords?.backend?.some((keyword: string) => titleLower.includes(keyword.toLowerCase()))) {
+    return templates.backend.replace('{title}', title)
+  }
+  
+  // 检查思考关键词
+  if (keywords?.thinking?.some((keyword: string) => titleLower.includes(keyword.toLowerCase()))) {
+    return templates.thinking.replace('{title}', title)
+  }
+  
+  // 检查教程关键词
+  if (keywords?.tutorial?.some((keyword: string) => titleLower.includes(keyword.toLowerCase()))) {
+    return templates.tutorial.replace('{title}', title)
+  }
+  
+  // 使用默认模板（随机选择）
+  if (templates.default && templates.default.length > 0) {
+    const randomIndex = Math.floor(Math.random() * templates.default.length)
+    return templates.default[randomIndex].replace('{title}', title)
+  }
+  
+  return `关于${title}的精彩内容，值得一读。`
 }
 
-// 获取文章标签（智能生成）
+// 获取文章标签（使用配置化规则）
 const getArticleTags = (doc: Doc): string[] => {
   const tags: string[] = []
   const title = removeFileExtension(doc.name).toLowerCase()
   const notebookName = doc.notebookName?.toLowerCase() || ''
+  const tagRules = homeData.value?.contentTemplates?.tagRules
+  const maxTags = homeData.value?.contentTemplates?.defaults?.maxTags || 3
   
-  // 技术类标签
-  if (title.includes('vue') || title.includes('react') || title.includes('angular')) {
-    tags.push('前端框架')
-  }
-  if (title.includes('javascript') || title.includes('js') || title.includes('typescript') || title.includes('ts')) {
-    tags.push('JavaScript')
-  }
-  if (title.includes('css') || title.includes('scss') || title.includes('样式')) {
-    tags.push('CSS')
-  }
-  if (title.includes('node') || title.includes('express') || title.includes('koa')) {
-    tags.push('Node.js')
-  }
-  if (title.includes('python') || title.includes('django') || title.includes('flask')) {
-    tags.push('Python')
-  }
-  if (title.includes('docker') || title.includes('k8s') || title.includes('kubernetes')) {
-    tags.push('DevOps')
-  }
-  if (title.includes('算法') || title.includes('数据结构') || title.includes('leetcode')) {
-    tags.push('算法')
+  if (!tagRules) {
+    return tags
   }
   
-  // 内容类型标签
-  if (title.includes('教程') || title.includes('入门') || title.includes('指南')) {
-    tags.push('教程')
-  }
-  if (title.includes('总结') || title.includes('回顾') || title.includes('复盘')) {
-    tags.push('总结')
-  }
-  if (title.includes('思考') || title.includes('感悟') || title.includes('心得')) {
-    tags.push('思考')
-  }
-  if (title.includes('实战') || title.includes('项目') || title.includes('案例')) {
-    tags.push('实战')
-  }
-  if (title.includes('问题') || title.includes('解决') || title.includes('踩坑')) {
-    tags.push('问题解决')
+  // 检查技术类标签
+  if (tagRules.tech) {
+    Object.values(tagRules.tech).forEach((rule: any) => {
+      if (rule.keywords?.some((keyword: string) => title.includes(keyword.toLowerCase()))) {
+        tags.push(rule.tag)
+      }
+    })
   }
   
-  // 笔记本类型标签
-  if (notebookName.includes('工作') || notebookName.includes('项目')) {
-    tags.push('工作')
-  }
-  if (notebookName.includes('学习') || notebookName.includes('笔记')) {
-    tags.push('学习')
-  }
-  if (notebookName.includes('生活') || notebookName.includes('日常')) {
-    tags.push('生活')
+  // 检查内容类型标签
+  if (tagRules.content) {
+    Object.values(tagRules.content).forEach((rule: any) => {
+      if (rule.keywords?.some((keyword: string) => title.includes(keyword.toLowerCase()))) {
+        tags.push(rule.tag)
+      }
+    })
   }
   
-  // 限制标签数量，最多显示3个
-  return tags.slice(0, 3)
+  // 检查分类标签（基于笔记本名称）
+  if (tagRules.category) {
+    Object.values(tagRules.category).forEach((rule: any) => {
+      if (rule.keywords?.some((keyword: string) => notebookName.includes(keyword.toLowerCase()))) {
+        tags.push(rule.tag)
+      }
+    })
+  }
+  
+  // 去重并限制标签数量
+  return [...new Set(tags)].slice(0, maxTags)
 }
 
 // 跳转到文章详情
@@ -375,34 +372,30 @@ const goToArticle = (doc: Doc) => {
 
 // 社交链接操作
 const openEmail = () => {
-  const email = configStore.socialLinks.email || 'contact@example.com'
+  const email = homeData.value?.socialLinks?.email || 'contact@example.com'
   window.open(`mailto:${email}`)
 }
 
 const openGitHub = () => {
-  const github = configStore.socialLinks.github || 'https://github.com'
+  const github = homeData.value?.socialLinks?.github || 'https://github.com'
   window.open(github)
 }
 
 const openWebsite = () => {
-  const website = configStore.socialLinks.website || 'https://example.com'
+  const website = homeData.value?.socialLinks?.website || 'https://example.com'
   window.open(website)
 }
 
 // 初始化
 onMounted(async () => {
-  // 获取配置信息
-  if (Object.keys(configStore.configs).length === 0) {
-    await configStore.fetchActiveConfigs()
-  }
+  // 获取首页完整数据（包含个人信息、设置、推荐文档等）
+  const maxArticles = 12 // 默认推荐文章数量
+  await homeStore.fetchHomeData(maxArticles)
   
-  // 获取笔记本数据
+  // 保持向后兼容：如果需要单独的笔记本数据
   if (notebooks.value.length === 0) {
     await noteStore.fetchNotebooks()
   }
-  
-  // 获取推荐文章
-  await loadRecommendedDocs()
 })
 </script>
 
