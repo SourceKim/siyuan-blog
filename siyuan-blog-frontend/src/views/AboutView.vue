@@ -1,148 +1,151 @@
 <template>
   <div class="about-view">
-    <div class="about-container">
-      <!-- 加载状态 -->
-      <div v-if="loading" class="loading-section">
-        <el-skeleton :rows="6" animated />
-      </div>
+    <!-- 加载状态 -->
+    <div v-if="loading" class="loading-section">
+      <el-skeleton :rows="6" animated />
+    </div>
 
-      <!-- 错误状态 -->
-      <div v-else-if="error" class="error-section">
-        <el-alert
-          :title="error"
-          type="error"
-          show-icon
-        >
-          <template #default>
-            <p>加载个人信息时出现错误，请稍后重试。</p>
-            <el-button @click="fetchAboutMe" type="primary" size="small">
-              重新加载
-            </el-button>
-          </template>
-        </el-alert>
+    <!-- 错误状态 -->
+    <div v-else-if="error" class="error-section">
+      <div class="error-card">
+        <el-icon class="error-icon"><Warning /></el-icon>
+        <h3>加载失败</h3>
+        <p>{{ error }}</p>
+        <el-button @click="fetchAboutMe" type="primary" class="retry-btn">
+          重新加载
+        </el-button>
       </div>
+    </div>
 
-      <!-- 个人信息内容 -->
-      <div v-else-if="aboutMe" class="about-content">
-        <!-- 个人信息卡片 -->
-        <el-card class="profile-card" shadow="never">
-          <div class="profile-header">
-            <el-avatar 
-              v-if="aboutMe.config.about.showAvatar"
-              :src="aboutMe.avatarUrl" 
-              :size="120"
-              class="profile-avatar"
-            >
-              <el-icon><User /></el-icon>
-            </el-avatar>
+    <!-- 个人信息内容 -->
+    <div v-else-if="aboutMe" class="about-content">
+      <!-- 个人信息头部 -->
+      <div class="hero-section">
+        <div class="hero-content">
+          <div class="profile-section">
+            <div class="avatar-container">
+              <div 
+                v-if="aboutMe.config.about.showAvatar"
+                class="profile-avatar neon-border"
+                :style="`background-image: url(${aboutMe.avatarUrl || '/default-avatar.png'})`"
+              >
+              </div>
+            </div>
             <div class="profile-info">
-              <h1 class="profile-name">{{ aboutMe.name }}</h1>
+              <h1 class="profile-name neon-text">{{ aboutMe.name }}</h1>
+              <p class="profile-title">开发者 / 写作者</p>
               <p class="profile-bio">{{ aboutMe.bio }}</p>
             </div>
           </div>
-        </el-card>
-
-        <!-- 个人介绍 -->
-        <el-card class="intro-card" shadow="never">
-          <template #header>
-            <div class="card-header">
-              <el-icon><InfoFilled /></el-icon>
-              <span>关于我</span>
-            </div>
-          </template>
-          
-          <div class="intro-content">
-            <p>{{ aboutMe.bio }}</p>
-            
-            <div 
-              v-if="aboutMe.config.about.showContactInfo"
-              class="contact-info"
-            >
-              <h3>联系方式</h3>
-              <div class="contact-links">
-                <el-link 
-                  :href="`mailto:${aboutMe.config.social.email}`" 
-                  :icon="Message"
-                  target="_blank"
-                >
-                  发送邮件
-                </el-link>
-                <el-link 
-                  :href="aboutMe.config.social.github" 
-                  :icon="Link"
-                  target="_blank"
-                >
-                  GitHub
-                </el-link>
-                <el-link 
-                  :href="aboutMe.config.social.website" 
-                  :icon="Position"
-                  target="_blank"
-                >
-                  个人网站
-                </el-link>
-              </div>
-            </div>
-          </div>
-        </el-card>
-
-        <!-- 博客统计 -->
-        <el-card 
-          v-if="aboutMe.config.about.showBlogStats"
-          class="stats-card" 
-          shadow="never"
-        >
-          <template #header>
-            <div class="card-header">
-              <el-icon><TrendCharts /></el-icon>
-              <span>博客统计</span>
-            </div>
-          </template>
-          
-          <el-row :gutter="24">
-            <el-col :xs="12" :sm="6" v-for="stat in blogStats" :key="stat.label">
-              <div class="stat-item">
-                <div class="stat-value">{{ stat.value }}</div>
-                <div class="stat-label">{{ stat.label }}</div>
-              </div>
-            </el-col>
-          </el-row>
-        </el-card>
-
-        <!-- 技术栈 -->
-        <el-card 
-          v-if="aboutMe.config.about.showTechStack"
-          class="tech-card" 
-          shadow="never"
-        >
-          <template #header>
-            <div class="card-header">
-              <el-icon><Tools /></el-icon>
-              <span>技术栈</span>
-            </div>
-          </template>
-          
-          <div class="tech-stack">
-            <el-tag 
-              v-for="tech in aboutMe.config.techStack" 
-              :key="tech.name"
-              :type="tech.type || undefined"
-              class="tech-tag"
-              size="large"
-            >
-              {{ tech.name }}
-            </el-tag>
-          </div>
-        </el-card>
+        </div>
       </div>
 
-      <!-- 空状态 -->
-      <div v-else class="empty-section">
-        <el-empty description="暂无个人信息">
-          <el-button @click="fetchAboutMe" type="primary">
-            重新加载
-          </el-button>
-        </el-empty>
+      <!-- 联系方式与技能 -->
+      <div class="contact-skills-section">
+        <div class="section-content">
+          <h2 class="section-title">联系方式 & 技能</h2>
+          <div class="contact-skills-grid">
+            <!-- 联系方式 -->
+            <div v-if="aboutMe.config.about.showContactInfo" class="social-links">
+              <a 
+                :href="`mailto:${aboutMe.config.social.email}`"
+                class="social-link hover-glow"
+                title="邮箱"
+              >
+                <el-icon><Message /></el-icon>
+              </a>
+              <a 
+                :href="aboutMe.config.social.github"
+                class="social-link hover-glow"
+                title="GitHub"
+                target="_blank"
+              >
+                <svg class="github-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+              </a>
+              <a 
+                :href="aboutMe.config.social.website"
+                class="social-link hover-glow"
+                title="个人网站"
+                target="_blank"
+              >
+                <el-icon><Position /></el-icon>
+              </a>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- 技能标签 -->
+            <div v-if="aboutMe.config.about.showTechStack" class="tech-skills">
+              <span 
+                v-for="tech in aboutMe.config.techStack" 
+                :key="tech.name"
+                class="tech-tag"
+                :class="`tech-${tech.type || 'default'}`"
+              >
+                {{ tech.name }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 工作经历 -->
+      <div class="experience-section">
+        <div class="section-content">
+          <h2 class="section-title">经历</h2>
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-marker"></div>
+              <h3 class="timeline-title">全栈开发工程师</h3>
+              <p class="timeline-period">2021 - 至今</p>
+              <p class="timeline-description">负责开发和维护可扩展的Web应用程序，使用现代前端技术栈。</p>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-marker"></div>
+              <h3 class="timeline-title">自由职业开发者</h3>
+              <p class="timeline-period">2019 - 2021</p>
+              <p class="timeline-description">为各种客户构建定制网站和应用程序，专注于性能和用户体验。</p>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-marker"></div>
+              <h3 class="timeline-title">计算机科学学士</h3>
+              <p class="timeline-period">2015 - 2019</p>
+              <p class="timeline-description">优等生毕业，专注于软件工程和人机交互。</p>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-marker"></div>
+              <h3 class="timeline-title">技术博客</h3>
+              <p class="timeline-period">2018 - 至今</p>
+              <p class="timeline-description">分享关于Web开发、新技术和生产力工具的见解。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 博客统计 -->
+      <div v-if="aboutMe.config.about.showBlogStats" class="stats-section">
+        <div class="section-content">
+          <h2 class="section-title">博客统计</h2>
+          <div class="stats-grid">
+            <div v-for="stat in blogStats" :key="stat.label" class="stat-card">
+              <div class="stat-value">{{ stat.value }}</div>
+              <div class="stat-label">{{ stat.label }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 空状态 -->
+    <div v-else class="empty-section">
+      <div class="empty-content">
+        <el-icon class="empty-icon"><User /></el-icon>
+        <h3>暂无个人信息</h3>
+        <el-button @click="fetchAboutMe" type="primary" class="retry-btn">
+          重新加载
+        </el-button>
       </div>
     </div>
   </div>
@@ -155,12 +158,9 @@ import { useNoteStore } from '@/stores/note'
 import { storeToRefs } from 'pinia'
 import {
   User,
-  InfoFilled,
+  Warning,
   Message,
-  Link,
-  Position,
-  TrendCharts,
-  Tools
+  Position
 } from '@element-plus/icons-vue'
 
 // 状态管理
@@ -201,159 +201,423 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* CSS 变量定义 */
+:root {
+  --bg-primary: #111827;
+  --bg-secondary: #1f2937;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --accent-primary: #3b82f6;
+  --accent-secondary: #818cf8;
+  --border-color: rgba(75, 85, 99, 0.3);
+  --neon-glow: 0 0 5px var(--accent-secondary), 0 0 10px var(--accent-secondary), 0 0 15px var(--accent-primary);
+}
+
 .about-view {
-  min-height: 100%;
-  background: var(--el-bg-color-page);
+  min-height: 100vh;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-.about-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
+/* 加载和错误状态 */
 .loading-section,
 .error-section,
 .empty-section {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 400px;
+  min-height: 60vh;
 }
 
+.error-card,
+.empty-content {
+  text-align: center;
+  padding: 3rem;
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.error-icon,
+.empty-icon {
+  font-size: 3rem;
+  color: var(--accent-primary);
+  margin-bottom: 1rem;
+}
+
+.error-card h3,
+.empty-content h3 {
+  margin: 0 0 1rem 0;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+}
+
+.error-card p {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.retry-btn {
+  background: var(--accent-primary) !important;
+  border-color: var(--accent-primary) !important;
+}
+
+/* 主要内容容器 */
 .about-content {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+/* Hero Section */
+.hero-section {
+  padding: 3rem 0 4rem;
+  text-align: center;
+}
+
+.profile-section {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-}
-
-/* 个人信息卡片 */
-.profile-card {
-  border-radius: 12px;
-}
-
-.profile-header {
-  display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 2rem;
+}
+
+.avatar-container {
+  position: relative;
 }
 
 .profile-avatar {
-  flex-shrink: 0;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border: 2px solid var(--accent-primary);
+  position: relative;
+}
+
+/* 霓虹边框效果 */
+.neon-border {
+  box-shadow: var(--neon-glow);
+  animation: pulse-border 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-border {
+  0% {
+    box-shadow: 0 0 5px var(--accent-secondary), 0 0 10px var(--accent-secondary), 0 0 15px var(--accent-primary);
+  }
+  100% {
+    box-shadow: 0 0 8px var(--accent-secondary), 0 0 15px var(--accent-secondary), 0 0 25px var(--accent-primary);
+  }
 }
 
 .profile-info {
-  flex: 1;
+  max-width: 600px;
 }
 
 .profile-name {
-  font-size: 32px;
-  font-weight: 600;
-  margin: 0 0 12px 0;
-  color: var(--el-text-color-primary);
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  background: linear-gradient(135deg, #60a5fa, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.05em;
+}
+
+/* 霓虹文字效果 */
+.neon-text {
+  text-shadow: 0 0 5px var(--accent-secondary);
+}
+
+.profile-title {
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+  margin: 0 0 1rem 0;
 }
 
 .profile-bio {
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 1.6;
-  color: var(--el-text-color-regular);
+  color: var(--text-primary);
   margin: 0;
 }
 
-/* 卡片头部 */
-.card-header {
+/* 联系方式与技能区域 */
+.contact-skills-section {
+  padding: 3rem 0;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 3rem;
+}
+
+.section-content {
+  padding: 0 2rem;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 2rem 0;
+  letter-spacing: 0.05em;
+}
+
+.contact-skills-grid {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-weight: 600;
-}
-
-/* 介绍内容 */
-.intro-content {
-  line-height: 1.8;
-}
-
-.contact-info {
-  margin-top: 24px;
-}
-
-.contact-info h3 {
-  margin: 0 0 12px 0;
-  font-size: 16px;
-  color: var(--el-text-color-primary);
-}
-
-.contact-links {
-  display: flex;
-  gap: 16px;
+  gap: 2rem;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
-/* 统计卡片 */
-.stat-item {
-  text-align: center;
-  padding: 16px;
+/* 社交链接 */
+.social-links {
+  display: flex;
+  gap: 1rem;
 }
 
-.stat-value {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--el-color-primary);
-  margin-bottom: 4px;
+.social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  color: var(--accent-secondary);
+  text-decoration: none;
+  transition: all 0.3s ease;
 }
 
-.stat-label {
-  font-size: 12px;
-  color: var(--el-text-color-regular);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+.social-link:hover {
+  background: var(--text-secondary);
+  transform: translateY(-2px);
 }
 
-/* 技术栈 */
-.tech-stack {
+/* 悬停发光效果 */
+.hover-glow:hover {
+  box-shadow: 0 0 8px var(--accent-primary);
+}
+
+.github-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* 分隔线 */
+.divider {
+  height: 2rem;
+  width: 1px;
+  background: var(--border-color);
+}
+
+/* 技能标签 */
+.tech-skills {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 0.75rem;
+  justify-content: center;
 }
 
 .tech-tag {
-  font-size: 14px;
-  padding: 8px 16px;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.tech-tag:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* 技能标签颜色 */
+.tech-primary { border-color: var(--accent-primary); color: var(--accent-primary); }
+.tech-success { border-color: #10b981; color: #10b981; }
+.tech-warning { border-color: #f59e0b; color: #f59e0b; }
+.tech-info { border-color: #06b6d4; color: #06b6d4; }
+.tech-danger { border-color: #ef4444; color: #ef4444; }
+
+/* 经历时间线 */
+.experience-section {
+  margin-bottom: 3rem;
+}
+
+.timeline {
+  position: relative;
+  border-left: 2px solid var(--border-color);
+  padding-left: 2rem;
+  margin-left: 1rem;
+}
+
+.timeline-item {
+  margin-bottom: 2.5rem;
+  position: relative;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -2.25rem;
+  top: 0.375rem;
+  width: 1rem;
+  height: 1rem;
+  background: var(--accent-secondary);
+  border-radius: 50%;
+  border: 4px solid var(--bg-primary);
+  box-shadow: 0 0 0 1px var(--border-color);
+}
+
+.timeline-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--accent-primary);
+  margin: 0 0 0.25rem 0;
+}
+
+.timeline-period {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0 0 0.5rem 0;
+}
+
+.timeline-description {
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* 博客统计 */
+.stats-section {
+  margin-bottom: 3rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.stat-card {
+  text-align: center;
+  padding: 1.5rem;
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+  margin-bottom: 0.25rem;
+  display: block;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .about-container {
-    padding: 16px;
+  .about-content {
+    padding: 1rem;
   }
   
-  .profile-header {
-    flex-direction: column;
-    text-align: center;
-    gap: 16px;
+  .profile-section {
+    gap: 1.5rem;
   }
   
   .profile-name {
-    font-size: 24px;
+    font-size: 2rem;
   }
   
-  .contact-links {
-    justify-content: center;
+  .contact-skills-grid {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .divider {
+    height: 1px;
+    width: 50%;
+  }
+  
+  .section-content {
+    padding: 0 1rem;
+  }
+  
+  .timeline {
+    padding-left: 1.5rem;
+  }
+  
+  .timeline-marker {
+    left: -1.75rem;
   }
 }
 
 @media (max-width: 480px) {
   .profile-avatar {
-    width: 80px !important;
-    height: 80px !important;
+    width: 120px;
+    height: 120px;
   }
   
-  .tech-stack {
-    justify-content: center;
+  .profile-name {
+    font-size: 1.75rem;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+  }
+  
+  .social-links {
+    gap: 0.75rem;
+  }
+  
+  .social-link {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .stat-card {
+    padding: 1rem;
   }
   
   .stat-value {
-    font-size: 20px;
+    font-size: 1.5rem;
   }
+}
+
+/* 深色主题兼容 */
+.dark .about-view {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border-color: rgba(71, 85, 105, 0.3);
 }
 </style> 
