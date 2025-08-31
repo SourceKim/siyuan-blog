@@ -1,0 +1,180 @@
+<html><head>
+<meta charset="utf-8"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<title>Stitch Design</title>
+<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style type="text/tailwindcss">
+      :root {
+        --dark-bg: #111827;
+        --dark-card: #1f2937;
+        --neon-accent: #3b82f6;
+        --purple-accent: #8b5cf6;
+        --text-primary: #f9fafb;
+        --text-secondary: #9ca3af;
+      }
+      .glow-on-hover {
+        transition: box-shadow 0.3s ease-in-out;
+      }
+      .glow-on-hover:hover {
+        box-shadow: 0 0 15px 5px rgba(59, 130, 246, 0.4), 0 0 5px 1px rgba(139, 92, 246, 0.3);
+      }
+      .prose-pre-bg {
+        background-color: #1e293b;
+      }
+      .prose .token.keyword {
+        color: #93c5fd;
+      }
+      .prose .token.function {
+        color: #a78bfa;
+      }
+      .prose .token.string {
+        color: #a5f3fc;
+      }
+      .prose .token.comment {
+        color: #6b7280;
+      }
+      .prose .token.punctuation {
+        color: #6b7280;
+      }
+    </style>
+</head>
+<body class="bg-[var(--dark-bg)] text-[var(--text-primary)]" style='font-family: "Inter", sans-serif;'>
+<div class="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden">
+<div class="flex h-full grow">
+<aside class="w-80 flex-shrink-0 p-6 border-r border-gray-800">
+<div class="flex flex-col gap-8">
+<div class="flex flex-col">
+<h1 class="text-white text-lg font-bold leading-normal">Sophia's Blog</h1>
+<p class="text-[var(--text-secondary)] text-sm font-normal leading-normal">Tech &amp; Minimalism</p>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-[var(--dark-card)] transition-colors duration-200" href="#">
+<svg fill="currentColor" height="20px" viewBox="0 0 256 256" width="20px" xmlns="http://www.w3.org/2000/svg">
+<path d="M224,48V208a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V48A16,16,0,0,1,48,32H208A16,16,0,0,1,224,48ZM96,128a8,8,0,0,0,8,8h48a8,8,0,0,0,0-16H104A8,8,0,0,0,96,128Zm8-40h48a8,8,0,0,0,0-16H104a8,8,0,0,0,0,16Zm64,72H88a8,8,0,0,0,0,16h80a8,8,0,0,0,0-16Z"></path>
+</svg>
+<span class="text-sm font-medium">All Notes</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-[var(--dark-card)] transition-colors duration-200" href="#">
+<svg fill="currentColor" height="20px" viewBox="0 0 256 256" width="20px" xmlns="http://www.w3.org/2000/svg">
+<path d="M128,24a104,104,0,1,0,104,104A104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm45.08-124.68-32.3,19.82a8,8,0,0,0-4.16,10.63l12.28,32.74-29.2-22.44a8,8,0,0,0-9.4,0l-29.2,22.44,12.28-32.74a8,8,0,0,0-4.16-10.63l-32.3-19.82a8,8,0,0,1,4.16-14.75l34.42,5.3,15.38-30.76a8,8,0,0,1,14.24,0l15.38,30.76,34.42-5.3a8,8,0,0,1,4.16,14.75Z"></path>
+</svg>
+<span class="text-sm font-medium">Favorites</span>
+</a>
+<details class="group" open="">
+<summary class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-[var(--dark-card)] transition-colors duration-200 cursor-pointer list-none">
+<svg class="transition-transform group-open:rotate-90" fill="currentColor" height="20" viewBox="0 0 256 256" width="20" xmlns="http://www.w3.org/2000/svg">
+<path d="m184.49 136.49-80 80a12 12 0 0 1-17-17L159 128 87.51 56.49a12 12 0 1 1 17-17l80 80a12 12 0 0 1 0 17Z"></path>
+</svg>
+<span class="text-sm font-medium">Projects</span>
+</summary>
+<div class="pl-5 mt-2 flex flex-col gap-1 border-l border-gray-700 ml-6">
+<a class="text-sm text-[var(--text-secondary)] hover:text-white transition-colors duration-200 pl-4 py-1" href="#">Vue Frontend</a>
+<details open="">
+<summary class="flex items-center gap-3 px-4 py-1 rounded-lg hover:bg-[var(--dark-card)] transition-colors duration-200 cursor-pointer list-none">
+<svg class="transition-transform group-open:rotate-90" fill="currentColor" height="20" viewBox="0 0 256 256" width="20" xmlns="http://www.w3.org/2000/svg">
+<path d="m184.49 136.49-80 80a12 12 0 0 1-17-17L159 128 87.51 56.49a12 12 0 1 1 17-17l80 80a12 12 0 0 1 0 17Z"></path>
+</svg>
+<a class="text-sm text-[var(--text-secondary)] hover:text-white transition-colors duration-200" href="#">Siyuan Backend</a>
+</summary>
+<div class="pl-5 mt-2 flex flex-col gap-1 border-l border-gray-700 ml-6">
+<a class="text-sm text-white bg-[var(--neon-accent)] bg-opacity-20 rounded-md py-1 pl-4" href="#">Database Schema</a>
+<a class="text-sm text-[var(--text-secondary)] hover:text-white transition-colors duration-200 pl-4 py-1" href="#">API Endpoints</a>
+</div>
+</details>
+</div>
+</details>
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-[var(--dark-card)] transition-colors duration-200" href="#">
+<svg fill="currentColor" height="20px" viewBox="0 0 256 256" width="20px" xmlns="http://www.w3.org/2000/svg">
+<path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"></path>
+</svg>
+<span class="text-sm font-medium">Trash</span>
+</a>
+</nav>
+</div>
+</aside>
+<main class="flex-1 min-w-0">
+<div class="max-w-4xl mx-auto px-6 lg:px-8 py-16">
+<article class="prose prose-invert prose-lg max-w-none prose-h1:font-black prose-h1:tracking-tighter prose-h2:tracking-tight prose-h2:font-bold prose-h2:border-b prose-h2:border-gray-700 prose-h2:pb-3 prose-p:text-[var(--text-secondary)]">
+<h1 class="text-5xl font-extrabold tracking-tight">Database Schema for a Minimalist Blog</h1>
+<div class="flex items-center gap-4 mt-6 mb-8">
+<span class="inline-block bg-blue-500/10 text-blue-400 text-xs font-medium px-2.5 py-1 rounded-full">Database</span>
+<span class="inline-block bg-purple-500/10 text-purple-400 text-xs font-medium px-2.5 py-1 rounded-full">Siyuan</span>
+<span class="inline-block bg-gray-500/10 text-gray-400 text-xs font-medium px-2.5 py-1 rounded-full">Tech</span>
+</div>
+<hr class="border-gray-800 my-8"/>
+<div class="flex items-center gap-4 text-sm text-[var(--text-secondary)] mb-12">
+<div class="flex items-center gap-2">
+<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-5.5-2.5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zM10 12a5.99 5.99 0 00-4.793 2.39A6.483 6.483 0 0010 16.5a6.483 6.483 0 004.793-2.11A5.99 5.99 0 0010 12z" fill-rule="evenodd"></path>
+</svg>
+<span>Sophia Chen</span>
+</div>
+<div class="flex items-center gap-2">
+<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" fill-rule="evenodd"></path>
+</svg>
+<span>July 26, 2024</span>
+</div>
+</div>
+<h2>Introduction</h2>
+<p>
+                When designing a backend for a personal blog, especially one with a minimalist aesthetic, the database schema is a critical foundation. This article outlines a
+                simple yet effective schema for a Siyuan-powered blog, focusing on the core entities: Notebooks, Articles, and Tags.
+              </p>
+<h2>Core Entities</h2>
+<p>
+                The database will revolve around three main tables. We'll use SQL syntax for clarity.
+              </p>
+<pre class="prose-pre-bg p-4 rounded-lg text-sm text-gray-300 overflow-x-auto"><code class="language-sql"><span class="token comment">-- Notebooks Table: Represents the folder structure</span>
+<span class="token keyword">CREATE</span> <span class="token keyword">TABLE</span> Notebooks (
+    id <span class="token keyword">VARCHAR</span>(<span class="token string">255</span>) <span class="token keyword">PRIMARY KEY</span>,
+    name <span class="token keyword">VARCHAR</span>(<span class="token string">255</span>) <span class="token keyword">NOT NULL</span>,
+    parent_id <span class="token keyword">VARCHAR</span>(<span class="token string">255</span>),
+    created_at <span class="token keyword">TIMESTAMP</span> <span class="token keyword">DEFAULT</span> <span class="token keyword">CURRENT_TIMESTAMP</span>,
+    <span class="token keyword">FOREIGN KEY</span> (parent_id) <span class="token keyword">REFERENCES</span> Notebooks(id)
+);
+<span class="token comment">-- Articles Table: Stores the content of each post</span>
+<span class="token keyword">CREATE</span> <span class="token keyword">TABLE</span> Articles (
+    id <span class="token keyword">VARCHAR</span>(<span class="token string">255</span>) <span class="token keyword">PRIMARY KEY</span>,
+    title <span class="token keyword">VARCHAR</span>(<span class="token string">255</span>) <span class="token keyword">NOT NULL</span>,
+    content <span class="token keyword">TEXT</span>,
+    notebook_id <span class="token keyword">VARCHAR</span>(<span class="token string">255</span>),
+    created_at <span class="token keyword">TIMESTAMP</span> <span class="token keyword">DEFAULT</span> <span class="token keyword">CURRENT_TIMESTAMP</span>,
+    updated_at <span class="token keyword">TIMESTAMP</span> <span class="token keyword">DEFAULT</span> <span class="token keyword">CURRENT_TIMESTAMP</span>,
+    <span class="token keyword">FOREIGN KEY</span> (notebook_id) <span class="token keyword">REFERENCES</span> Notebooks(id)
+);
+</code></pre>
+<h2>Schema Explanation</h2>
+<p>
+                The `Notebooks` table uses a self-referencing `parent_id` to create a hierarchical tree structure, mirroring the directory system in Siyuan. The `Articles` table
+                holds the main content, linked to a specific notebook. This setup allows for easy navigation and organization, which is essential for a clean, minimalist blog
+                experience.
+              </p>
+</article>
+</div>
+</main>
+<aside class="w-80 flex-shrink-0 p-6 hidden xl:block">
+<div class="sticky top-6">
+<div class="bg-[var(--dark-card)] p-6 rounded-xl border border-gray-800 glow-on-hover">
+<h3 class="text-white text-lg font-semibold mb-4">Table of Contents</h3>
+<ul class="space-y-2">
+<li>
+<a class="relative pl-6 text-[var(--neon-accent)] text-sm font-semibold before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-1.5 before:h-1.5 before:bg-[var(--neon-accent)] before:rounded-full" href="#">Introduction</a>
+</li>
+<li>
+<a class="relative pl-6 text-white hover:text-[var(--neon-accent)] transition-colors duration-200 text-sm font-medium before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-1.5 before:h-1.5 before:bg-gray-600 before:rounded-full hover:before:bg-[var(--neon-accent)]" href="#">Core Entities</a>
+</li>
+<li>
+<a class="relative pl-6 text-white hover:text-[var(--neon-accent)] transition-colors duration-200 text-sm font-medium before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-1.5 before:h-1.5 before:bg-gray-600 before:rounded-full hover:before:bg-[var(--neon-accent)]" href="#">Schema Explanation</a>
+</li>
+</ul>
+</div>
+</div>
+</aside>
+</div>
+</div>
+
+</body></html>

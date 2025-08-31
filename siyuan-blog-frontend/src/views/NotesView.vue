@@ -115,81 +115,79 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* CSS 变量定义 */
+/* CSS 变量定义 - 参考示例的深色主题 */
 :root {
-  --vp-c-white: #ffffff;
-  --vp-c-black: #000000;
-  --vp-c-gray-1: #f8f8f8;
-  --vp-c-gray-2: #e5e5e5;
-  --vp-c-gray-3: #d1d5db;
-  --vp-c-text-1: #213547;
-  --vp-c-text-2: #476582;
-  --vp-c-text-3: #7c8b9c;
-  --vp-c-brand-1: #3451b2;
-  --vp-c-brand-2: #3a5ccc;
-  --vp-c-bg: #ffffff;
-  --vp-c-bg-alt: #f6f6f7;
-  --vp-c-bg-elv: #ffffff;
-  --vp-sidebar-width: 280px;
-  --vp-sidebar-collapsed-width: 60px;
+  --dark-bg: #111827;
+  --dark-card: #1f2937;
+  --neon-accent: #3b82f6;
+  --purple-accent: #8b5cf6;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --border-color: #374151;
+  --vp-sidebar-width: 320px;
+  --vp-sidebar-collapsed-width: 70px;
 }
 
 /* 全局布局 */
 .notes-layout {
   min-height: 100vh;
-  background: var(--vp-c-bg);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--dark-bg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   position: relative;
+  color: var(--text-primary);
 }
 
 /* 主容器 */
 .main-container {
   display: flex;
   min-height: 100vh;
+  background: var(--dark-bg);
 }
 
 /* 侧边栏 */
 .sidebar {
   width: var(--vp-sidebar-width);
-  background: var(--vp-c-bg-alt);
-  border-right: 1px solid var(--vp-c-gray-2);
+  background: var(--dark-bg);
+  border-right: 1px solid var(--border-color);
   position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
   z-index: 50;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
 }
 
 /* 桌面端折叠状态 */
 .sidebar:not(.sidebar-open) {
-  width: 60px;
-  border-right: 1px solid var(--vp-c-gray-2);
+  width: var(--vp-sidebar-collapsed-width);
+  border-right: 1px solid var(--border-color);
 }
 
 /* 折叠按钮 */
 .collapse-btn {
   position: absolute;
-  right: -12px;
-  top: 20px;
-  width: 24px;
-  height: 24px;
-  background: var(--el-color-primary);
+  right: -16px;
+  top: 24px;
+  width: 32px;
+  height: 32px;
+  background: var(--neon-accent);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   color: white;
-  font-size: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-  transition: transform 0.2s ease;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
   z-index: 60;
+  border: 1px solid var(--border-color);
 }
 
 .collapse-btn:hover {
-  transform: scale(1.1);
+  transform: scale(1.05);
+  background: #4f90ff;
 }
 
 /* 移动端的transform逻辑 */
@@ -216,10 +214,10 @@ onMounted(() => {
 }
 
 .sidebar-content {
-  padding: 24px 0;
+  padding: 32px 0;
   white-space: nowrap;
   opacity: 1;
-  transition: opacity 0.3s ease;
+  transition: all 0.3s ease;
   overflow: hidden;
 }
 
@@ -235,19 +233,20 @@ onMounted(() => {
   justify-content: space-between;
   padding: 0 24px 16px;
   margin-bottom: 16px;
-  border-bottom: 1px solid var(--vp-c-gray-2);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .section-title {
   font-size: 18px;
-  font-weight: 600;
-  color: var(--vp-c-text-1);
+  font-weight: 700;
+  color: var(--text-primary);
   margin: 0;
+  letter-spacing: 0.02em;
 }
 
 .header-actions {
   display: flex;
-  gap: 4px;
+  gap: 8px;
 }
 
 .search-box {
@@ -258,8 +257,8 @@ onMounted(() => {
 .content {
   flex: 1;
   margin-left: var(--vp-sidebar-width);
-  background: var(--vp-c-bg);
-  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--dark-bg);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 100vh;
 }
 
@@ -286,7 +285,8 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
   z-index: 40;
   display: none;
 }
@@ -303,19 +303,43 @@ onMounted(() => {
   }
 }
 
-/* 暗色模式支持 */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --vp-c-bg: #1a1a1a;
-    --vp-c-bg-alt: #2d2d2d;
-    --vp-c-bg-elv: #262626;
-    --vp-c-text-1: #ffffff;
-    --vp-c-text-2: #c9c9c9;
-    --vp-c-text-3: #8e8e8e;
-    --vp-c-gray-1: #3d3d3d;
-    --vp-c-gray-2: #4d4d4d;
-    --vp-c-gray-3: #5d5d5d;
+/* 动画效果 */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: var(--shadow-secondary);
   }
+  50% {
+    box-shadow: var(--neon-glow), var(--shadow-secondary);
+  }
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-secondary);
+}
+
+/* 主题适配 */
+.dark {
+  --bg-primary: #0f1419;
+  --bg-secondary: #1a1f29;
+  --bg-tertiary: #242936;
+  --text-primary: #e6e8eb;
+  --text-secondary: #8b949e;
+  --accent-primary: #58a6ff;
 }
 
 @media (min-width: 960px) {
@@ -344,20 +368,18 @@ onMounted(() => {
   }
 }
 
-/* 暗色模式支持 */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --vp-c-bg: #1b1b1f;
-    --vp-c-bg-alt: #161618;
-    --vp-c-bg-elv: #202127;
-    --vp-c-text-1: rgba(255, 255, 245, 0.86);
-    --vp-c-text-2: rgba(235, 235, 245, 0.6);
-    --vp-c-text-3: rgba(235, 235, 245, 0.38);
-    --vp-c-gray-1: #515c67;
-    --vp-c-gray-2: #414853;
-    --vp-c-gray-3: #32363f;
-    --vp-c-brand-1: #a8b1ff;
-    --vp-c-brand-2: #5c7cfa;
+/* 响应式动画 */
+@media (prefers-reduced-motion: no-preference) {
+  .sidebar,
+  .content,
+  .collapse-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
+}
+
+/* 焦点可访问性 */
+.collapse-btn:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
 }
 </style> 

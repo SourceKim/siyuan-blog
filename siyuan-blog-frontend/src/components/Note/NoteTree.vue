@@ -320,57 +320,67 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* 主题变量 - 与示例保持一致 */
 .note-tree {
   height: 100%;
   overflow-y: auto;
   background: transparent;
   position: relative;
+  --dark-bg: #111827;
+  --dark-card: #1f2937;
+  --neon-accent: #3b82f6;
+  --purple-accent: #8b5cf6;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --border-color: #374151;
 }
 
 .notebooks-section,
 .docs-section {
-  padding: 12px;
+  padding: 16px;
 }
 
 .notebook-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .notebook-item {
   display: flex;
   align-items: center;
-  padding: 12px;
+  gap: 12px;
+  padding: 12px 16px;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s;
-  border: 1px solid var(--vp-c-gray-2);
-  background: var(--vp-c-bg);
+  transition: background-color 0.2s ease;
+  background: transparent;
 }
 
 .notebook-item:hover {
-  background: var(--vp-c-bg-alt);
-  border-color: var(--vp-c-brand-1);
+  background: var(--dark-card);
 }
 
 .notebook-icon {
-  margin-right: 8px;
-  color: var(--vp-c-brand-1);
+  color: var(--text-primary);
+  font-size: 20px;
+  flex-shrink: 0;
 }
 
 .notebook-name {
   flex: 1;
   font-weight: 500;
-  color: var(--vp-c-text-1);
+  color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
+  font-size: 14px;
 }
 
 .arrow-icon {
-  color: var(--vp-c-text-3);
+  color: var(--text-secondary);
+  flex-shrink: 0;
 }
 
 .docs-header {
@@ -379,36 +389,70 @@ onMounted(() => {
   justify-content: space-between;
   margin-bottom: 16px;
   padding-bottom: 8px;
-  border-bottom: 1px solid var(--vp-c-gray-2);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .docs-header h4 {
   margin: 0;
   font-size: 14px;
-  color: var(--vp-c-text-1);
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .doc-tree {
   background: transparent;
-  margin-top: 8px;
+  margin-top: 12px;
+}
+
+/* 覆盖Element Plus树组件样式 - 简洁风格 */
+.doc-tree :deep(.el-tree-node) {
+  margin-bottom: 2px;
+}
+
+.doc-tree :deep(.el-tree-node__content) {
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+  background: transparent;
+}
+
+.doc-tree :deep(.el-tree-node__content:hover) {
+  background: var(--dark-card);
+}
+
+.doc-tree :deep(.el-tree-node.is-current > .el-tree-node__content) {
+  background: rgba(59, 130, 246, 0.2);
+  color: var(--neon-accent);
+}
+
+.doc-tree :deep(.el-tree-node__expand-icon) {
+  color: var(--text-secondary);
+  transition: transform 0.2s ease;
+}
+
+.doc-tree :deep(.el-tree-node__expand-icon.expanded) {
+  transform: rotate(90deg);
 }
 
 .tree-node {
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 4px 0;
+  padding: 0;
+  gap: 8px;
 }
 
 .node-icon {
-  margin-right: 8px;
-  color: var(--vp-c-brand-1);
+  color: var(--text-primary);
+  font-size: 16px;
+  flex-shrink: 0;
 }
 
 .node-label {
   flex: 1;
   font-size: 14px;
-  color: var(--vp-c-text-1);
+  font-weight: 500;
+  color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -419,28 +463,97 @@ onMounted(() => {
   margin-left: 8px;
 }
 
+.node-info :deep(.el-tag) {
+  background: var(--dark-card);
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+  font-size: 11px;
+  height: 20px;
+  line-height: 18px;
+}
+
 .loading-container {
-  padding: 16px;
+  padding: 20px;
+}
+
+.loading-container :deep(.el-skeleton__item) {
+  background: var(--dark-card);
+}
+
+/* 空状态样式 */
+:deep(.el-empty) {
+  color: var(--text-secondary);
+}
+
+:deep(.el-empty__image svg) {
+  fill: var(--text-muted);
+}
+
+:deep(.el-empty__description) {
+  color: var(--text-secondary);
+}
+
+/* 错误提示样式 */
+:deep(.el-alert) {
+  background: var(--dark-card);
+  border-color: #f56565;
+  border-radius: 8px;
+}
+
+:deep(.el-alert__title) {
+  color: #f56565;
+}
+
+/* 按钮样式优化 */
+:deep(.el-button) {
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+:deep(.el-button--primary) {
+  background: var(--neon-accent);
+  border-color: var(--neon-accent);
+}
+
+:deep(.el-button--primary:hover) {
+  background: #4f90ff;
+  border-color: #4f90ff;
+}
+
+:deep(.el-button--text) {
+  color: var(--text-secondary);
+}
+
+:deep(.el-button--text:hover) {
+  color: var(--neon-accent);
+  background: var(--dark-card);
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
   .notebooks-section,
   .docs-section {
-    padding: 8px;
+    padding: 12px;
+  }
+  
+  .notebook-item {
+    padding: 14px;
+  }
+  
+  .notebook-name {
+    font-size: 14px;
   }
 }
 
-/* 暗色模式支持 */
-@media (prefers-color-scheme: dark) {
-  .notebook-item {
-    background: var(--vp-c-bg-elv);
-    border-color: var(--vp-c-gray-3);
-  }
-  
-  .notebook-item:hover {
-    background: var(--vp-c-bg-alt);
-    border-color: var(--vp-c-brand-2);
-  }
+/* 焦点可访问性 */
+.notebook-item:focus-visible {
+  outline: 2px solid var(--neon-accent);
+  outline-offset: 2px;
+}
+
+.doc-tree :deep(.el-tree-node__content:focus-visible) {
+  outline: 2px solid var(--neon-accent);
+  outline-offset: 2px;
 }
 </style> 
