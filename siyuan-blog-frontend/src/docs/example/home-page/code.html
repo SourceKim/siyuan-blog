@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Stitch Design</title>
+<link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;family=Roboto:wght@400;500;700&amp;family=Nunito+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style type="text/tailwindcss">
+    :root {
+      --primary-neon-blue: #00BFFF;
+      --primary-neon-purple: #8A2BE2;
+      --dark-gray-bg: #1A1A1A;
+      --dark-blue-main: #1C2541;
+      --dark-gray-card: #2C2C2C;
+    }
+    body {
+      font-family: 'Inter', 'Roboto', 'Nunito Sans', sans-serif;
+      background-color: var(--dark-gray-bg);
+      color: #E0E0E0;
+    }
+    .tech-style-border {
+      border: 2px solid;
+      border-image-slice: 1;
+      border-width: 2px;
+      border-image-source: linear-gradient(to right, var(--primary-neon-blue), var(--primary-neon-purple));
+    }
+    .nav-link:hover {
+      color: var(--primary-neon-blue);
+    }
+    .contact-btn {
+      background-color: var(--dark-gray-card);
+      border: 1px solid var(--primary-neon-blue);
+      transition: all 0.3s ease;
+    }
+    .contact-btn:hover {
+      background-color: var(--primary-neon-blue);
+      color: var(--dark-gray-bg);
+    }
+    .article-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 30px rgba(0, 191, 255, 0.2);
+    }
+    .timeline-item:before {
+        content: '';
+        position: absolute;
+        left: 20px;
+        top: 20px;
+        bottom: -20px;
+        width: 2px;
+        background-color: #4A4A4A;
+        z-index: 0;
+    }
+    .timeline-icon {
+        background-color: var(--dark-gray-bg);
+        z-index: 1;
+    }
+  </style>
+</head>
+<body class="bg-[var(--dark-gray-bg)] text-gray-200">
+<div class="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#2A2A2A] px-10 py-4 sticky top-0 bg-[var(--dark-gray-bg)] z-50">
+<div class="flex items-center gap-3 text-white">
+<svg class="size-6 text-[var(--primary-neon-blue)]" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path><path d="M2 7L12 12L22 7" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path><path d="M12 22V12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<h2 class="text-xl font-bold tracking-wider uppercase">Alexia's Hub</h2>
+</div>
+<div class="flex items-center gap-8">
+<a class="text-gray-300 hover:text-[var(--primary-neon-blue)] transition-colors duration-300 text-sm font-medium leading-normal" href="#">Home</a>
+<a class="text-gray-300 hover:text-[var(--primary-neon-blue)] transition-colors duration-300 text-sm font-medium leading-normal" href="#">Notebooks</a>
+<a class="text-gray-300 hover:text-[var(--primary-neon-blue)] transition-colors duration-300 text-sm font-medium leading-normal" href="#">About Me</a>
+</div>
+</header>
+<div class="flex flex-1">
+<aside class="w-80 flex-shrink-0 bg-[var(--dark-gray-bg)] border-r border-[#2A2A2A]">
+<div class="h-full p-6">
+<div class="bg-[var(--dark-gray-card)] p-6 rounded-xl shadow-lg border border-gray-700/50 flex flex-col items-center text-center h-full">
+<div class="relative mb-4 mt-4">
+<img alt="Alexia's Avatar" class="rounded-full size-32 object-cover tech-style-border p-1" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRLcquo-hBYW5uEGxMIzD3j4iOEY_DWQNSYTbCHCGorPMI2TT5mvlmP4lpy0iTL34ht2IQS1ZuoCkT3KYhuTlWT3MIjUfOLbs8oow_ZbMLkAbwEdHSbnJKPbgGvRuV3Duwh6ahlxFhGok3IjNSMT2LP9lFUMq7IGpDHwO3bKk0otFrZkVGkYoJs8JxxFWNAapc0JRPxjgOqgBY6uWh2Bf9hEBWwfJf0g0AMaBgf14g_BtfKyj2P3JB5FC2go4WuFVSZd_btXG-E_o"/>
+<span class="absolute bottom-1 right-1 block h-5 w-5 rounded-full border-2 border-[var(--dark-gray-card)] bg-green-400"></span>
+</div>
+<h3 class="text-2xl font-bold text-white tracking-wide">Alexia</h3>
+<p class="text-sm text-[var(--primary-neon-blue)] font-medium mt-1">Software Engineer</p>
+<div class="flex-grow mt-6 text-gray-400 text-sm leading-relaxed text-left space-y-4">
+<p>Hello! I'm Alexia, a software engineer with a passion for building beautiful and functional web applications. My expertise lies in modern frontend frameworks like Vue.js and React, coupled with a deep understanding of backend technologies.</p>
+<p>This blog is my digital garden, a space where I share my journey, learnings, and thoughts on technology, programming, and personal growth. I believe in the power of open-source and collaborative learning.</p>
+<p>When I'm not coding, you can find me exploring new coffee shops, reading sci-fi novels, or hiking in the mountains. I'm always eager to connect with like-minded individuals, so feel free to reach out!</p>
+</div>
+<div class="flex flex-col gap-3 mt-auto w-full pt-6">
+<button class="contact-btn flex w-full items-center justify-center rounded-lg h-10 px-4 text-sm font-semibold text-gray-200">
+<span class="truncate">Email</span>
+</button>
+<button class="contact-btn flex w-full items-center justify-center rounded-lg h-10 px-4 text-sm font-semibold text-gray-200">
+<span class="truncate">GitHub</span>
+</button>
+<button class="contact-btn flex w-full items-center justify-center rounded-lg h-10 px-4 text-sm font-semibold text-gray-200">
+<span class="truncate">LinkedIn</span>
+</button>
+</div>
+</div>
+</div>
+</aside>
+<main class="layout-content-container flex flex-col max-w-[960px] flex-1 p-10">
+<div class="mb-10">
+<h2 class="text-3xl font-bold text-white tracking-wider mb-4">Recommended</h2>
+<div class="bg-[var(--dark-gray-card)] rounded-xl overflow-hidden shadow-2xl shadow-blue-500/10 article-card transition-all duration-300 ease-in-out border border-gray-700/50">
+<div class="relative">
+<img alt="Recommended article banner" class="w-full h-64 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJyPdNQsfcsz9XaP81o1nRqsVUdupg5tpS4mx5iQHLP3mGtii7m3ybQq2gs2F-83XOHGPGLsMvjxjeOFxa4OBZRd9TdedzumBAH9HQWPVIeBrUQZq-eovpa1PFNvJMBikPe79n5k1RMLFa4HIFbAm4MHD-sx11iyY5w5Ge3Jrs4XdtVvZhqKVIHXIpKQs7IsklIyeamMVI6YRjqVsmew2Vkem6dKQyNeZeDvi_dJZBiPRnkdfdOMFceis8wk9ozE4mxsJAW9seBX0"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+</div>
+<div class="p-6">
+<h3 class="text-2xl font-bold text-white leading-tight tracking-[-0.015em]">Dive into the Future of Tech</h3>
+<p class="text-gray-400 text-base font-normal leading-relaxed mt-2">
+                      Our curated selection of must-read articles, handpicked for their insights and impact on the tech community.
+                    </p>
+<button class="mt-4 flex items-center justify-center rounded-lg h-10 px-5 bg-gradient-to-r from-[var(--primary-neon-blue)] to-[var(--primary-neon-purple)] text-white text-sm font-bold leading-normal hover:opacity-90 transition-opacity">
+<span class="truncate">Explore Now</span>
+</button>
+</div>
+</div>
+</div>
+<div>
+<h2 class="text-3xl font-bold text-white tracking-wider mb-6">Recently Updated</h2>
+<div class="space-y-8">
+<div class="relative timeline-item flex gap-4">
+<div class="timeline-icon relative pt-0.5">
+<div class="flex size-10 items-center justify-center rounded-full bg-[var(--dark-gray-card)] border-2 border-[var(--primary-neon-blue)]">
+<svg class="size-5 text-[var(--primary-neon-blue)]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+</div>
+<div class="flex-1 pb-8">
+<h3 class="text-lg font-semibold text-white">Mastering Vue 3 Composition API</h3>
+<p class="text-sm text-gray-500 mt-1">July 26, 2024</p>
+<div class="mt-3 flex gap-2">
+<span class="inline-block rounded-full bg-blue-500/20 px-3 py-1 text-xs font-medium text-blue-300">Vue</span>
+<span class="inline-block rounded-full bg-purple-500/20 px-3 py-1 text-xs font-medium text-purple-300">Frontend</span>
+</div>
+</div>
+</div>
+<div class="relative timeline-item flex gap-4">
+<div class="timeline-icon relative pt-0.5">
+<div class="flex size-10 items-center justify-center rounded-full bg-[var(--dark-gray-card)] border-2 border-[var(--primary-neon-blue)]">
+<svg class="size-5 text-[var(--primary-neon-blue)]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+</div>
+<div class="flex-1 pb-8">
+<h3 class="text-lg font-semibold text-white">Advanced Siyuan Backend Development</h3>
+<p class="text-sm text-gray-500 mt-1">July 20, 2024</p>
+<div class="mt-3 flex gap-2">
+<span class="inline-block rounded-full bg-green-500/20 px-3 py-1 text-xs font-medium text-green-300">Siyuan</span>
+<span class="inline-block rounded-full bg-gray-500/20 px-3 py-1 text-xs font-medium text-gray-300">Backend</span>
+</div>
+</div>
+</div>
+<div class="relative timeline-item flex gap-4">
+<div class="timeline-icon relative pt-0.5">
+<div class="flex size-10 items-center justify-center rounded-full bg-[var(--dark-gray-card)] border-2 border-[var(--primary-neon-blue)]">
+<svg class="size-5 text-[var(--primary-neon-blue)]" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</div>
+</div>
+<div class="flex-1">
+<h3 class="text-lg font-semibold text-white">Building Scalable Applications with Node.js</h3>
+<p class="text-sm text-gray-500 mt-1">July 15, 2024</p>
+<div class="mt-3 flex gap-2">
+<span class="inline-block rounded-full bg-green-500/20 px-3 py-1 text-xs font-medium text-green-300">Node.js</span>
+<span class="inline-block rounded-full bg-gray-500/20 px-3 py-1 text-xs font-medium text-gray-300">Backend</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</div>
+
+</body></html>
