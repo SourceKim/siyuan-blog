@@ -323,7 +323,7 @@ onMounted(() => {
 /* 主题变量 - 与示例保持一致 */
 .note-tree {
   height: 100%;
-  overflow-y: auto;
+  overflow-y: hidden;
   background: transparent;
   position: relative;
   --dark-bg: #111827;

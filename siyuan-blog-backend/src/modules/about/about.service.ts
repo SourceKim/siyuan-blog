@@ -129,17 +129,27 @@ export class AboutService {
    */
   getExperience(): ExperienceItemDto[] {
     try {
+      console.log('=== getExperience 调试信息 ===')
       const experienceConfig = this.fileConfigService.getConfig('experience') as any[]
+      console.log('从 getConfig 获取的 experience 数据:', experienceConfig)
+      console.log('数据类型:', typeof experienceConfig)
+      console.log('是否为数组:', Array.isArray(experienceConfig))
       
       if (!Array.isArray(experienceConfig)) {
+        console.log('experienceConfig 不是数组，返回空数组')
         return []
       }
 
-      return experienceConfig.map(item => ({
+      const result = experienceConfig.map(item => ({
         title: item.title || '',
         period: item.period || '',
         description: item.description || ''
       }))
+      
+      console.log('处理后的 experience 结果:', result)
+      console.log('=== getExperience 调试信息结束 ===')
+      
+      return result
     } catch (error) {
       console.error('获取工作经历失败:', error)
       return []

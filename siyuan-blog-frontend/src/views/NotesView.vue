@@ -150,7 +150,7 @@ onMounted(() => {
   background: var(--dark-bg);
   border-right: 1px solid var(--border-color);
   position: fixed;
-  top: 0;
+  top: 60px; /* 为AppHeader留出空间 */
   bottom: 0;
   left: 0;
   z-index: 50;
@@ -181,7 +181,7 @@ onMounted(() => {
   font-size: 14px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
-  z-index: 60;
+  z-index: 9999;
   border: 1px solid var(--border-color);
 }
 
@@ -218,7 +218,9 @@ onMounted(() => {
   white-space: nowrap;
   opacity: 1;
   transition: all 0.3s ease;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: calc(100vh - 92px); /* 减去header和padding的高度 */
 }
 
 /* 折叠时隐藏内容 */
@@ -257,24 +259,30 @@ onMounted(() => {
 .content {
   flex: 1;
   margin-left: var(--vp-sidebar-width);
+  margin-top: 60px; /* 为AppHeader留出空间 */
   background: var(--dark-bg);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  min-height: 100vh;
+  min-height: calc(100vh - 60px); /* 减去header高度 */
+  position: relative;
+  z-index: 1;
 }
 
 /* 侧边栏折叠时，内容区域调整 */
 .content.sidebar-collapsed {
   margin-left: var(--vp-sidebar-collapsed-width);
+  margin-top: 60px; /* 为AppHeader留出空间 */
 }
 
 /* 桌面端内容区域确保正确的margin */
 @media (min-width: 961px) {
   .content {
     margin-left: var(--vp-sidebar-width);
+    margin-top: 60px; /* 为AppHeader留出空间 */
   }
   
   .content.sidebar-collapsed {
     margin-left: var(--vp-sidebar-collapsed-width);
+    margin-top: 60px; /* 为AppHeader留出空间 */
   }
 }
 
@@ -350,6 +358,7 @@ onMounted(() => {
   
   .content {
     margin-left: 0;
+    margin-top: 60px; /* 移动端也需要为header留出空间 */
   }
 }
 
@@ -381,5 +390,15 @@ onMounted(() => {
 .collapse-btn:focus-visible {
   outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
+}
+
+/* 侧边栏滚动条样式 */
+.sidebar-content {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.sidebar-content::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 </style> 

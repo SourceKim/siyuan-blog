@@ -7,10 +7,10 @@
       class="profile-sidebar" 
       :class="{ collapsed: drawerCollapsed }"
     >
-      <div class="sidebar-content">
+      <div class="home-sidebar-content">
         <!-- 收缩按钮 -->
         <div 
-          class="collapse-btn" 
+          class="home-collapse-btn" 
           @click="toggleDrawer"
         >
           <el-icon>
@@ -447,14 +447,14 @@ onMounted(async () => {
   background: var(--tech-gradient);
 }
 
-.sidebar-content {
+.home-sidebar-content {
   height: 100%;
   padding: 24px;
   overflow: hidden;
   position: relative;
 }
 
-.collapse-btn {
+.home-collapse-btn {
   position: absolute;
   right: -12px;
   top: 24px;
@@ -474,7 +474,7 @@ onMounted(async () => {
   z-index: 10;
 }
 
-.collapse-btn:hover {
+.home-collapse-btn:hover {
   transform: scale(1.1);
   box-shadow: var(--tech-glow);
 }
@@ -946,7 +946,7 @@ onMounted(async () => {
     width: 100%;
   }
   
-  .sidebar-content {
+  .home-sidebar-content {
     padding: 20px;
   }
   
@@ -955,7 +955,7 @@ onMounted(async () => {
     padding: 24px 20px;
   }
   
-  .collapse-btn {
+  .home-collapse-btn {
     right: 20px;
     top: 20px;
   }
