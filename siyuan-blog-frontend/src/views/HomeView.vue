@@ -8,17 +8,6 @@
       :class="{ collapsed: drawerCollapsed }"
     >
       <div class="home-sidebar-content">
-        <!-- 收缩按钮 -->
-        <div 
-          class="home-collapse-btn" 
-          @click="toggleDrawer"
-        >
-          <el-icon>
-            <ArrowLeft v-if="!drawerCollapsed" />
-            <ArrowRight v-else />
-          </el-icon>
-        </div>
-
         <!-- 个人信息卡片 -->
         <div class="profile-card" v-if="!drawerCollapsed">
           <!-- 头像区域 -->
@@ -99,6 +88,17 @@
     <main class="main-content" :class="{ 
       expanded: drawerCollapsed 
     }">
+      <!-- 收缩按钮 -->
+      <div 
+        class="home-collapse-btn" 
+        @click="toggleDrawer"
+      >
+        <el-icon>
+          <ArrowLeft v-if="!drawerCollapsed" />
+          <ArrowRight v-else />
+        </el-icon>
+      </div>
+      
       <div class="content-container">
         <!-- 推荐文章区域 -->
         <section class="featured-section">
@@ -430,7 +430,7 @@ onMounted(async () => {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   z-index: 1000;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .profile-sidebar.collapsed {
@@ -448,18 +448,20 @@ onMounted(async () => {
 }
 
 .home-sidebar-content {
-  height: 100%;
+  height: auto;
+  min-height: 100%;
   padding: 24px;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
   position: relative;
 }
 
 .home-collapse-btn {
-  position: absolute;
-  right: -12px;
-  top: 24px;
-  width: 28px;
-  height: 28px;
+  position: fixed;
+  left: 304px;
+  top: 100px;
+  width: 32px;
+  height: 32px;
   background: var(--tech-gradient);
   border-radius: 50%;
   display: flex;
@@ -467,16 +469,21 @@ onMounted(async () => {
   justify-content: center;
   cursor: pointer;
   color: white;
-  font-size: 14px;
+  font-size: 16px;
   box-shadow: var(--tech-shadow);
   transition: all 0.3s ease;
   border: none;
-  z-index: 10;
+  z-index: 1001;
 }
 
 .home-collapse-btn:hover {
   transform: scale(1.1);
   box-shadow: var(--tech-glow);
+}
+
+/* 侧边栏收缩时按钮位置调整 */
+.profile-sidebar.collapsed ~ .main-content .home-collapse-btn {
+  left: 44px;
 }
 
 /* 个人信息卡片 */
@@ -490,8 +497,8 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
   gap: 24px;
-  height: calc(100vh - 48px);
-  overflow-y: auto;
+  height: auto;
+  min-height: calc(100vh - 96px);
 }
 
 /* 头像区域 */
@@ -956,8 +963,10 @@ onMounted(async () => {
   }
   
   .home-collapse-btn {
+    position: fixed;
     right: 20px;
     top: 20px;
+    left: auto;
   }
   
   .main-content {
