@@ -94,11 +94,6 @@
       <div class="experience-section">
         <div class="section-content">
           <h2 class="section-title">经历</h2>
-          <!-- 调试信息 -->
-          <div style="background: #333; padding: 10px; margin: 10px 0; border-radius: 4px; font-family: monospace; font-size: 12px; color: #fff;">
-            <div>Experience 数据长度: {{ aboutMe?.config?.experience?.length || 0 }}</div>
-            <div>Experience 数据: {{ JSON.stringify(aboutMe?.config?.experience, null, 2) }}</div>
-          </div>
           <div class="timeline">
             <div 
               v-for="(exp, index) in aboutMe?.config?.experience || []" 
@@ -176,10 +171,6 @@ const updateStats = () => {
 // 获取个人信息
 const fetchAboutMe = async () => {
   await aboutStore.fetchAboutMe()
-  
-  // 调试信息
-  console.log('AboutMe 数据:', aboutMe.value)
-  console.log('Experience 数据:', aboutMe.value?.config?.experience)
 }
 
 // 初始化
@@ -267,7 +258,7 @@ onMounted(async () => {
 
 /* Hero Section */
 .hero-section {
-  padding: 3rem 0 4rem;
+  padding-bottom: 3rem;
   text-align: center;
 }
 
@@ -283,8 +274,8 @@ onMounted(async () => {
 }
 
 .profile-avatar {
-  width: 160px;
-  height: 160px;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
   background-size: cover;
   background-position: center;
