@@ -98,34 +98,6 @@ export interface ExperienceItem {
   description: string
 }
 
-// 内容模板类型
-export interface ContentTemplates {
-  summaryTemplates: {
-    default: string[]
-    frontend: string
-    backend: string
-    thinking: string
-    tutorial: string
-  }
-  tagRules: {
-    tech: { [key: string]: { keywords: string[], tag: string } }
-    content: { [key: string]: { keywords: string[], tag: string } }
-    category: { [key: string]: { keywords: string[], tag: string } }
-  }
-  summaryKeywords: {
-    frontend: string[]
-    backend: string[]
-    thinking: string[]
-    tutorial: string[]
-  }
-  defaults: {
-    fallbackName: string
-    fallbackTitle: string
-    fallbackBio: string
-    maxTags: number
-    unknownNotebook: string
-  }
-}
 
 // 配置类型
 export interface AboutMeConfig {

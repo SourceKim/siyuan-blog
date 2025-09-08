@@ -4,13 +4,13 @@
       <!-- Logo和标题 -->
       <div class="logo-section">
         <el-avatar 
-          :src="aboutMe?.avatarUrl" 
+          :src="headerData?.avatarUrl" 
           :size="36"
           class="logo-avatar"
         >
           <el-icon><User /></el-icon>
         </el-avatar>
-        <span class="site-title">{{ aboutMe?.name || 'SiYuan Blog' }}</span>
+        <span class="site-title">{{ headerData?.siteName || 'SiYuan Blog' }}</span>
       </div>
 
       <!-- 导航菜单 -->
@@ -87,7 +87,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useThemeStore } from '@/stores/theme'
-import { useAboutStore } from '@/stores/about'
+import { useLayoutStore } from '@/stores/layout'
 import { storeToRefs } from 'pinia'
 import {
   House,
@@ -101,9 +101,9 @@ import {
 
 // 状态管理
 const themeStore = useThemeStore()
-const aboutStore = useAboutStore()
+const layoutStore = useLayoutStore()
 const { isDark } = storeToRefs(themeStore)
-const { aboutMe } = storeToRefs(aboutStore)
+const { headerData } = storeToRefs(layoutStore)
 
 // 移动端菜单
 const showMobileMenu = ref(false)
@@ -123,7 +123,9 @@ const handleMobileMenuSelect = () => {
 
 // 初始化
 onMounted(() => {
-  aboutStore.fetchAboutMe()
+  if (!headerData.value) {
+    layoutStore.fetchLayoutData()
+  }
 })
 </script>
 

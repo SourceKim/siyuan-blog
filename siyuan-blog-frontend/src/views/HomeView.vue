@@ -26,13 +26,13 @@
           
           <!-- 姓名和标题 -->
           <div class="profile-header">
-            <h3 class="profile-name">{{ homeData?.profile?.name || homeData?.contentTemplates?.defaults?.fallbackName || '博主' }}</h3>
-            <p class="profile-title">{{ homeData?.profile?.title || homeData?.contentTemplates?.defaults?.fallbackTitle || '开发者' }}</p>
+            <h3 class="profile-name">{{ homeData?.profile?.name || '博主' }}</h3>
+            <p class="profile-title">{{ homeData?.profile?.title || '开发者' }}</p>
           </div>
 
           <!-- 个人简介 -->
           <div class="profile-bio">
-            <p>{{ homeData?.profile?.bio || homeData?.contentTemplates?.defaults?.fallbackBio || '这是我的数字花园，分享技术思考与成长历程。' }}</p>
+            <p>{{ homeData?.profile?.bio || '这是我的数字花园，分享技术思考与成长历程。' }}</p>
           </div>
 
           <!-- 统计信息 -->
@@ -227,7 +227,7 @@ import {
   ArrowLeft,
   ArrowRight
 } from '@element-plus/icons-vue'
-import type { Doc, ContentTemplates } from '@/api/types'
+import type { Doc } from '@/api/types'
 import TechBackground from '@/components/TechBackground.vue'
 
 const router = useRouter()
@@ -275,93 +275,18 @@ const removeFileExtension = (filename: string): string => {
 
 // 获取笔记本名称
 const getNotebookName = (doc: Doc): string => {
-  // 使用配置的默认值
-  return doc.notebookName || homeData.value?.contentTemplates?.defaults?.unknownNotebook || '未知笔记本'
+  return doc.notebookName || '未知笔记本'
 }
 
-// 生成文章摘要（使用配置化模板）
+// 生成文章摘要
 const generateSummary = (doc: Doc): string => {
   const title = removeFileExtension(doc.name)
-  const templates = homeData.value?.contentTemplates?.summaryTemplates
-  const keywords = homeData.value?.contentTemplates?.summaryKeywords
-  
-  if (!templates) {
-    return `关于${title}的精彩内容，值得一读。`
-  }
-  
-  // 根据关键词智能选择模板
-  const titleLower = title.toLowerCase()
-  
-  // 检查前端关键词
-  if (keywords?.frontend?.some((keyword: string) => titleLower.includes(keyword.toLowerCase()))) {
-    return templates.frontend.replace('{title}', title)
-  }
-  
-  // 检查后端关键词  
-  if (keywords?.backend?.some((keyword: string) => titleLower.includes(keyword.toLowerCase()))) {
-    return templates.backend.replace('{title}', title)
-  }
-  
-  // 检查思考关键词
-  if (keywords?.thinking?.some((keyword: string) => titleLower.includes(keyword.toLowerCase()))) {
-    return templates.thinking.replace('{title}', title)
-  }
-  
-  // 检查教程关键词
-  if (keywords?.tutorial?.some((keyword: string) => titleLower.includes(keyword.toLowerCase()))) {
-    return templates.tutorial.replace('{title}', title)
-  }
-  
-  // 使用默认模板（随机选择）
-  if (templates.default && templates.default.length > 0) {
-    const randomIndex = Math.floor(Math.random() * templates.default.length)
-    return templates.default[randomIndex].replace('{title}', title)
-  }
-  
   return `关于${title}的精彩内容，值得一读。`
 }
 
-// 获取文章标签（使用配置化规则）
+// 获取文章标签
 const getArticleTags = (doc: Doc): string[] => {
-  const tags: string[] = []
-  const title = removeFileExtension(doc.name).toLowerCase()
-  const notebookName = doc.notebookName?.toLowerCase() || ''
-  const tagRules = homeData.value?.contentTemplates?.tagRules
-  const maxTags = homeData.value?.contentTemplates?.defaults?.maxTags || 3
-  
-  if (!tagRules) {
-    return tags
-  }
-  
-  // 检查技术类标签
-  if (tagRules.tech) {
-    Object.values(tagRules.tech).forEach((rule: any) => {
-      if (rule.keywords?.some((keyword: string) => title.includes(keyword.toLowerCase()))) {
-        tags.push(rule.tag)
-      }
-    })
-  }
-  
-  // 检查内容类型标签
-  if (tagRules.content) {
-    Object.values(tagRules.content).forEach((rule: any) => {
-      if (rule.keywords?.some((keyword: string) => title.includes(keyword.toLowerCase()))) {
-        tags.push(rule.tag)
-      }
-    })
-  }
-  
-  // 检查分类标签（基于笔记本名称）
-  if (tagRules.category) {
-    Object.values(tagRules.category).forEach((rule: any) => {
-      if (rule.keywords?.some((keyword: string) => notebookName.includes(keyword.toLowerCase()))) {
-        tags.push(rule.tag)
-      }
-    })
-  }
-  
-  // 去重并限制标签数量
-  return [...new Set(tags)].slice(0, maxTags)
+  return [] // 简化实现，不自动生成标签
 }
 
 // 跳转到文章详情

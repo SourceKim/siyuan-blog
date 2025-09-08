@@ -2,23 +2,32 @@
   <el-footer class="app-footer">
     <div class="footer-content">
       <div class="footer-info">
-        <p>&copy; {{ currentYear }} {{ aboutMe?.name || 'SiYuan Blog' }}. 基于思源笔记构建</p>
-        <p class="footer-links">
-          <el-link @click="$router.push('/about')" :underline="false">关于我</el-link>
-          <span class="divider">|</span>
-          <el-link href="https://github.com/siyuan-note/siyuan" target="_blank" :underline="false">
-            思源笔记
-          </el-link>
-          <span class="divider">|</span>
-          <el-link href="https://element-plus.org/" target="_blank" :underline="false">
-            Element Plus
-          </el-link>
+        <p>&copy; {{ footerData?.currentYear || currentYear }} {{ footerData?.siteName || 'SiYuan Blog' }}. {{ footerData?.slogan || '基于思源笔记构建' }}</p>
+        <p class="footer-links" v-if="footerData?.links">
+          <template v-for="(link, index) in footerData.links" :key="link.url">
+            <el-link 
+              v-if="link.external"
+              :href="link.url" 
+              target="_blank" 
+              :underline="false"
+            >
+              {{ link.text }}
+            </el-link>
+            <el-link 
+              v-else
+              @click="$router.push(link.url)" 
+              :underline="false"
+            >
+              {{ link.text }}
+            </el-link>
+            <span v-if="index < footerData.links.length - 1" class="divider">|</span>
+          </template>
         </p>
       </div>
       
-      <div class="footer-stats" v-if="aboutMe">
+      <div class="footer-stats" v-if="footerData?.bio">
         <el-text size="small" type="info">
-          {{ aboutMe.bio }}
+          {{ footerData.bio }}
         </el-text>
       </div>
     </div>
@@ -27,20 +36,20 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
-import { useAboutStore } from '@/stores/about'
+import { useLayoutStore } from '@/stores/layout'
 import { storeToRefs } from 'pinia'
 
 // 状态管理
-const aboutStore = useAboutStore()
-const { aboutMe } = storeToRefs(aboutStore)
+const layoutStore = useLayoutStore()
+const { footerData } = storeToRefs(layoutStore)
 
 // 当前年份
 const currentYear = computed(() => new Date().getFullYear())
 
 // 初始化
 onMounted(() => {
-  if (!aboutMe.value) {
-    aboutStore.fetchAboutMe()
+  if (!footerData.value) {
+    layoutStore.fetchLayoutData()
   }
 })
 </script>
