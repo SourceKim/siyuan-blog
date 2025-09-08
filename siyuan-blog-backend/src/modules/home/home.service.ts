@@ -3,8 +3,7 @@ import {
   ProfileInfoDto, 
   SocialLinksDto, 
   BlogStatsDto, 
-  RecommendedDocDto,
-  ContentTemplatesDto 
+  RecommendedDocDto
 } from './home.dto'
 import { FileConfigService } from '../../config/file-config.service'
 import { NoteService } from '../note/note.service'
@@ -23,20 +22,18 @@ export class HomeService {
    */
   async getHomeData(recommendedCount?: number): Promise<HomeDataDto> {
     try {
-      const [profile, socialLinks, blogStats, recommendedDocs, contentTemplates] = await Promise.all([
+      const [profile, socialLinks, blogStats, recommendedDocs] = await Promise.all([
         this.getProfileInfo(),
         this.getSocialLinks(),
         this.getBlogStats(),
-        this.getRecommendedDocs(recommendedCount),
-        this.getContentTemplates()
+        this.getRecommendedDocs(recommendedCount)
       ])
 
       return {
         profile,
         socialLinks,
         blogStats,
-        recommendedDocs,
-        contentTemplates
+        recommendedDocs
       }
     } catch (error) {
       console.error('获取首页数据失败:', error)
@@ -140,74 +137,12 @@ export class HomeService {
   }
 
   /**
-   * 生成文档摘要（智能摘要生成）
+   * 生成文档摘要（简单摘要）
    */
   private generateSummary(title: string): string {
     // 移除 .sy 后缀
     const cleanTitle = title.replace(/\.sy$/, '')
-    
-    // 根据标题关键词生成智能摘要
-    const summaries = [
-      `探索${cleanTitle}的深层机制，揭示技术背后的核心原理与实践方法。`,
-      `深入分析${cleanTitle}，分享实战经验与最佳实践，助你快速掌握关键技能。`,
-      `从理论到实践，全面解析${cleanTitle}的应用场景与解决方案。`,
-      `${cleanTitle}的完整指南，包含前沿技术分享与深度思考。`,
-      `关于${cleanTitle}的技术洞察，结合实际案例的深度分析。`
-    ]
-    
-    // 根据标题内容智能选择摘要模板
-    if (cleanTitle.includes('Vue') || cleanTitle.includes('React') || cleanTitle.includes('前端')) {
-      return `深入探讨${cleanTitle}的现代前端开发实践，分享高效开发技巧与架构设计思路。`
-    } else if (cleanTitle.includes('Node') || cleanTitle.includes('后端') || cleanTitle.includes('服务器')) {
-      return `解析${cleanTitle}的后端技术架构，从基础概念到生产环境的完整实践指南。`
-    } else if (cleanTitle.includes('思考') || cleanTitle.includes('总结') || cleanTitle.includes('感悟')) {
-      return `关于${cleanTitle}的深度思考与总结，分享个人见解与成长心得。`
-    } else if (cleanTitle.includes('教程') || cleanTitle.includes('入门') || cleanTitle.includes('指南')) {
-      return `${cleanTitle}完整教程，从零基础到进阶应用的系统性学习路径。`
-    }
-    
-    // 默认随机选择一个摘要
-    const randomIndex = Math.floor(Math.random() * summaries.length)
-    return summaries[randomIndex]
+    return `关于${cleanTitle}的精彩内容，值得一读。`
   }
 
-  /**
-   * 获取内容模板配置
-   */
-  async getContentTemplates(): Promise<ContentTemplatesDto> {
-    try {
-      const templatesConfig = this.fileConfigService.getConfig('content_templates')
-      
-      return {
-        summaryTemplates: templatesConfig?.summaryTemplates || {
-          default: ['探索{title}的深层机制，揭示技术背后的核心原理与实践方法。'],
-          frontend: '深入探讨{title}的现代前端开发实践，分享高效开发技巧与架构设计思路。',
-          backend: '解析{title}的后端技术架构，从基础概念到生产环境的完整实践指南。',
-          thinking: '关于{title}的深度思考与总结，分享个人见解与成长心得。',
-          tutorial: '{title}完整教程，从零基础到进阶应用的系统性学习路径。'
-        },
-        tagRules: templatesConfig?.tagRules || {
-          tech: {},
-          content: {},
-          category: {}
-        },
-        summaryKeywords: templatesConfig?.summaryKeywords || {
-          frontend: ['vue', 'react', '前端'],
-          backend: ['node', '后端', '服务器'],
-          thinking: ['思考', '总结', '感悟'],
-          tutorial: ['教程', '入门', '指南']
-        },
-        defaults: templatesConfig?.defaults || {
-          fallbackName: '博主',
-          fallbackTitle: '开发者',
-          fallbackBio: '这是我的数字花园，分享技术思考与成长历程。',
-          maxTags: 3,
-          unknownNotebook: '未知笔记本'
-        }
-      }
-    } catch (error) {
-      console.error('获取内容模板失败:', error)
-      throw error
-    }
-  }
 }

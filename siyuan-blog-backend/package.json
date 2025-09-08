@@ -4,9 +4,10 @@
   "description": "SiYuan Blog 后端 API 服务",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run copy-assets",
+    "copy-assets": "copyfiles -u 1 src/**/*.json dist/",
     "start": "node dist/index.js",
-    "dev": "NODE_ENV=development concurrently \"tsc --watch\" \"nodemon dist/index.js\"",
+    "dev": "NODE_ENV=development concurrently \"tsc --watch\" \"npm run copy-assets\" \"nodemon dist/index.js\"",
     "dev:ts": "ts-node-dev --respawn --transpile-only src/index.ts",
     "lint": "eslint src/**/*.ts --fix",
     "format": "prettier --write src/"

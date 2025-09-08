@@ -102,43 +102,38 @@ export class FileConfigService {
           description: '分享关于Web开发、新技术和生产力工具的见解。'
         }
       ],
-      'content_templates': {
-        summaryTemplates: {
-          default: [
-            '探索{title}的深层机制，揭示技术背后的核心原理与实践方法。',
-            '深入分析{title}，分享实战经验与最佳实践，助你快速掌握关键技能。',
-            '从理论到实践，全面解析{title}的应用场景与解决方案。',
-            '{title}的完整指南，包含前沿技术分享与深度思考。',
-            '关于{title}的技术洞察，结合实际案例的深度分析。'
-          ],
-          frontend: '深入探讨{title}的现代前端开发实践，分享高效开发技巧与架构设计思路。',
-          backend: '解析{title}的后端技术架构，从基础概念到生产环境的完整实践指南。',
-          thinking: '关于{title}的深度思考与总结，分享个人见解与成长心得。',
-          tutorial: '{title}完整教程，从零基础到进阶应用的系统性学习路径。'
+      'notebook_whitelist': {
+        enabled: true,
+        whitelistedNotebooks: []
+      },
+      'layout_config': {
+        site: {
+          siteName: 'SiYuan Blog',
+          avatarUrl: '/default-avatar.png',
+          bio: '基于思源笔记构建的个人博客',
+          description: '记录技术学习和生活感悟的个人博客',
+          keywords: ['博客', '技术', '思源笔记', '个人网站'],
+          author: '博主'
         },
-        tagRules: {
-          tech: {
-            frontend: {
-              keywords: ['vue', 'react', 'angular'],
-              tag: '前端框架'
+        footer: {
+          slogan: '基于思源笔记构建',
+          links: [
+            {
+              text: '关于我',
+              url: '/about',
+              external: false
             },
-            javascript: {
-              keywords: ['javascript', 'js', 'typescript', 'ts'],
-              tag: 'JavaScript'
+            {
+              text: '思源笔记',
+              url: 'https://github.com/siyuan-note/siyuan',
+              external: true
+            },
+            {
+              text: 'Element Plus',
+              url: 'https://element-plus.org/',
+              external: true
             }
-          },
-          content: {
-            tutorial: {
-              keywords: ['教程', '入门', '指南'],
-              tag: '教程'
-            }
-          }
-        },
-        defaults: {
-          fallbackName: '博主',
-          fallbackTitle: '开发者',
-          maxTags: 3,
-          unknownNotebook: '未知笔记本'
+          ]
         }
       }
     }
@@ -150,7 +145,7 @@ export class FileConfigService {
    * 获取所有配置文件列表
    */
   private getAllConfigKeys(): string[] {
-    return ['about_me', 'social_links', 'tech_stack', 'experience', 'content_templates']
+    return ['about_me', 'social_links', 'tech_stack', 'experience', 'notebook_whitelist', 'layout_config']
   }
 
   /**
@@ -241,5 +236,49 @@ export class FileConfigService {
         this.createDefaultConfig(configKey)
       }
     }
+  }
+
+  /**
+   * 获取笔记本白名单配置
+   */
+  getNotebookWhitelist(): { enabled: boolean; whitelistedNotebooks: Array<{ id: string; name: string; description?: string }> } {
+    const config = this.readConfig('notebook_whitelist')
+    
+    // 如果配置为null或undefined，返回默认配置（禁用白名单，允许所有笔记本）
+    if (!config) {
+      return {
+        enabled: false,
+        whitelistedNotebooks: []
+      }
+    }
+    
+    return config
+  }
+
+  /**
+   * 更新笔记本白名单配置
+   */
+  updateNotebookWhitelist(whitelist: { enabled: boolean; whitelistedNotebooks: Array<{ id: string; name: string; description?: string }> }): void {
+    this.writeConfig('notebook_whitelist', whitelist)
+  }
+
+  /**
+   * 检查笔记本是否在白名单中
+   */
+  isNotebookAllowed(notebookId: string): boolean {
+    const whitelist = this.getNotebookWhitelist()
+    
+    // 如果白名单功能未启用，允许所有笔记本
+    if (!whitelist.enabled) {
+      return true
+    }
+
+    // 如果白名单为空，拒绝所有笔记本
+    if (!whitelist.whitelistedNotebooks || whitelist.whitelistedNotebooks.length === 0) {
+      return false
+    }
+
+    // 检查笔记本ID是否在白名单中
+    return whitelist.whitelistedNotebooks.some(notebook => notebook.id === notebookId)
   }
 } 

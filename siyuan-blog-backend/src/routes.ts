@@ -4,6 +4,7 @@ import { noteRoutes } from './modules/note/note.routes'
 import { configRoutes } from './modules/config/config.routes'
 import { homeRoutes } from './modules/home/home.routes'
 import { aboutRoutes } from './modules/about/about.routes'
+import { layoutRoutes } from './modules/layout/layout.routes'
 
 export const setupRoutes = (app: Express) => {
   // API 路由前缀
@@ -21,6 +22,8 @@ export const setupRoutes = (app: Express) => {
   // About 模块路由 - 挂载到 /api/about 下
   app.use(`${apiPrefix}/about`, aboutRoutes)
 
+  // Layout 模块路由 - 挂载到 /api/layout 下
+  app.use(`${apiPrefix}/layout`, layoutRoutes)
 
 
   // 404 处理

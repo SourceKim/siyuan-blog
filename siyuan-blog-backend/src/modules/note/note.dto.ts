@@ -97,6 +97,25 @@ export class GetOutlineRequestDto {
   preview?: boolean
 }
 
+// 笔记本白名单相关 DTO
+export class NotebookWhitelistDto {
+  enabled!: boolean
+  whitelistedNotebooks!: Array<{
+    id: string
+    name: string
+    description?: string
+  }>
+}
+
+export class UpdateNotebookWhitelistRequestDto {
+  enabled!: boolean
+  whitelistedNotebooks!: Array<{
+    id: string
+    name: string
+    description?: string
+  }>
+}
+
 // 标准响应格式
 export class ApiResponse<T = any> {
   code: number

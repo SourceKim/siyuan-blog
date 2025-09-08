@@ -1,12 +1,15 @@
 import { Request, Response } from 'express'
 import { NoteService } from './note.service'
-import { GetDocsRequestDto, GetDocRequestDto, GetRecommendedRequestDto, GetOutlineRequestDto, ApiResponse } from './note.dto'
+import { GetDocsRequestDto, GetDocRequestDto, GetRecommendedRequestDto, GetOutlineRequestDto, ApiResponse, UpdateNotebookWhitelistRequestDto } from './note.dto'
+import { FileConfigService } from '../../config/file-config.service'
 
 export class NoteController {
   private noteService: NoteService
+  private fileConfigService: FileConfigService
 
   constructor() {
     this.noteService = new NoteService()
+    this.fileConfigService = new FileConfigService()
   }
 
   /**
@@ -92,6 +95,60 @@ export class NoteController {
       res.json(ApiResponse.success(docs, '获取推荐文档成功'))
     } catch (error) {
       res.status(500).json(ApiResponse.error(1, '获取推荐文档失败'))
+    }
+  }
+
+  /**
+   * 获取笔记本白名单配置
+   */
+  async getNotebookWhitelist(req: Request, res: Response): Promise<void> {
+    try {
+      const whitelist = this.fileConfigService.getNotebookWhitelist()
+      res.json(ApiResponse.success(whitelist, '获取白名单配置成功'))
+    } catch (error) {
+      res.status(500).json(ApiResponse.error(1, '获取白名单配置失败'))
+    }
+  }
+
+  /**
+   * 更新笔记本白名单配置
+   */
+  async updateNotebookWhitelist(req: Request, res: Response): Promise<void> {
+    try {
+      const { enabled, whitelistedNotebooks } = req.body as UpdateNotebookWhitelistRequestDto
+      
+      // 验证请求参数
+      if (typeof enabled !== 'boolean') {
+        res.status(400).json(ApiResponse.error(400, 'enabled参数必须为布尔值'))
+        return
+      }
+
+      if (!Array.isArray(whitelistedNotebooks)) {
+        res.status(400).json(ApiResponse.error(400, 'whitelistedNotebooks参数必须为数组'))
+        return
+      }
+
+      // 验证白名单项的格式
+      for (const notebook of whitelistedNotebooks) {
+        if (!notebook.id || typeof notebook.id !== 'string') {
+          res.status(400).json(ApiResponse.error(400, '白名单项必须包含有效的id字段'))
+          return
+        }
+        if (!notebook.name || typeof notebook.name !== 'string') {
+          res.status(400).json(ApiResponse.error(400, '白名单项必须包含有效的name字段'))
+          return
+        }
+      }
+
+      // 更新配置
+      this.fileConfigService.updateNotebookWhitelist({
+        enabled,
+        whitelistedNotebooks
+      })
+
+      res.json(ApiResponse.success(null, '更新白名单配置成功'))
+    } catch (error) {
+      res.status(500).json(ApiResponse.error(1, '更新白名单配置失败'))
     }
   }
 }

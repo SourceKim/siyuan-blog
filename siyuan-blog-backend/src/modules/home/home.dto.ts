@@ -31,34 +31,6 @@ export class RecommendedDocDto {
   summary?: string
 }
 
-// 内容模板 DTO
-export class ContentTemplatesDto {
-  summaryTemplates!: {
-    default: string[]
-    frontend: string
-    backend: string
-    thinking: string
-    tutorial: string
-  }
-  tagRules!: {
-    tech: { [key: string]: { keywords: string[], tag: string } }
-    content: { [key: string]: { keywords: string[], tag: string } }
-    category: { [key: string]: { keywords: string[], tag: string } }
-  }
-  summaryKeywords!: {
-    frontend: string[]
-    backend: string[]
-    thinking: string[]
-    tutorial: string[]
-  }
-  defaults!: {
-    fallbackName: string
-    fallbackTitle: string
-    fallbackBio: string
-    maxTags: number
-    unknownNotebook: string
-  }
-}
 
 // 首页数据响应 DTO
 export class HomeDataDto {
@@ -66,7 +38,6 @@ export class HomeDataDto {
   socialLinks!: SocialLinksDto
   blogStats!: BlogStatsDto
   recommendedDocs!: RecommendedDocDto[]
-  contentTemplates!: ContentTemplatesDto
 }
 
 // 获取推荐文档请求 DTO
