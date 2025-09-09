@@ -263,7 +263,6 @@ onUnmounted(() => {
 /* 主题变量 - 与示例保持一致 */
 .note-content {
   height: 100%;
-  background: var(--dark-bg);
   --dark-bg: #111827;
   --dark-card: #1f2937;
   --neon-accent: #3b82f6;
@@ -290,18 +289,6 @@ onUnmounted(() => {
   position: relative;
 }
 
-.welcome-page::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 70% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
-  z-index: 0;
-}
 
 .hero-section {
   text-align: center;

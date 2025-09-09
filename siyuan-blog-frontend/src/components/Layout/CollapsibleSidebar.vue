@@ -136,7 +136,6 @@ defineExpose({
 .collapsible-layout {
   display: flex;
   min-height: 100vh;
-  background: var(--tech-dark-bg);
   color: var(--tech-text-light);
   font-family: 'Inter', 'Roboto', 'Nunito Sans', sans-serif;
   position: relative;
@@ -188,7 +187,6 @@ defineExpose({
 /* 主内容区域 */
 .content {
   flex: 1;
-  background: var(--tech-dark-bg);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 100vh;
   position: relative;

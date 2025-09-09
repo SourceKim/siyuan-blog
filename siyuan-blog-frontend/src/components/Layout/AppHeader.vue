@@ -135,6 +135,8 @@ onMounted(() => {
   border-bottom: 1px solid var(--el-border-color);
   padding: 0;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 10;
 }
 
 .header-content {

@@ -177,10 +177,7 @@ const fetchAboutMe = async () => {
 onMounted(async () => {
   await fetchAboutMe()
   
-  // 获取笔记数据以更新统计
-  if (notebooks.value.length === 0) {
-    await noteStore.fetchNotebooks()
-  }
+  // 笔记本数据现在通过博客文档树获取，不需要单独获取
   updateStats()
 })
 </script>
@@ -200,9 +197,10 @@ onMounted(async () => {
 
 .about-view {
   min-height: 100vh;
-  background: var(--bg-primary);
+  background: transparent;
   color: var(--text-primary);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  position: relative;
 }
 
 /* 加载和错误状态 */
@@ -220,7 +218,8 @@ onMounted(async () => {
   text-align: center;
   padding: 3rem;
   border-radius: 12px;
-  background: var(--bg-secondary);
+  background: rgba(31, 41, 55, 0.8);
+  backdrop-filter: blur(10px);
   border: 1px solid var(--border-color);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
@@ -254,6 +253,8 @@ onMounted(async () => {
   max-width: 960px;
   margin: 0 auto;
   padding: 2rem 1rem;
+  position: relative;
+  z-index: 1;
 }
 
 /* Hero Section */
@@ -335,7 +336,8 @@ onMounted(async () => {
 /* 联系方式与技能区域 */
 .contact-skills-section {
   padding: 3rem 0;
-  background: var(--bg-secondary);
+  background: rgba(31, 41, 55, 0.8);
+  backdrop-filter: blur(10px);
   border-radius: 12px;
   border: 1px solid var(--border-color);
   margin-bottom: 3rem;
@@ -373,7 +375,8 @@ onMounted(async () => {
   justify-content: center;
   width: 3rem;
   height: 3rem;
-  background: var(--bg-secondary);
+  background: rgba(31, 41, 55, 0.8);
+  backdrop-filter: blur(10px);
   border: 1px solid var(--border-color);
   border-radius: 50%;
   color: var(--accent-secondary);
@@ -417,7 +420,8 @@ onMounted(async () => {
   font-size: 0.875rem;
   font-weight: 500;
   border: 1px solid var(--border-color);
-  background: var(--bg-secondary);
+  background: rgba(31, 41, 55, 0.8);
+  backdrop-filter: blur(10px);
   color: var(--text-primary);
   transition: all 0.3s ease;
 }
@@ -498,7 +502,8 @@ onMounted(async () => {
   text-align: center;
   padding: 1.5rem;
   border-radius: 8px;
-  background: var(--bg-secondary);
+  background: rgba(31, 41, 55, 0.8);
+  backdrop-filter: blur(10px);
   border: 1px solid var(--border-color);
   transition: all 0.3s ease;
 }

@@ -1,5 +1,8 @@
 <template>
   <el-container class="app-layout">
+    <!-- 科技感背景动画 -->
+    <TechBackground />
+    
     <!-- 头部 -->
     <AppHeader />
     
@@ -20,6 +23,7 @@ import { onMounted } from 'vue'
 import { useThemeStore } from '@/stores/theme'
 import AppHeader from './AppHeader.vue'
 import AppFooter from './AppFooter.vue'
+import TechBackground from '@/components/TechBackground.vue'
 
 // 初始化主题
 const themeStore = useThemeStore()
@@ -34,12 +38,15 @@ onMounted(() => {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .app-main {
   flex: 1;
   padding: 0;
-  background: var(--el-bg-color-page);
+  background: transparent;
+  position: relative;
+  z-index: 1;
 }
 
 .main-content {

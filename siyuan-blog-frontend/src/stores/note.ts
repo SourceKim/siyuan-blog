@@ -21,38 +21,7 @@ export const useNoteStore = defineStore('note', () => {
   const hasBlogDocumentTree = computed(() => blogDocumentTree.value.length > 0)
   const hasRecommendedDocs = computed(() => recommendedDocs.value.length > 0)
 
-  // 获取所有笔记本
-  const fetchNotebooks = async () => {
-    try {
-      loading.value = true
-      error.value = null
-      notebooks.value = await noteApi.getNotebooks()
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : '获取笔记本失败'
-      console.error('获取笔记本失败:', err)
-    } finally {
-      loading.value = false
-    }
-  }
 
-  // 选择笔记本
-  const selectNotebook = async (notebook: Notebook) => {
-    try {
-      loading.value = true
-      error.value = null
-      currentNotebook.value = notebook
-      currentDoc.value = null
-      currentNote.value = null
-      
-      // 获取该笔记本的文档列表
-      docs.value = await noteApi.getDocs({ notebook: notebook.id })
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : '获取文档列表失败'
-      console.error('获取文档列表失败:', err)
-    } finally {
-      loading.value = false
-    }
-  }
 
   // 获取子文档
   const fetchSubDocs = async (parentDoc: Doc): Promise<Doc[]> => {
@@ -181,8 +150,6 @@ export const useNoteStore = defineStore('note', () => {
     hasRecommendedDocs,
     
     // 方法
-    fetchNotebooks,
-    selectNotebook,
     fetchSubDocs,
     selectDoc,
     fetchRecommendedDocs,

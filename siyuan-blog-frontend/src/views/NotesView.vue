@@ -1,5 +1,6 @@
 <template>
-  <CollapsibleSidebar 
+  <div class="notes-view-container">
+    <CollapsibleSidebar 
     :default-open="true"
     sidebar-width="320px"
     collapsed-width="60px"
@@ -45,6 +46,7 @@
       </div>
     </template>
   </CollapsibleSidebar>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -116,6 +118,13 @@ onMounted(async () => {
   --tech-glow: 0 0 20px rgba(0, 191, 255, 0.3);
 }
 
+/* 容器样式 */
+.notes-view-container {
+  position: relative;
+  height: 100vh;
+  background: transparent;
+}
+
 /* 侧边栏内容样式 */
 .notes-sidebar-content {
   height: 100%;
@@ -123,6 +132,8 @@ onMounted(async () => {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 1;
 }
 
 .section-header {
@@ -159,9 +170,11 @@ onMounted(async () => {
 /* 主内容区域样式 */
 .notes-content {
   height: 100vh;
-  background: var(--tech-dark-bg);
+  background: transparent;
   padding: 0;
   margin: 0;
+  position: relative;
+  z-index: 1;
 }
 
 /* 响应式设计 */

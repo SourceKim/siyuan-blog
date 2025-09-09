@@ -3,13 +3,6 @@ import type { Notebook, Doc, Note, OutlineItem, GetDocsRequest, GetDocRequest, G
 
 // 笔记相关API
 export const noteApi = {
-  // 获取所有笔记本
-  async getNotebooks(): Promise<Notebook[]> {
-    console.log('🌐 API: 调用 getNotebooks')
-    const result = await api.post('/notebooks') as Notebook[]
-    console.log('📊 API: getNotebooks 返回结果:', result)
-    return result
-  },
 
   // 获取文档列表
   async getDocs(params: GetDocsRequest): Promise<Doc[]> {

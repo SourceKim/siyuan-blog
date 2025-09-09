@@ -1,7 +1,5 @@
 <template>
   <div class="home-view">
-    <!-- 科技感背景动画 -->
-    <TechBackground />
     <!-- 左侧个人信息侧边栏 -->
     <aside 
       class="profile-sidebar" 
@@ -228,7 +226,6 @@ import {
   ArrowRight
 } from '@element-plus/icons-vue'
 import type { Doc } from '@/api/types'
-import TechBackground from '@/components/TechBackground.vue'
 
 const router = useRouter()
 
@@ -317,10 +314,7 @@ onMounted(async () => {
   const maxArticles = 12 // 默认推荐文章数量
   await homeStore.fetchHomeData(maxArticles)
   
-  // 保持向后兼容：如果需要单独的笔记本数据
-  if (notebooks.value.length === 0) {
-    await noteStore.fetchNotebooks()
-  }
+  // 笔记本数据现在通过博客文档树获取，不需要单独获取
 })
 </script>
 
@@ -342,7 +336,7 @@ onMounted(async () => {
 .home-view {
   display: flex;
   min-height: 100vh;
-  background: var(--tech-dark-bg);
+  background: transparent;
   color: var(--tech-text-light);
   font-family: 'Inter', 'Roboto', 'Nunito Sans', sans-serif;
 }
@@ -350,7 +344,8 @@ onMounted(async () => {
 /* 左侧个人信息侧边栏 */
 .profile-sidebar {
   width: 320px;
-  background: var(--tech-dark-card);
+  background: rgba(26, 26, 26, 0.8);
+  backdrop-filter: blur(10px);
   border-right: 1px solid var(--tech-dark-border);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -603,7 +598,7 @@ onMounted(async () => {
   flex: 1;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-y: auto;
-  background: var(--tech-dark-bg);
+  background: transparent;
 }
 
 .main-content.expanded {
@@ -648,7 +643,8 @@ onMounted(async () => {
 }
 
 .featured-card {
-  background: var(--tech-dark-card);
+  background: rgba(26, 26, 26, 0.8);
+  backdrop-filter: blur(10px);
   border-radius: 16px;
   overflow: hidden;
   cursor: pointer;
@@ -794,7 +790,8 @@ onMounted(async () => {
 .marker-dot {
   width: 16px;
   height: 16px;
-  background: var(--tech-dark-card);
+  background: rgba(26, 26, 26, 0.8);
+  backdrop-filter: blur(10px);
   border: 2px solid var(--tech-primary);
   border-radius: 50%;
   display: flex;
