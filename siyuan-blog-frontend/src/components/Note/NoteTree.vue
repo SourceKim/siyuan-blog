@@ -1,55 +1,10 @@
 <template>
   <div class="note-tree">
-
-
-    <!-- 笔记本列表 -->
-    <div class="notebooks-section" v-if="!currentNotebook">
-      <el-empty 
-        v-if="!hasNotebooks && !loading" 
-        description="暂无笔记本"
-        :image-size="100"
-      >
-        <el-button @click="fetchNotebooks" type="primary">
-          重新加载
-        </el-button>
-      </el-empty>
-      
-      <div v-else class="notebook-list">
-        <div 
-          v-for="notebook in filteredNotebooks" 
-          :key="notebook.id"
-          class="notebook-item"
-          @click="selectNotebook(notebook)"
-        >
-          <el-icon class="notebook-icon">
-            <component :is="notebook.icon || 'Folder'" />
-          </el-icon>
-          <el-tooltip 
-            :content="notebook.name" 
-            placement="right"
-            :disabled="!isTextOverflow(notebook.name)"
-            :show-after="500"
-          >
-            <span class="notebook-name">{{ notebook.name }}</span>
-          </el-tooltip>
-          <el-icon class="arrow-icon"><ArrowRight /></el-icon>
-        </div>
-      </div>
-    </div>
-
-    <!-- 文档树 -->
-    <div class="docs-section" v-else>
-      <!-- 返回按钮 -->
+    <!-- 直接展示文档树，跳过笔记本选择 -->
+    <div class="docs-section">
+      <!-- 文档树标题 -->
       <div class="docs-header">
-        <el-button 
-          @click="backToNotebooks"
-          :icon="ArrowLeft"
-          size="small"
-          text
-        >
-          返回笔记本
-        </el-button>
-        <h4>{{ currentNotebook.name }}</h4>
+        <h4>博客文档</h4>
       </div>
 
       <!-- 文档树 -->
@@ -88,472 +43,396 @@
       </el-tree>
 
       <el-empty 
-        v-if="!hasDocs && !loading" 
-        description="该笔记本暂无文档"
+        v-if="!hasBlogDocumentTree && !props.loading" 
+        description="暂无文档"
         :image-size="80"
       />
     </div>
 
     <!-- 加载状态 -->
-    <div v-if="loading" class="loading-container">
+    <div v-if="props.loading" class="loading-container">
       <el-skeleton :rows="5" animated />
     </div>
-
-    <!-- 错误提示 -->
-    <el-alert
-      v-if="error"
-      :title="error"
-      type="error"
-      @close="clearError"
-      closable
-    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useNoteStore } from '@/stores/note'
+import { noteApi } from '@/api/note'
 import { storeToRefs } from 'pinia'
-import type { Doc, Notebook } from '@/api/types'
+import type { Doc } from '@/api/types'
 import {
-  Folder,
   Document,
-  ArrowRight,
+  Folder,
   ArrowLeft,
-  FolderOpened
+  ArrowRight
 } from '@element-plus/icons-vue'
+import type { ElTree } from 'element-plus'
 
 // Props
-const props = defineProps<{
+interface Props {
   searchText?: string
-}>()
+  loading?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  searchText: '',
+  loading: false
+})
 
 // Emits
-const emit = defineEmits<{
-  'doc-selected': [doc: Doc]
-}>()
+interface Emits {
+  (e: 'doc-selected', doc: Doc): void
+}
 
-// 状态管理
+const emit = defineEmits<Emits>()
+
+// Store
 const noteStore = useNoteStore()
 const {
-  notebooks,
-  currentNotebook,
-  docs,
+  blogDocumentTree,
   currentDoc,
-  loading,
-  error,
-  hasNotebooks,
-  hasDocs
+  hasBlogDocumentTree
 } = storeToRefs(noteStore)
 
-// 树组件引用
-const docTreeRef = ref()
+// Refs
+const docTreeRef = ref<InstanceType<typeof ElTree>>()
 
-// 计算属性：过滤的笔记本
-const filteredNotebooks = computed(() => {
-  const searchText = props.searchText || ''
-  if (!searchText) return notebooks.value
-  return notebooks.value.filter(notebook => 
-    notebook.name.toLowerCase().includes(searchText.toLowerCase())
-  )
-})
-
-// 计算属性：过滤的树数据
-const filteredTreeData = computed(() => {
-  let data = docs.value.map(doc => ({
-    ...doc,
-    children: []
-  }))
-  
-  const searchText = props.searchText || ''
-  if (searchText) {
-    data = data.filter(doc => 
-      removeFileExtension(doc.name).toLowerCase().includes(searchText.toLowerCase())
-    )
-  }
-  
-  console.log('🌳 filteredTreeData 计算属性更新:')
-  console.log('📋 原始docs数据:', docs.value)
-  console.log('🔍 搜索文本:', searchText)
-  console.log('🌲 转换后的树数据:', data)
-  
-  return data
-})
-
-// 树配置
+// Tree配置
 const treeProps = {
   children: 'children',
   label: 'name',
-  isLeaf: (data: any) => {
-    const isLeaf = data.subFileCount === 0
-    console.log(`🍃 isLeaf 检查 - 文档: ${data.name}, subFileCount: ${data.subFileCount}, isLeaf: ${isLeaf}`)
-    return isLeaf
+  isLeaf: (data: Doc) => data.subFileCount === 0
+}
+
+// 过滤后的树数据
+const filteredTreeData = computed(() => {
+  if (!props.searchText.trim()) {
+    return blogDocumentTree.value
   }
-}
+  
+  const searchLower = props.searchText.toLowerCase()
+  return filterTreeData(blogDocumentTree.value, searchLower)
+})
 
-const fetchNotebooks = async () => {
-  await noteStore.fetchNotebooks()
-}
-
-const selectNotebook = async (notebook: Notebook) => {
-  console.log('📚 选择笔记本:', notebook)
-  await noteStore.selectNotebook(notebook)
-}
-
-const backToNotebooks = () => {
-  console.log('⬅️ 返回笔记本列表')
-  noteStore.currentNotebook = null
-  noteStore.currentDoc = null
-  noteStore.currentNote = null
-  noteStore.docs = []
+// 递归过滤树数据
+const filterTreeData = (data: Doc[], searchText: string): Doc[] => {
+  return data.filter(item => {
+    const nameMatch = item.name.toLowerCase().includes(searchText)
+    const hasChildMatch = item.children && filterTreeData(item.children, searchText).length > 0
+    
+    if (nameMatch || hasChildMatch) {
+      return {
+        ...item,
+        children: item.children ? filterTreeData(item.children, searchText) : undefined
+      }
+    }
+    return false
+  })
 }
 
 // 懒加载子文档
-const loadSubDocs = async (node: any, resolve: (data: any[]) => void) => {
-  console.log('🌲 loadSubDocs 被调用')
-  console.log('📁 node:', node)
-  console.log('📄 node.data:', node.data)
-  console.log('📊 subFileCount:', node.data?.subFileCount)
+const loadSubDocs = async (node: any, resolve: (data: Doc[]) => void) => {
+  if (node.level === 0) {
+    // 根节点，返回博客文档树
+    resolve(blogDocumentTree.value)
+    return
+  }
   
   try {
-    if (!currentNotebook.value) {
-      console.warn('❌ 没有当前笔记本')
+    if (node.data && node.data.subFileCount > 0) {
+      console.log('🌳 懒加载子文档:', node.data.name, '路径:', node.data.path)
+      
+      // 直接调用 API 获取子文档，不传 notebook 参数（后端会自动使用博客笔记本）
+      const subDocs = await noteApi.getDocs({
+        path: node.data.path
+      })
+      
+      console.log('📁 获取到子文档:', subDocs.length, '个')
+      resolve(subDocs)
+    } else {
       resolve([])
-      return
     }
-
-    console.log('📚 当前笔记本:', currentNotebook.value)
-    console.log('🔍 开始获取子文档，父文档路径:', node.data.path)
-    
-    const subDocs = await noteStore.fetchSubDocs(node.data)
-    
-    console.log('📋 获取到的子文档原始数据:', subDocs)
-    console.log('📈 子文档数量:', subDocs?.length || 0)
-    
-    // 转换数据格式，确保每个子文档也有children数组
-    const formattedSubDocs = (subDocs || []).map(doc => ({
-      ...doc,
-      children: []
-    }))
-    
-    console.log('✨ 格式化后的子文档:', formattedSubDocs)
-    
-    resolve(formattedSubDocs)
   } catch (error) {
-    console.error('💥 加载子文档失败:', error)
+    console.error('加载子文档失败:', error)
     resolve([])
   }
 }
 
-const handleNodeClick = async (data: Doc) => {
-  console.log('👆 用户点击节点:', data.name, 'subFileCount:', data.subFileCount)
-  await noteStore.selectDoc(data)
-  emit('doc-selected', data)
+// 节点点击事件
+const handleNodeClick = (data: Doc, node: any) => {
+  if (data.subFileCount === 0) {
+    // 这是一个文档，选择它
+    noteStore.selectDoc(data)
+    emit('doc-selected', data)
+  }
 }
 
-const handleNodeExpand = (data: any, node: any) => {
-  console.log('📂 节点展开事件触发')
-  console.log('📄 展开的数据:', data)
-  console.log('🌲 展开的节点:', node)
+// 节点展开事件
+const handleNodeExpand = (data: Doc, node: any) => {
+  console.log('节点展开:', data.name)
 }
 
-const handleNodeCollapse = (data: any, node: any) => {
-  console.log('📁 节点折叠事件触发')
-  console.log('📄 折叠的数据:', data)
-  console.log('🌲 折叠的节点:', node)
+// 节点折叠事件
+const handleNodeCollapse = (data: Doc, node: any) => {
+  console.log('节点折叠:', data.name)
 }
 
+// 获取节点图标
 const getNodeIcon = (data: Doc) => {
   if (data.subFileCount > 0) {
-    return 'FolderOpened'
+    return 'Folder'
   }
   return 'Document'
 }
 
+// 移除文件扩展名
 const removeFileExtension = (filename: string): string => {
   return filename.replace(/\.sy$/, '')
 }
 
+// 检查文本是否溢出
 const isTextOverflow = (text: string): boolean => {
-  // 根据侧边栏宽度和字体大小估算，超过一定长度就显示tooltip
-  // 中文字符按2个字符宽度计算，英文字符按1个字符计算
-  const chineseChars = (text.match(/[\u4e00-\u9fa5]/g) || []).length
-  const otherChars = text.length - chineseChars
-  const estimatedWidth = chineseChars * 2 + otherChars
-  
-  // 大约20个字符宽度就会溢出
-  return estimatedWidth > 20
+  return text.length > 20
 }
 
-const clearError = () => {
-  noteStore.error = null
-}
-
-// 监听当前选中的文档，设置树的当前项
+// 监听当前文档变化，高亮对应节点
 watch(currentDoc, (newDoc) => {
   if (newDoc && docTreeRef.value) {
-    docTreeRef.value.setCurrentKey(newDoc.id)
+    nextTick(() => {
+      docTreeRef.value?.setCurrentKey(newDoc.id)
+    })
   }
-})
+}, { immediate: true })
 
-// 监听当前笔记本变化
-watch(currentNotebook, (newNotebook) => {
-  console.log('📚 当前笔记本变化:', newNotebook)
-  if (newNotebook) {
-    console.log('📋 当前文档列表:', docs.value)
+// 监听搜索文本变化
+watch(() => props.searchText, () => {
+  // 搜索时展开所有节点
+  if (props.searchText.trim() && docTreeRef.value) {
+    nextTick(() => {
+      // 展开所有匹配的节点
+      const expandAll = (data: Doc[]) => {
+        data.forEach(item => {
+          if (item.name.toLowerCase().includes(props.searchText.toLowerCase())) {
+            docTreeRef.value?.getNode(item.id)?.expand()
+          }
+          if (item.children) {
+            expandAll(item.children)
+          }
+        })
+      }
+      expandAll(filteredTreeData.value)
+    })
   }
-})
-
-// 监听docs变化
-watch(docs, (newDocs) => {
-  console.log('📄 文档列表变化:', newDocs)
-  newDocs.forEach(doc => {
-    console.log(`  - ${doc.name} (subFileCount: ${doc.subFileCount})`)
-  })
-})
-
-// 初始化
-onMounted(() => {
-  console.log('🚀 NoteTree 组件挂载完成')
-  fetchNotebooks()
 })
 </script>
 
 <style scoped>
-/* 主题变量 - 与示例保持一致 */
+/* CSS 变量定义 - 科技感配色（与首页统一） */
+:root {
+  --tech-primary: #00bfff;
+  --tech-secondary: #8a2be2;
+  --tech-dark-bg: #0a0a0a;
+  --tech-dark-card: #1a1a1a;
+  --tech-dark-border: #333;
+  --tech-text-light: #e0e0e0;
+  --tech-text-muted: #9ca3af;
+  --tech-gradient: linear-gradient(135deg, var(--tech-primary), var(--tech-secondary));
+  --tech-shadow: 0 8px 32px rgba(0, 191, 255, 0.1);
+  --tech-glow: 0 0 20px rgba(0, 191, 255, 0.3);
+}
+
 .note-tree {
   height: 100%;
-  overflow-y: hidden;
-  background: transparent;
-  position: relative;
-  --dark-bg: #111827;
-  --dark-card: #1f2937;
-  --neon-accent: #3b82f6;
-  --purple-accent: #8b5cf6;
-  --text-primary: #f9fafb;
-  --text-secondary: #9ca3af;
-  --border-color: #374151;
-}
-
-.notebooks-section,
-.docs-section {
-  padding: 16px;
-}
-
-.notebook-list {
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 
-.notebook-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  background: transparent;
-}
-
-.notebook-item:hover {
-  background: var(--dark-card);
-}
-
-.notebook-icon {
-  color: var(--text-primary);
-  font-size: 20px;
-  flex-shrink: 0;
-}
-
-.notebook-name {
+.docs-section {
   flex: 1;
-  font-weight: 500;
-  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
-  font-size: 14px;
-}
-
-.arrow-icon {
-  color: var(--text-secondary);
-  flex-shrink: 0;
 }
 
 .docs-header {
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--tech-dark-border);
+  background: var(--tech-dark-card);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border-color);
+  gap: 12px;
+  flex-shrink: 0;
 }
 
 .docs-header h4 {
   margin: 0;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--tech-text-light);
+  flex: 1;
 }
 
 .doc-tree {
-  background: transparent;
-  margin-top: 12px;
-}
-
-/* 覆盖Element Plus树组件样式 - 简洁风格 */
-.doc-tree :deep(.el-tree-node) {
-  margin-bottom: 2px;
-}
-
-.doc-tree :deep(.el-tree-node__content) {
-  padding: 8px 16px;
-  border-radius: 8px;
-  transition: background-color 0.2s ease;
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
   background: transparent;
 }
 
-.doc-tree :deep(.el-tree-node__content:hover) {
-  background: var(--dark-card);
-}
-
-.doc-tree :deep(.el-tree-node.is-current > .el-tree-node__content) {
-  background: rgba(59, 130, 246, 0.2);
-  color: var(--neon-accent);
-}
-
-.doc-tree :deep(.el-tree-node__expand-icon) {
-  color: var(--text-secondary);
-  transition: transform 0.2s ease;
-}
-
-.doc-tree :deep(.el-tree-node__expand-icon.expanded) {
-  transform: rotate(90deg);
-}
-
+/* 树节点样式 */
 .tree-node {
   display: flex;
   align-items: center;
-  width: 100%;
-  padding: 0;
   gap: 8px;
+  padding: 4px 0;
+  width: 100%;
+  min-height: 32px;
 }
 
 .node-icon {
-  color: var(--text-primary);
   font-size: 16px;
+  color: var(--tech-primary);
   flex-shrink: 0;
 }
 
 .node-label {
-  flex: 1;
   font-size: 14px;
-  font-weight: 500;
-  color: var(--text-primary);
+  color: var(--tech-text-light);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  min-width: 0;
+  flex: 1;
+  line-height: 1.4;
 }
 
 .node-info {
-  margin-left: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
-.node-info :deep(.el-tag) {
-  background: var(--dark-card);
-  border-color: var(--border-color);
-  color: var(--text-secondary);
-  font-size: 11px;
-  height: 20px;
-  line-height: 18px;
+/* Element Plus Tree 自定义样式 */
+:deep(.el-tree) {
+  background: transparent;
+  color: var(--tech-text-light);
 }
 
+:deep(.el-tree-node) {
+  position: relative;
+}
+
+:deep(.el-tree-node__content) {
+  background: transparent;
+  border-radius: 6px;
+  margin: 2px 8px;
+  padding: 8px 12px;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  min-height: 40px;
+}
+
+:deep(.el-tree-node__content:hover) {
+  background: rgba(0, 191, 255, 0.1);
+  border-color: var(--tech-primary);
+  transform: translateX(4px);
+}
+
+:deep(.el-tree-node.is-current > .el-tree-node__content) {
+  background: var(--tech-gradient);
+  color: white;
+  box-shadow: var(--tech-glow);
+}
+
+:deep(.el-tree-node.is-current > .el-tree-node__content .node-icon) {
+  color: white;
+}
+
+:deep(.el-tree-node.is-current > .el-tree-node__content .node-label) {
+  color: white;
+  font-weight: 500;
+}
+
+:deep(.el-tree-node__expand-icon) {
+  color: var(--tech-primary);
+  font-size: 14px;
+}
+
+:deep(.el-tree-node__expand-icon.is-leaf) {
+  color: transparent;
+}
+
+:deep(.el-tree-node__loading-icon) {
+  color: var(--tech-primary);
+}
+
+/* 加载状态 */
 .loading-container {
-  padding: 20px;
+  padding: 24px;
 }
 
-.loading-container :deep(.el-skeleton__item) {
-  background: var(--dark-card);
+:deep(.el-skeleton__item) {
+  background: var(--tech-dark-card);
 }
 
 /* 空状态样式 */
 :deep(.el-empty) {
-  color: var(--text-secondary);
+  padding: 40px 20px;
 }
 
-:deep(.el-empty__image svg) {
-  fill: var(--text-muted);
+:deep(.el-empty__description p) {
+  color: var(--tech-text-muted);
 }
 
-:deep(.el-empty__description) {
-  color: var(--text-secondary);
+/* 标签样式 */
+:deep(.el-tag) {
+  background: rgba(0, 191, 255, 0.1);
+  border-color: var(--tech-primary);
+  color: var(--tech-primary);
+  font-size: 11px;
 }
 
-/* 错误提示样式 */
-:deep(.el-alert) {
-  background: var(--dark-card);
-  border-color: #f56565;
-  border-radius: 8px;
+/* 自定义滚动条 */
+.doc-tree::-webkit-scrollbar {
+  width: 6px;
 }
 
-:deep(.el-alert__title) {
-  color: #f56565;
+.doc-tree::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-/* 按钮样式优化 */
-:deep(.el-button) {
-  border-radius: 8px;
-  font-weight: 500;
-  transition: all 0.2s ease;
+.doc-tree::-webkit-scrollbar-thumb {
+  background: var(--tech-primary);
+  border-radius: 3px;
 }
 
-:deep(.el-button--primary) {
-  background: var(--neon-accent);
-  border-color: var(--neon-accent);
-}
-
-:deep(.el-button--primary:hover) {
-  background: #4f90ff;
-  border-color: #4f90ff;
-}
-
-:deep(.el-button--text) {
-  color: var(--text-secondary);
-}
-
-:deep(.el-button--text:hover) {
-  color: var(--neon-accent);
-  background: var(--dark-card);
+.doc-tree::-webkit-scrollbar-thumb:hover {
+  background: var(--tech-secondary);
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .notebooks-section,
-  .docs-section {
-    padding: 12px;
+  .docs-header {
+    padding: 8px 16px;
   }
   
-  .notebook-item {
-    padding: 14px;
+  .docs-header h4 {
+    font-size: 15px;
   }
   
-  .notebook-name {
-    font-size: 14px;
+  .tree-node {
+    min-height: 28px;
+  }
+  
+  .node-label {
+    font-size: 13px;
+  }
+  
+  :deep(.el-tree-node__content) {
+    margin: 1px 4px;
+    padding: 6px 8px;
+    min-height: 36px;
   }
 }
-
-/* 焦点可访问性 */
-.notebook-item:focus-visible {
-  outline: 2px solid var(--neon-accent);
-  outline-offset: 2px;
-}
-
-.doc-tree :deep(.el-tree-node__content:focus-visible) {
-  outline: 2px solid var(--neon-accent);
-  outline-offset: 2px;
-}
-</style> 
+</style>

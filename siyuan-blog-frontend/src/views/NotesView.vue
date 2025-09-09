@@ -10,16 +10,16 @@
     <template #sidebar>
       <div class="notes-sidebar-content">
         <div class="section-header">
-          <h2 class="section-title">笔记导航</h2>
+          <h2 class="section-title">博客文档</h2>
           <div class="header-actions">
-            <el-button @click="refreshNotebooks" :loading="loading" :icon="Refresh" size="small" text />
+            <el-button @click="refreshDocuments" :loading="loading" :icon="Refresh" size="small" text />
           </div>
         </div>
         
         <div class="search-box">
           <el-input
             v-model="searchText"
-            placeholder="搜索笔记本和文档..."
+            placeholder="搜索文档..."
             :prefix-icon="Search"
             clearable
             size="small"
@@ -27,11 +27,13 @@
         </div>
 
         <!-- 使用 NoteTree 组件 -->
-        <NoteTree 
-          v-loading="loading"
-          :search-text="searchText"
-          @doc-selected="handleDocSelected"
-        />
+        <div class="tree-container">
+          <NoteTree 
+            :search-text="searchText"
+            :loading="loading"
+            @doc-selected="handleDocSelected"
+          />
+        </div>
       </div>
     </template>
 
@@ -69,8 +71,8 @@ const {
 const searchText = ref('')
 
 // 方法
-const refreshNotebooks = async () => {
-  await noteStore.fetchNotebooks()
+const refreshDocuments = async () => {
+  await noteStore.fetchBlogDocumentTree()
 }
 
 const handleDocSelected = (doc: Doc) => {
@@ -80,6 +82,7 @@ const handleDocSelected = (doc: Doc) => {
 
 const handleSidebarToggle = (isOpen: boolean) => {
   console.log('侧边栏状态:', isOpen ? '展开' : '收起')
+  console.log('当前loading状态:', loading.value)
 }
 
 const handleSidebarClose = () => {
@@ -87,8 +90,14 @@ const handleSidebarClose = () => {
 }
 
 // 生命周期
-onMounted(() => {
-  refreshNotebooks()
+onMounted(async () => {
+  console.log('NotesView mounted, 开始加载文档树')
+  try {
+    await refreshDocuments()
+    console.log('文档树加载完成')
+  } catch (error) {
+    console.error('文档树加载失败:', error)
+  }
 })
 </script>
 
@@ -111,7 +120,9 @@ onMounted(() => {
 .notes-sidebar-content {
   height: 100%;
   padding: 32px 0;
-  overflow-y: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .section-header {
@@ -138,6 +149,11 @@ onMounted(() => {
 
 .search-box {
   padding: 0 24px 16px;
+}
+
+.tree-container {
+  flex: 1;
+  overflow: hidden;
 }
 
 /* 主内容区域样式 */

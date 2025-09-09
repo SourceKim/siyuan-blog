@@ -42,4 +42,12 @@ export const noteApi = {
     console.log('📊 API: getRecommendedDocs 返回结果:', result)
     return result
   },
+
+  // 获取博客文档树
+  async getBlogDocumentTree(): Promise<Doc[]> {
+    console.log('🌐 API: 调用 getBlogDocumentTree')
+    const result = await api.get('/blog-tree') as Doc[]
+    console.log('📊 API: getBlogDocumentTree 返回结果:', result)
+    return result
+  },
 } 

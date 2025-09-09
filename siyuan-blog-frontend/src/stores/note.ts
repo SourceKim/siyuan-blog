@@ -8,6 +8,7 @@ export const useNoteStore = defineStore('note', () => {
   const notebooks = ref<Notebook[]>([])
   const currentNotebook = ref<Notebook | null>(null)
   const docs = ref<Doc[]>([])
+  const blogDocumentTree = ref<Doc[]>([])
   const currentDoc = ref<Doc | null>(null)
   const currentNote = ref<Note | null>(null)
   const recommendedDocs = ref<Doc[]>([])
@@ -17,6 +18,7 @@ export const useNoteStore = defineStore('note', () => {
   // 计算属性
   const hasNotebooks = computed(() => notebooks.value.length > 0)
   const hasDocs = computed(() => docs.value.length > 0)
+  const hasBlogDocumentTree = computed(() => blogDocumentTree.value.length > 0)
   const hasRecommendedDocs = computed(() => recommendedDocs.value.length > 0)
 
   // 获取所有笔记本
@@ -134,11 +136,26 @@ export const useNoteStore = defineStore('note', () => {
     }
   }
 
+  // 获取博客文档树
+  const fetchBlogDocumentTree = async () => {
+    try {
+      loading.value = true
+      error.value = null
+      blogDocumentTree.value = await noteApi.getBlogDocumentTree()
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '获取博客文档树失败'
+      console.error('获取博客文档树失败:', err)
+    } finally {
+      loading.value = false
+    }
+  }
+
   // 清空状态
   const clearState = () => {
     notebooks.value = []
     currentNotebook.value = null
     docs.value = []
+    blogDocumentTree.value = []
     currentDoc.value = null
     currentNote.value = null
     recommendedDocs.value = []
@@ -150,6 +167,7 @@ export const useNoteStore = defineStore('note', () => {
     notebooks,
     currentNotebook,
     docs,
+    blogDocumentTree,
     currentDoc,
     currentNote,
     recommendedDocs,
@@ -159,6 +177,7 @@ export const useNoteStore = defineStore('note', () => {
     // 计算属性
     hasNotebooks,
     hasDocs,
+    hasBlogDocumentTree,
     hasRecommendedDocs,
     
     // 方法
@@ -167,6 +186,7 @@ export const useNoteStore = defineStore('note', () => {
     fetchSubDocs,
     selectDoc,
     fetchRecommendedDocs,
+    fetchBlogDocumentTree,
     clearState,
   }
 }) 

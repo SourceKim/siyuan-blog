@@ -120,7 +120,7 @@ export interface AboutMe {
 
 // 请求参数类型
 export interface GetDocsRequest {
-  notebook: string
+  notebook?: string  // 可选，不传时后端自动使用博客笔记本
   path?: string
 }
 
