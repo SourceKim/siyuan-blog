@@ -19,10 +19,7 @@ router.post('/outline', (req, res) => noteController.getDocOutline(req, res))
 // 获取推荐文章
 router.post('/recommended', (req, res) => noteController.getRecommendedDocs(req, res))
 
-// 获取笔记本白名单配置
-router.get('/whitelist', (req, res) => noteController.getNotebookWhitelist(req, res))
-
-// 更新笔记本白名单配置
-router.post('/whitelist', (req, res) => noteController.updateNotebookWhitelist(req, res))
+// 获取博客文档树
+router.get('/blog-tree', (req, res) => noteController.getBlogDocumentTree(req, res))
 
 export { router as noteRoutes }

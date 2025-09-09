@@ -102,10 +102,6 @@ export class FileConfigService {
           description: '分享关于Web开发、新技术和生产力工具的见解。'
         }
       ],
-      'notebook_whitelist': {
-        enabled: true,
-        whitelistedNotebooks: []
-      },
       'layout_config': {
         site: {
           siteName: 'SiYuan Blog',
@@ -145,7 +141,7 @@ export class FileConfigService {
    * 获取所有配置文件列表
    */
   private getAllConfigKeys(): string[] {
-    return ['about_me', 'social_links', 'tech_stack', 'experience', 'notebook_whitelist', 'layout_config']
+    return ['about_me', 'social_links', 'tech_stack', 'experience', 'layout_config']
   }
 
   /**
@@ -238,47 +234,4 @@ export class FileConfigService {
     }
   }
 
-  /**
-   * 获取笔记本白名单配置
-   */
-  getNotebookWhitelist(): { enabled: boolean; whitelistedNotebooks: Array<{ id: string; name: string; description?: string }> } {
-    const config = this.readConfig('notebook_whitelist')
-    
-    // 如果配置为null或undefined，返回默认配置（禁用白名单，允许所有笔记本）
-    if (!config) {
-      return {
-        enabled: false,
-        whitelistedNotebooks: []
-      }
-    }
-    
-    return config
-  }
-
-  /**
-   * 更新笔记本白名单配置
-   */
-  updateNotebookWhitelist(whitelist: { enabled: boolean; whitelistedNotebooks: Array<{ id: string; name: string; description?: string }> }): void {
-    this.writeConfig('notebook_whitelist', whitelist)
-  }
-
-  /**
-   * 检查笔记本是否在白名单中
-   */
-  isNotebookAllowed(notebookId: string): boolean {
-    const whitelist = this.getNotebookWhitelist()
-    
-    // 如果白名单功能未启用，允许所有笔记本
-    if (!whitelist.enabled) {
-      return true
-    }
-
-    // 如果白名单为空，拒绝所有笔记本
-    if (!whitelist.whitelistedNotebooks || whitelist.whitelistedNotebooks.length === 0) {
-      return false
-    }
-
-    // 检查笔记本ID是否在白名单中
-    return whitelist.whitelistedNotebooks.some(notebook => notebook.id === notebookId)
-  }
 } 

@@ -80,7 +80,7 @@ export class OutlineItemDto {
 
 // 请求参数 DTO
 export class GetDocsRequestDto {
-  notebook?: string
+  notebook?: string  // 可选，不传时后端自动使用博客笔记本
   path?: string
 }
 
@@ -97,24 +97,6 @@ export class GetOutlineRequestDto {
   preview?: boolean
 }
 
-// 笔记本白名单相关 DTO
-export class NotebookWhitelistDto {
-  enabled!: boolean
-  whitelistedNotebooks!: Array<{
-    id: string
-    name: string
-    description?: string
-  }>
-}
-
-export class UpdateNotebookWhitelistRequestDto {
-  enabled!: boolean
-  whitelistedNotebooks!: Array<{
-    id: string
-    name: string
-    description?: string
-  }>
-}
 
 // 标准响应格式
 export class ApiResponse<T = any> {

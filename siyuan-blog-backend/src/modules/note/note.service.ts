@@ -1,18 +1,17 @@
 import axios from 'axios'
 import { config } from '../../config'
-import { FileConfigService } from '../../config/file-config.service'
 import { NotebookDto, DocDto, NoteDto, OutlineItemDto } from './note.dto'
 
 export class NoteService {
   private siyuanBaseUrl: string
   private siyuanToken: string
-  private fileConfigService: FileConfigService
+  private blogNotebookId: string
 
   constructor() {
     // 使用配置文件中的思源笔记 API 设置
     this.siyuanBaseUrl = config.siyuan.apiUrl
     this.siyuanToken = config.siyuan.token
-    this.fileConfigService = new FileConfigService()
+    this.blogNotebookId = config.blog.notebookId
   }
 
   /**
@@ -73,9 +72,9 @@ export class NoteService {
   }
 
   /**
-   * 获取所有笔记本
+   * 获取博客笔记本信息
    */
-  async getNotebooks(): Promise<NotebookDto[]> {
+  async getBlogNotebook(): Promise<NotebookDto | null> {
     const apiPath = '/api/notebook/lsNotebooks'
     const requestData = {}
     
@@ -94,17 +93,22 @@ export class NoteService {
 
       const allNotebooks = response.data.data.notebooks || []
       
-      // 应用白名单过滤
-      const filteredNotebooks = this.filterNotebooksByWhitelist(allNotebooks)
+      // 查找博客笔记本
+      const blogNotebook = allNotebooks.find((notebook: any) => notebook.id === this.blogNotebookId)
       
       if (config.nodeEnv === 'development') {
-        console.log('📝 笔记本过滤结果:')
-        console.log('  - 原始笔记本数量:', allNotebooks.length)
-        console.log('  - 过滤后笔记本数量:', filteredNotebooks.length)
-        console.log('  - 白名单状态:', this.fileConfigService.getNotebookWhitelist().enabled ? '启用' : '禁用')
+        console.log('📝 博客笔记本查找结果:')
+        console.log('  - 目标笔记本ID:', this.blogNotebookId)
+        console.log('  - 找到博客笔记本:', blogNotebook ? blogNotebook.name : '未找到')
       }
       
-      return filteredNotebooks
+      return blogNotebook ? {
+        id: blogNotebook.id,
+        name: blogNotebook.name,
+        icon: blogNotebook.icon,
+        sort: blogNotebook.sort,
+        closed: blogNotebook.closed
+      } : null
     } catch (error) {
       this.logSiyuanError(apiPath, error, requestData)
       throw error
@@ -112,48 +116,31 @@ export class NoteService {
   }
 
   /**
-   * 过滤笔记本白名单
+   * 获取所有笔记本（兼容性方法，返回博客笔记本）
    */
-  private filterNotebooksByWhitelist(notebooks: NotebookDto[]): NotebookDto[] {
-    const whitelist = this.fileConfigService.getNotebookWhitelist()
+  async getNotebooks(): Promise<NotebookDto[]> {
+    const blogNotebook = await this.getBlogNotebook()
+    return blogNotebook ? [blogNotebook] : []
+  }
+
+
+  /**
+   * 获取博客笔记本下的文档列表
+   */
+  async getDocs(notebook?: string, path: string = '/'): Promise<DocDto[]> {
+    // 如果没有指定 notebook，使用博客笔记本
+    const targetNotebook = notebook || this.blogNotebookId
     
-    // 如果白名单功能未启用，返回所有笔记本
-    if (!whitelist.enabled) {
-      return notebooks
-    }
-
-    // 如果白名单为空，返回空数组
-    if (!whitelist.whitelistedNotebooks || whitelist.whitelistedNotebooks.length === 0) {
-      return []
-    }
-
-    // 过滤出白名单中的笔记本
-    return notebooks.filter(notebook => 
-      this.fileConfigService.isNotebookAllowed(notebook.id)
-    )
-  }
-
-  /**
-   * 检查笔记本是否被允许
-   */
-  private isNotebookAllowed(notebookId: string): boolean {
-    return this.fileConfigService.isNotebookAllowed(notebookId)
-  }
-
-  /**
-   * 获取指定笔记本下的文档列表
-   */
-  async getDocs(notebook: string, path: string = '/'): Promise<DocDto[]> {
-    // 检查笔记本是否在白名单中
-    if (!this.isNotebookAllowed(notebook)) {
+    // 只允许访问博客笔记本
+    if (targetNotebook !== this.blogNotebookId) {
       if (config.nodeEnv === 'development') {
-        console.log(`❌ 笔记本 ${notebook} 不在白名单中，拒绝访问`)
+        console.log(`❌ 只允许访问博客笔记本 ${this.blogNotebookId}，拒绝访问 ${targetNotebook}`)
       }
-      throw new Error('访问被拒绝：笔记本不在允许列表中')
+      throw new Error('访问被拒绝：只允许访问博客笔记本')
     }
 
     const apiPath = '/api/filetree/listDocsByPath'
-    const requestData = { notebook, path }
+    const requestData = { notebook: targetNotebook, path }
     
     try {
       this.logSiyuanRequest(apiPath, requestData)
@@ -178,13 +165,13 @@ export class NoteService {
   /**
    * 获取笔记本信息
    */
-  async getNotebookInfo(notebook: string): Promise<{ name: string }> {
-    // 检查笔记本是否在白名单中
-    if (!this.isNotebookAllowed(notebook)) {
+  async getNotebookInfo(notebook: string = this.blogNotebookId): Promise<{ name: string }> {
+    // 只允许获取博客笔记本信息
+    if (notebook !== this.blogNotebookId) {
       if (config.nodeEnv === 'development') {
-        console.log(`❌ 笔记本 ${notebook} 不在白名单中，拒绝获取信息`)
+        console.log(`❌ 只允许获取博客笔记本 ${this.blogNotebookId} 信息，拒绝获取 ${notebook}`)
       }
-      throw new Error('访问被拒绝：笔记本不在允许列表中')
+      throw new Error('访问被拒绝：只允许获取博客笔记本信息')
     }
 
     const apiPath = '/api/notebook/getNotebookInfo'
@@ -273,11 +260,11 @@ export class NoteService {
   /**
    * 递归获取笔记本下的所有文档
    */
-  private async getAllDocsRecursive(notebook: string, path: string = '/'): Promise<DocDto[]> {
-    // 检查笔记本是否在白名单中
-    if (!this.isNotebookAllowed(notebook)) {
+  private async getAllDocsRecursive(notebook: string = this.blogNotebookId, path: string = '/'): Promise<DocDto[]> {
+    // 只允许访问博客笔记本
+    if (notebook !== this.blogNotebookId) {
       if (config.nodeEnv === 'development') {
-        console.log(`❌ 笔记本 ${notebook} 不在白名单中，跳过获取文档`)
+        console.log(`❌ 只允许访问博客笔记本 ${this.blogNotebookId}，跳过获取 ${notebook}`)
       }
       return []
     }
@@ -299,45 +286,34 @@ export class NoteService {
   }
 
   /**
-   * 获取推荐文章
+   * 获取推荐文章（从博客笔记本）
    */
   async getRecommendedDocs(count: number = 10): Promise<DocDto[]> {
     try {
       if (config.nodeEnv === 'development') {
-        console.log('🎲 开始获取推荐文章, 需要数量:', count)
+        console.log('🎲 开始从博客笔记本获取推荐文章, 需要数量:', count)
       }
       
-      // 获取所有笔记本（已经过滤白名单）
-      const notebooks = await this.getNotebooks()
-      let allDocs: DocDto[] = []
-
-      // 遍历所有允许的笔记本，获取所有文档并添加笔记本名称
-      for (const notebook of notebooks) {
-        try {
-          // 获取笔记本详细信息
-          const notebookInfo = await this.getNotebookInfo(notebook.id)
-          
-          // 获取该笔记本下的所有文档
-          const docs = await this.getAllDocsRecursive(notebook.id)
-          
-          // 为每个文档添加笔记本名称
-          const docsWithNotebookName = docs.map(doc => ({
-            ...doc,
-            notebookName: notebookInfo.name
-          }))
-          
-          allDocs = allDocs.concat(docsWithNotebookName)
-        } catch (error: any) {
-          if (config.nodeEnv === 'development') {
-            console.log(`⚠️  跳过笔记本 ${notebook.id}: ${error?.message || '未知错误'}`)
-          }
-          // 继续处理其他笔记本
-          continue
+      // 获取博客笔记本信息
+      const blogNotebook = await this.getBlogNotebook()
+      if (!blogNotebook) {
+        if (config.nodeEnv === 'development') {
+          console.log('❌ 博客笔记本未找到')
         }
+        return []
       }
 
+      // 获取博客笔记本下的所有文档
+      const docs = await this.getAllDocsRecursive(this.blogNotebookId)
+      
+      // 为每个文档添加笔记本名称
+      const docsWithNotebookName = docs.map(doc => ({
+        ...doc,
+        notebookName: blogNotebook.name
+      }))
+
       // 过滤掉目录类型的文档，只保留真正的文章（subFileCount === 0）
-      const articles = allDocs.filter(doc => doc.subFileCount === 0)
+      const articles = docsWithNotebookName.filter(doc => doc.subFileCount === 0)
 
       // 随机打乱数组
       const shuffled = articles.sort(() => 0.5 - Math.random())
@@ -347,11 +323,10 @@ export class NoteService {
       
       if (config.nodeEnv === 'development') {
         console.log('📊 推荐文章统计:')
-        console.log('  - 允许的笔记本数:', notebooks.length)
-        console.log('  - 总文档数:', allDocs.length)
+        console.log('  - 博客笔记本:', blogNotebook.name)
+        console.log('  - 总文档数:', docs.length)
         console.log('  - 文章数量:', articles.length)
         console.log('  - 返回数量:', result.length)
-        console.log('  - 白名单状态:', this.fileConfigService.getNotebookWhitelist().enabled ? '启用' : '禁用')
       }
       
       return result
@@ -360,6 +335,31 @@ export class NoteService {
         console.error('❌ 获取推荐文章失败:', error)
       }
       throw error
+    }
+  }
+
+  /**
+   * 获取博客笔记本的文档树结构
+   */
+  async getBlogDocumentTree(): Promise<DocDto[]> {
+    try {
+      if (config.nodeEnv === 'development') {
+        console.log('🌳 获取博客笔记本文档树结构')
+      }
+      
+      // 获取博客笔记本根目录的文档
+      const docs = await this.getDocs(this.blogNotebookId, '/')
+      
+      if (config.nodeEnv === 'development') {
+        console.log('📄 博客笔记本根目录文档数:', docs.length)
+      }
+      
+      return docs
+    } catch (error) {
+      if (config.nodeEnv === 'development') {
+        console.error('❌ 获取博客文档树失败:', error)
+      }
+      return []
     }
   }
 }

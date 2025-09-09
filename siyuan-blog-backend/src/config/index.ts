@@ -21,6 +21,11 @@ export const config = {
     token: process.env.SIYUAN_TOKEN || '',
   },
   
+  // 博客配置
+  blog: {
+    notebookId: process.env.BLOG_NOTEBOOK_ID || '20241222030552-fbamp62',
+  },
+  
   // CORS 配置
   cors: {
     origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:3000'],
