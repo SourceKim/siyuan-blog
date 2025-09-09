@@ -9,17 +9,6 @@ export class NoteController {
     this.noteService = new NoteService()
   }
 
-  /**
-   * 获取所有笔记本
-   */
-  async getNotebooks(req: Request, res: Response): Promise<void> {
-    try {
-      const notebooks = await this.noteService.getNotebooks()
-      res.json(ApiResponse.success(notebooks, '获取笔记本列表成功'))
-    } catch (error) {
-      res.status(500).json(ApiResponse.error(1, '获取笔记本列表失败'))
-    }
-  }
 
   /**
    * 获取文档列表

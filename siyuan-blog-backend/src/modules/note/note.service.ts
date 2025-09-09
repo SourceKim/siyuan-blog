@@ -115,13 +115,6 @@ export class NoteService {
     }
   }
 
-  /**
-   * 获取所有笔记本（兼容性方法，返回博客笔记本）
-   */
-  async getNotebooks(): Promise<NotebookDto[]> {
-    const blogNotebook = await this.getBlogNotebook()
-    return blogNotebook ? [blogNotebook] : []
-  }
 
 
   /**
