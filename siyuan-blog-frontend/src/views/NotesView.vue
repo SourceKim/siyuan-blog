@@ -12,9 +12,7 @@
       <div class="notes-sidebar-content">
         <div class="section-header">
           <h2 class="section-title">博客文档</h2>
-          <div class="header-actions">
-            <el-button @click="refreshDocuments" :loading="loading" :icon="Refresh" size="small" text />
-          </div>
+          
         </div>
         
         <div class="search-box">
@@ -57,10 +55,7 @@ import CollapsibleSidebar from '@/components/Layout/CollapsibleSidebar.vue'
 import NoteTree from '@/components/Note/NoteTree.vue'
 import NoteContent from '@/components/Note/NoteContent.vue'
 import type { Doc } from '@/api/types'
-import {
-  Search,
-  Refresh
-} from '@element-plus/icons-vue'
+import { Search } from '@element-plus/icons-vue'
 
 // 状态管理
 const noteStore = useNoteStore()
@@ -72,7 +67,7 @@ const {
 // 响应式状态
 const searchText = ref('')
 
-// 方法
+// 加载文档树
 const refreshDocuments = async () => {
   await noteStore.fetchBlogDocumentTree()
 }

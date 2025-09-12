@@ -6,14 +6,6 @@
         <el-icon><Menu /></el-icon>
         目录
       </h3>
-      <el-button 
-        @click="refreshOutline" 
-        :loading="loading"
-        :icon="Refresh"
-        size="small"
-        circle
-        text
-      />
     </div>
 
     <!-- 大纲内容 -->
@@ -59,7 +51,7 @@
 import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { noteApi } from '@/api/note'
 import type { OutlineItem } from '@/api/types'
-import { Menu, Refresh } from '@element-plus/icons-vue'
+import { Menu } from '@element-plus/icons-vue'
 import OutlineNode from './OutlineNode.vue'
 
 // Props
@@ -145,11 +137,7 @@ const debouncedFetchOutline = (docId?: string) => {
   }, 150) // 150ms 防抖
 }
 
-const refreshOutline = async () => {
-  // 强制刷新，清除防重复机制
-  currentRequestId.value = ''
-  await fetchOutline()
-}
+// 已移除手动刷新按钮
 
 const handleNodeClick = (item: OutlineItem | { id: string }) => {
   console.log('点击大纲节点:', item)

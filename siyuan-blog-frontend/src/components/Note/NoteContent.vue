@@ -44,24 +44,7 @@
               </span>
             </div>
             
-            <div class="content-actions">
-              <el-tooltip content="显示/隐藏目录">
-                <el-button 
-                  @click="toggleOutline"
-                  :type="showOutline ? 'primary' : 'default'"
-                  :icon="Menu"
-                  circle
-                />
-              </el-tooltip>
-              <el-tooltip content="刷新内容">
-                <el-button 
-                  @click="refreshContent"
-                  :loading="loading"
-                  :icon="Refresh"
-                  circle
-                />
-              </el-tooltip>
-            </div>
+            
           </header>
 
           <!-- 内容区域 -->
@@ -90,11 +73,10 @@
 
             <!-- 文档内容 -->
             <div v-else-if="currentNote" class="document-content">
-              <!-- 渲染HTML内容 -->
-              <div 
-                class="html-content"
-                v-html="sanitizedContent"
-              ></div>
+              <!-- 使用 SiyuanRenderer 渲染语义化 HTML -->
+              <div class="html-content">
+                <SiyuanRenderer :content="currentNote.content" />
+              </div>
             </div>
 
             <!-- 空内容 -->
@@ -110,23 +92,7 @@
             </div>
           </div>
 
-          <!-- 文档底部导航 -->
-          <footer class="article-footer" v-if="currentNote">
-            <div class="article-nav">
-              <div class="nav-prev">
-                <div v-if="prevDoc" @click="selectDoc(prevDoc)" class="nav-link">
-                  <span class="nav-direction">← 上一篇</span>
-                  <span class="nav-title">{{ removeFileExtension(prevDoc.name) }}</span>
-                </div>
-              </div>
-              <div class="nav-next">
-                <div v-if="nextDoc" @click="selectDoc(nextDoc)" class="nav-link">
-                  <span class="nav-direction">下一篇 →</span>
-                  <span class="nav-title">{{ removeFileExtension(nextDoc.name) }}</span>
-                </div>
-              </div>
-            </div>
-          </footer>
+          
         </article>
 
         <!-- 右侧：大纲 -->
@@ -154,15 +120,13 @@ import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useNoteStore } from '@/stores/note'
 import { storeToRefs } from 'pinia'
-import type { Doc } from '@/api/types'
+import { SiyuanRenderer } from '@/components/SiyuanRenderer'
 import NoteOutline from './NoteOutline.vue'
 import { 
   Document, 
-  Refresh, 
   House, 
   Clock, 
-  FolderOpened,
-  Menu
+  FolderOpened
 } from '@element-plus/icons-vue'
 
 // Router
@@ -174,7 +138,6 @@ const {
   currentNotebook,
   currentDoc,
   currentNote,
-  docs,
   loading,
   error
 } = storeToRefs(noteStore)
@@ -191,18 +154,7 @@ const sanitizedContent = computed(() => {
   return currentNote.value.content
 })
 
-// 计算上一篇和下一篇文档
-const prevDoc = computed(() => {
-  if (!currentDoc.value || !docs.value.length) return null
-  const currentIndex = docs.value.findIndex(doc => doc.id === currentDoc.value?.id)
-  return currentIndex > 0 ? docs.value[currentIndex - 1] : null
-})
-
-const nextDoc = computed(() => {
-  if (!currentDoc.value || !docs.value.length) return null
-  const currentIndex = docs.value.findIndex(doc => doc.id === currentDoc.value?.id)
-  return currentIndex < docs.value.length - 1 ? docs.value[currentIndex + 1] : null
-})
+// 已移除上一篇/下一篇导航
 
 // 方法
 const refreshContent = async () => {
@@ -211,17 +163,13 @@ const refreshContent = async () => {
   }
 }
 
-const selectDoc = async (doc: Doc) => {
-  await noteStore.selectDoc(doc)
-}
+// 已移除选择上一篇/下一篇的方法
 
 const goHome = () => {
   router.push('/')
 }
 
-const toggleOutline = () => {
-  showOutline.value = !showOutline.value
-}
+// 已移除手动切换目录按钮，保留桌面端默认显示、移动端遮罩关闭
 
 const hideOutline = () => {
   showOutline.value = false
@@ -267,9 +215,20 @@ onUnmounted(() => {
   --dark-card: #1f2937;
   --neon-accent: #3b82f6;
   --purple-accent: #8b5cf6;
+  /* 补充在本组件中使用到但未显式定义的强调/边框/背景变量，避免 h1 等样式失效 */
+  --accent-primary: #58a6ff;
+  --accent-secondary: #79c0ff;
+  --accent-tertiary: #bc8cff;
   --text-primary: #f9fafb;
   --text-secondary: #9ca3af;
   --border-color: #374151;
+  --bg-primary: #0f1419;
+  --bg-secondary: #1a1f29;
+  --bg-tertiary: #242936;
+  --vp-c-gray-2: rgba(240, 246, 252, 0.1);
+  --vp-c-bg-alt: rgba(240, 246, 252, 0.06);
+  --shadow-secondary: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --neon-glow: 0 0 20px rgba(88, 166, 255, 0.3);
 }
 
 .content-container {

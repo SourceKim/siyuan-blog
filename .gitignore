@@ -80,3 +80,6 @@ siyuan-data/
 # Temporary files
 *.tmp
 *.temp 
+
+# For cursor
+/render-example
