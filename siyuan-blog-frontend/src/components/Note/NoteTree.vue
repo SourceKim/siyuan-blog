@@ -2,11 +2,6 @@
   <div class="note-tree">
     <!-- 直接展示文档树，跳过笔记本选择 -->
     <div class="docs-section">
-      <!-- 文档树标题 -->
-      <div class="docs-header">
-        <h4>博客文档</h4>
-      </div>
-
       <!-- 文档树 -->
       <el-tree
         ref="docTreeRef"
@@ -257,23 +252,7 @@ watch(() => props.searchText, () => {
   overflow: hidden;
 }
 
-.docs-header {
-  padding: 12px 24px;
-  border-bottom: 1px solid var(--tech-dark-border);
-  background: var(--tech-dark-card);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-}
 
-.docs-header h4 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--tech-text-light);
-  flex: 1;
-}
 
 .doc-tree {
   flex: 1;
@@ -413,13 +392,6 @@ watch(() => props.searchText, () => {
 
 /* 响应式设计 */
 @media (max-width: 768px) {
-  .docs-header {
-    padding: 8px 16px;
-  }
-  
-  .docs-header h4 {
-    font-size: 15px;
-  }
   
   .tree-node {
     min-height: 28px;

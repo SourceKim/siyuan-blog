@@ -95,23 +95,9 @@
           
         </article>
 
-        <!-- 右侧：大纲 -->
-        <aside 
-          class="outline-sidebar" 
-          :class="{ 'outline-visible': showOutline }"
-          v-if="currentDoc"
-        >
-          <NoteOutline :doc-id="currentDoc.id" />
-        </aside>
+        
       </div>
     </div>
-
-    <!-- 大纲遮罩层（移动端） -->
-    <div 
-      v-if="showOutline && isMobile" 
-      class="outline-mask"
-      @click="hideOutline"
-    ></div>
   </div>
 </template>
 
@@ -121,7 +107,6 @@ import { useRouter } from 'vue-router'
 import { useNoteStore } from '@/stores/note'
 import { storeToRefs } from 'pinia'
 import { SiyuanRenderer } from '@/components/SiyuanRenderer'
-import NoteOutline from './NoteOutline.vue'
 import { 
   Document, 
   House, 
@@ -142,8 +127,7 @@ const {
   error
 } = storeToRefs(noteStore)
 
-// 响应式状态
-const showOutline = ref(false)
+// 响应式状态（已移除大纲相关显隐）
 const isMobile = ref(false)
 
 // 清理HTML内容（暂时直接返回内容，后续可添加DOMPurify）
@@ -169,11 +153,7 @@ const goHome = () => {
   router.push('/')
 }
 
-// 已移除手动切换目录按钮，保留桌面端默认显示、移动端遮罩关闭
-
-const hideOutline = () => {
-  showOutline.value = false
-}
+// 已移除手动切换目录按钮与遮罩
 
 const removeFileExtension = (filename: string): string => {
   return filename.replace(/\.sy$/, '')
@@ -186,9 +166,7 @@ const formatTime = (timeStr: string): string => {
 // 检测屏幕尺寸
 const checkMobile = () => {
   isMobile.value = window.innerWidth <= 768
-  if (!isMobile.value) {
-    showOutline.value = true // 桌面端默认显示大纲
-  }
+  // 已移除：桌面端默认显示大纲逻辑
 }
 
 // 监听窗口尺寸变化
@@ -232,8 +210,8 @@ onUnmounted(() => {
 }
 
 .content-container {
-  height: 100vh;
-  overflow: hidden;
+  /* 放开高度限制，避免内部上下空白被强制撑满 */
+  height: auto;
 }
 
 /* 欢迎页面 */
@@ -299,17 +277,17 @@ onUnmounted(() => {
 /* 文档布局 */
 .document-layout {
   display: flex;
-  height: 100vh;
   position: relative;
+  width: 100%;
 }
 
 /* 文章样式 */
 .article {
   flex: 1;
   overflow-y: auto;
-  padding: 40px 32px;
-  max-width: calc(100% - 300px);
-  margin: 0 auto;
+  padding: 24px 24px;
+  max-width: 100%;
+  margin: 0;
   position: relative;
 }
 
@@ -388,7 +366,7 @@ onUnmounted(() => {
 
 /* 内容区域 */
 .content-body {
-  margin-bottom: 32px;
+  margin-bottom: 16px;
   border-radius: 12px;
   background: var(--dark-card);
   border: 1px solid var(--border-color);
@@ -417,7 +395,7 @@ onUnmounted(() => {
 .document-content {
   line-height: 1.8;
   color: var(--text-primary);
-  padding: 32px;
+  padding: 20px;
 }
 
 /* HTML内容样式 */
@@ -427,7 +405,7 @@ onUnmounted(() => {
 .html-content :deep(h4),
 .html-content :deep(h5),
 .html-content :deep(h6) {
-  margin: 40px 0 20px;
+  margin: 24px 0 16px;
   font-weight: 700;
   line-height: 1.2;
   color: var(--text-primary);
@@ -665,17 +643,8 @@ onUnmounted(() => {
 
 /* 响应式设计 */
 @media (min-width: 1200px) {
-  .outline-sidebar {
-    position: static;
-    right: auto;
-  }
-  
-  .outline-sidebar.outline-visible {
-    right: auto;
-  }
-  
   .article {
-    max-width: calc(100% - 300px);
+    max-width: 100%;
   }
 }
 

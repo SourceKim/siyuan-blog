@@ -43,6 +43,13 @@
         <NoteContent />
       </div>
     </template>
+
+    <!-- 右侧大纲区域 -->
+    <template #outline>
+      <div class="notes-outline" v-if="currentDoc">
+        <NoteOutline :doc-id="currentDoc.id" />
+      </div>
+    </template>
   </CollapsibleSidebar>
   </div>
 </template>
@@ -54,6 +61,7 @@ import { storeToRefs } from 'pinia'
 import CollapsibleSidebar from '@/components/Layout/CollapsibleSidebar.vue'
 import NoteTree from '@/components/Note/NoteTree.vue'
 import NoteContent from '@/components/Note/NoteContent.vue'
+import NoteOutline from '@/components/Note/NoteOutline.vue'
 import type { Doc } from '@/api/types'
 import { Search } from '@element-plus/icons-vue'
 
@@ -164,12 +172,17 @@ onMounted(async () => {
 
 /* 主内容区域样式 */
 .notes-content {
-  height: 100vh;
+  min-height: 100vh;
   background: transparent;
   padding: 0;
   margin: 0;
   position: relative;
   z-index: 1;
+}
+
+.notes-outline {
+  height: 100%;
+  display: flex;
 }
 
 /* 响应式设计 */

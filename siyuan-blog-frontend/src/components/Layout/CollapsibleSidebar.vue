@@ -30,6 +30,11 @@
       <slot name="content" />
     </main>
 
+    <!-- 右侧大纲区域 -->
+    <aside class="outline-panel">
+      <slot name="outline" />
+    </aside>
+
     <!-- 侧边栏遮罩 (移动端) -->
     <div 
       v-if="sidebarOpen && isMobile" 
@@ -48,12 +53,14 @@ interface Props {
   defaultOpen?: boolean
   sidebarWidth?: string
   collapsedWidth?: string
+  outlineWidth?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   defaultOpen: true,
   sidebarWidth: '320px',
-  collapsedWidth: '60px'
+  collapsedWidth: '60px',
+  outlineWidth: '320px'
 })
 
 // Emits
@@ -130,11 +137,13 @@ defineExpose({
   --tech-glow: 0 0 20px rgba(0, 191, 255, 0.3);
   --sidebar-width: v-bind('props.sidebarWidth');
   --collapsed-width: v-bind('props.collapsedWidth');
+  --outline-width: v-bind('props.outlineWidth');
 }
 
 /* 布局容器 */
 .collapsible-layout {
   display: flex;
+  align-items: stretch;
   min-height: 100vh;
   color: var(--tech-text-light);
   font-family: 'Inter', 'Roboto', 'Nunito Sans', sans-serif;
@@ -143,6 +152,8 @@ defineExpose({
 
 /* 侧边栏 */
 .sidebar {
+  display: flex;
+  flex-direction: column;
   width: var(--sidebar-width);
   background: var(--tech-dark-card);
   border-right: 1px solid var(--tech-dark-border);
@@ -170,7 +181,6 @@ defineExpose({
 
 .sidebar-content {
   height: 100%;
-  padding: 24px 0;
   white-space: nowrap;
   opacity: 1;
   transition: all 0.3s ease;
@@ -186,12 +196,25 @@ defineExpose({
 
 /* 主内容区域 */
 .content {
-  flex: 1;
+  flex: 1 1 auto;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 100vh;
   position: relative;
   z-index: 1;
   overflow-y: auto;
+  /* 适度放宽内容区左右空间 */
+  padding: 0 8px;
+}
+
+/* 右侧大纲区域 */
+.outline-panel {
+  width: var(--outline-width);
+  background: var(--tech-dark-card);
+  border-left: 1px solid var(--tech-dark-border);
+  flex-shrink: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 折叠按钮 */
@@ -248,6 +271,11 @@ defineExpose({
   .content {
     margin-left: 0 !important;
     width: 100%;
+  }
+
+  /* 移动端隐藏右侧大纲区域 */
+  .outline-panel {
+    display: none;
   }
   
   /* 移动端调整折叠按钮位置 */
