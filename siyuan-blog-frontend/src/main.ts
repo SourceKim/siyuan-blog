@@ -8,6 +8,8 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import App from './App.vue'
 import router from './router'
 import './style.css'
+// highlight.js 主题样式（可更换为其他主题，如 'github-dark.css' 等）
+import 'highlight.js/styles/github-dark.css'
 
 const app = createApp(App)
 

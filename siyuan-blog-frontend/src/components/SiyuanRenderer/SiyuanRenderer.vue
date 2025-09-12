@@ -9,6 +9,7 @@
 import { computed, onMounted, watch, nextTick, ref } from 'vue'
 import transformSiyuanHtmlToSemantic from './transform'
 import hljs from 'highlight.js'
+import mermaid from 'mermaid'
 
 const props = defineProps<{
   content: string
@@ -25,12 +26,41 @@ async function enhanceRenderedContent() {
   await nextTick()
   const el = root.value
   if (!el) return
-  // 代码高亮
-  el.querySelectorAll('pre code').forEach((block) => {
+  // 代码高亮（跳过 render-node，如 mermaid/math 等）
+  el.querySelectorAll('pre:not(.render-node) code').forEach((block) => {
     try {
       hljs.highlightElement(block as HTMLElement)
     } catch {}
   })
+
+  // Mermaid 渲染
+  try {
+    // 初始化（只需一次）
+    if (!(mermaid as any)._initialized) {
+      mermaid.initialize({ startOnLoad: false, theme: 'dark' })
+      ;(mermaid as any)._initialized = true
+    }
+
+    // 将预处理节点替换为 mermaid 容器
+    const mermaidCodes = el.querySelectorAll('pre.render-node[data-subtype="mermaid"] code')
+    mermaidCodes.forEach((codeEl) => {
+      const codeText = (codeEl.textContent || '').trim()
+      const container = document.createElement('div')
+      container.className = 'mermaid'
+      container.textContent = codeText
+      const pre = codeEl.closest('pre')
+      if (pre && pre.parentElement) {
+        pre.parentElement.replaceChild(container, pre)
+      }
+    })
+
+    // 执行渲染
+    if (el.querySelector('.mermaid')) {
+      await mermaid.run({ querySelector: '.mermaid' })
+    }
+  } catch (err) {
+    console.error('Mermaid 渲染失败:', err)
+  }
 }
 
 onMounted(() => {
