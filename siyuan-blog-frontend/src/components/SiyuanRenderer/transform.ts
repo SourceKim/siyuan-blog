@@ -52,6 +52,17 @@ function renderInline(nodes: NodeListOf<ChildNode> | ChildNode[]): string {
       else if (dtype === "s") html += `<s>${content}</s>`
       else if (dtype === "mark") html += `<mark>${content}</mark>`
       else if (dtype === "code") html += `<code>${content}</code>`
+      else if (dtype === "img") {
+        // 处理内联图片：SiYuan 会在段落内用 span[data-type=img] 包裹 img
+        const img = el.querySelector('img') as HTMLImageElement | null
+        if (img) {
+          const src = img.getAttribute('data-src') || img.getAttribute('src') || ""
+          const alt = img.getAttribute('alt') || ""
+          const title = img.getAttribute('title') || ""
+          html += `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" title="${escapeHtml(title)}">`
+        }
+        // 若未找到 img，则忽略该节点
+      }
       else if (dtype === "inline-math") {
         const mathRaw = el.getAttribute("data-content") || ""
         const mathText = unescapeHtml(mathRaw)
