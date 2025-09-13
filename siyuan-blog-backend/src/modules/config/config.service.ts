@@ -13,7 +13,8 @@ export class ConfigService {
    */
   async getAllConfigs(): Promise<ConfigDto[]> {
     try {
-      const allConfig = this.fileConfigService.getAllConfig()
+      // 已移除 getAllConfig，返回空数组或按需实现收集逻辑
+      const allConfig: Record<string, any> = {}
       const configs: ConfigDto[] = []
       
       for (const [key, value] of Object.entries(allConfig)) {
@@ -91,7 +92,8 @@ export class ConfigService {
    */
   async getActiveConfigs(): Promise<{ [key: string]: any }> {
     try {
-      return this.fileConfigService.getAllConfig()
+      // 已移除 getAllConfig
+      return {}
     } catch (error) {
       console.error('获取活跃配置失败:', error)
       throw error

@@ -5,6 +5,7 @@ export class NotebookDto {
   sort!: number
   sortMode!: number
   icon!: string
+  // closed 字段在当前 DTO 中未声明，避免额外属性写入
 }
 
 // 文档 DTO

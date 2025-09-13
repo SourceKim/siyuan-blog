@@ -1,7 +1,5 @@
 import { 
   HomeDataDto, 
-  ProfileInfoDto, 
-  SocialLinksDto, 
   BlogStatsDto, 
   RecommendedDocDto
 } from './home.dto'
@@ -22,16 +20,27 @@ export class HomeService {
    */
   async getHomeData(recommendedCount?: number): Promise<HomeDataDto> {
     try {
-      const [profile, socialLinks, blogStats, recommendedDocs] = await Promise.all([
-        this.getProfileInfo(),
-        this.getSocialLinks(),
+      const [homeIntro, blogStats, recommendedDocs] = await Promise.all([
+        this.fileConfigService.getConfig('home-intro'),
         this.getBlogStats(),
         this.getRecommendedDocs(recommendedCount)
       ])
 
+      // 兼容：若 home-intro 无 socialLinks 字段，可回退 social_links.json
+      const socialLinks = homeIntro?.socialLinks || this.fileConfigService.getConfig('social_links') || {}
+
       return {
-        profile,
-        socialLinks,
+        profile: {
+          name: homeIntro?.name || '博主',
+          avatarUrl: homeIntro?.avatarUrl || '/default-avatar.png',
+          bio: homeIntro?.bio || '欢迎来到我的博客',
+          title: homeIntro?.title || '开发者'
+        },
+        socialLinks: {
+          email: socialLinks.email || 'contact@example.com',
+          github: socialLinks.github || 'https://github.com',
+          website: socialLinks.website || 'https://example.com'
+        },
         blogStats,
         recommendedDocs
       }
@@ -42,65 +51,18 @@ export class HomeService {
   }
 
   /**
-   * 获取个人信息
-   */
-  async getProfileInfo(): Promise<ProfileInfoDto> {
-    try {
-      // 直接从 about_me 配置获取数据
-      const aboutMeData = this.fileConfigService.getConfig('about_me')
-      
-      return {
-        name: aboutMeData?.name || '博主',
-        avatarUrl: aboutMeData?.avatarUrl || '/default-avatar.png',
-        bio: aboutMeData?.bio || '欢迎来到我的博客',
-        title: aboutMeData?.title || '开发者'
-      }
-    } catch (error) {
-      console.error('获取个人信息失败:', error)
-      throw error
-    }
-  }
-
-  /**
-   * 获取社交链接
-   */
-  async getSocialLinks(): Promise<SocialLinksDto> {
-    try {
-      const socialConfig = this.fileConfigService.getConfig('social_links') as any
-      
-      return {
-        email: socialConfig?.email || 'contact@example.com',
-        github: socialConfig?.github || 'https://github.com',
-        website: socialConfig?.website || 'https://example.com'
-      }
-    } catch (error) {
-      console.error('获取社交链接失败:', error)
-      throw error
-    }
-  }
-
-  /**
    * 获取博客统计信息
    */
   async getBlogStats(): Promise<BlogStatsDto> {
     try {
-      // 获取笔记本数量
-      const notebooks = await this.noteService.getNotebooks()
-      const notebookCount = notebooks.length
-
-      // 获取推荐文档来计算文档总数（这里可以根据实际需求调整）
-      const docs = await this.noteService.getRecommendedDocs(1000) // 获取大量文档来统计
-      const documentCount = docs.length
-
-      // 这里可以根据实际需求从数据库或其他地方获取真实的访问量和运行天数
-      const visitCount = 1 // 默认值，后续可以接入真实的统计
-      const runningDays = 1 // 默认值，后续可以计算真实的运行天数
-
+      // 直接读取 home-intro.json 中的写死统计配置
+      const intro = this.fileConfigService.getConfig('home-intro') || {}
+      const stats = intro.blogStats || {}
       return {
-        notebookCount,
-        documentCount,
-        visitCount,
-        runningDays
+        notebookCount: Number(stats.notebookCount ?? 0),
+        documentCount: Number(stats.documentCount ?? 0),
+        visitCount: Number(stats.visitCount ?? 1),
+        runningDays: Number(stats.runningDays ?? 1)
       }
     } catch (error) {
       console.error('获取博客统计失败:', error)

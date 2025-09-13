@@ -82,14 +82,7 @@ app.use(errorHandler)
 async function bootstrap() {
   console.log('🚀 启动博客后端服务...')
   
-  // 初始化配置文件
-  try {
-    const fileConfigService = new FileConfigService()
-    fileConfigService.initializeAllConfigs()
-    console.log('⚙️  配置文件初始化完成')
-  } catch (error) {
-    console.warn('⚠️  配置文件初始化失败:', error)
-  }
+  // 配置文件初始化逻辑已移除，直接启动
   
   // 启动服务器
   const port = config.port

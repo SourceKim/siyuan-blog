@@ -1,8 +1,0 @@
-[
-  { "name": "Vue 3", "type": "primary" },
-  { "name": "TypeScript", "type": "success" },
-  { "name": "Element Plus", "type": "warning" },
-  { "name": "SiYuan", "type": "info" },
-  { "name": "Pinia", "type": "danger" },
-  { "name": "Vite", "type": "" }
-] 

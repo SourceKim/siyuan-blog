@@ -24,8 +24,8 @@
           
           <!-- 姓名和标题 -->
           <div class="profile-header">
-            <h3 class="profile-name">{{ homeData?.profile?.name || '博主' }}</h3>
-            <p class="profile-title">{{ homeData?.profile?.title || '开发者' }}</p>
+            <h3 class="profile-name">{{ homeData?.profile?.name}}</h3>
+            <p class="profile-title">{{ homeData?.profile?.title}}</p>
           </div>
 
           <!-- 个人简介 -->

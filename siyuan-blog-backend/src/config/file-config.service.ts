@@ -16,21 +16,40 @@ export class FileConfigService {
   }
 
   /**
+   * 解析新旧键名的兼容映射，返回首个存在的文件键名
+   */
+  private resolveExistingKey(primaryKey: string, fallbackKeys: string[] = []): string {
+    const tryKeys = [primaryKey, ...fallbackKeys]
+    for (const key of tryKeys) {
+      const p = this.getConfigPath(key)
+      if (fs.existsSync(p)) return key
+    }
+    // 不存在则返回主键（将创建主键文件）
+    return primaryKey
+  }
+
+  /**
    * 读取指定配置文件
    */
   private readConfig(configKey: string): any {
     try {
-      const configPath = this.getConfigPath(configKey)
-      
+      // 新旧键名兼容：layout/layout_config, aboutme/about_me
+      const mappedKey =
+        configKey === 'layout'
+          ? this.resolveExistingKey('layout', ['layout_config'])
+          : configKey === 'aboutme'
+          ? this.resolveExistingKey('aboutme', ['about_me'])
+          : configKey
+
+      const configPath = this.getConfigPath(mappedKey)
       if (!fs.existsSync(configPath)) {
-        this.createDefaultConfig(configKey)
+        return null
       }
-      
       const data = fs.readFileSync(configPath, 'utf8')
       return JSON.parse(data)
     } catch (error) {
       console.error(`读取配置文件 ${configKey} 失败:`, error)
-      return this.getDefaultConfigByKey(configKey)
+      return null
     }
   }
 
@@ -39,7 +58,9 @@ export class FileConfigService {
    */
   private writeConfig(configKey: string, config: any): void {
     try {
-      const configPath = this.getConfigPath(configKey)
+      // 写入始终写到新键名
+      const targetKey = configKey === 'layout_config' ? 'layout' : configKey === 'about_me' ? 'aboutme' : configKey
+      const configPath = this.getConfigPath(targetKey)
       fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf8')
     } catch (error) {
       console.error(`写入配置文件 ${configKey} 失败:`, error)
@@ -47,115 +68,7 @@ export class FileConfigService {
     }
   }
 
-  /**
-   * 创建默认配置文件
-   */
-  private createDefaultConfig(configKey: string): void {
-    const defaultConfig = this.getDefaultConfigByKey(configKey)
-    this.writeConfig(configKey, defaultConfig)
-    console.log(`📝 创建默认配置文件: ${configKey}.json`)
-  }
-
-  /**
-   * 根据configKey获取默认配置
-   */
-  private getDefaultConfigByKey(configKey: string): any {
-    const defaultConfigs: { [key: string]: any } = {
-      'about_me': {
-        name: process.env.AUTHOR_NAME || '博主',
-        avatarUrl: process.env.AUTHOR_AVATAR_URL || '/default-avatar.png',
-        bio: process.env.AUTHOR_BIO || '欢迎来到我的博客，这里记录了我的技术学习和生活感悟。',
-        title: process.env.AUTHOR_TITLE || '全栈开发工程师'
-      },
-      'social_links': {
-        email: process.env.AUTHOR_EMAIL || 'contact@example.com',
-        github: process.env.AUTHOR_GITHUB || 'https://github.com',
-        website: process.env.AUTHOR_WEBSITE || 'https://example.com'
-      },
-      'tech_stack': [
-        { name: 'Vue 3', type: 'primary' },
-        { name: 'TypeScript', type: 'success' },
-        { name: 'Element Plus', type: 'warning' },
-        { name: 'SiYuan', type: 'info' },
-        { name: 'Pinia', type: 'danger' },
-        { name: 'Vite', type: '' }
-      ],
-      'experience': [
-        {
-          title: '全栈开发工程师',
-          period: '2021 - 至今',
-          description: '负责开发和维护可扩展的Web应用程序，使用现代前端技术栈。'
-        },
-        {
-          title: '自由职业开发者',
-          period: '2019 - 2021',
-          description: '为各种客户构建定制网站和应用程序，专注于性能和用户体验。'
-        },
-        {
-          title: '计算机科学学士',
-          period: '2015 - 2019',
-          description: '优等生毕业，专注于软件工程和人机交互。'
-        },
-        {
-          title: '技术博客',
-          period: '2018 - 至今',
-          description: '分享关于Web开发、新技术和生产力工具的见解。'
-        }
-      ],
-      'layout_config': {
-        site: {
-          siteName: 'SiYuan Blog',
-          avatarUrl: '/default-avatar.png',
-          bio: '基于思源笔记构建的个人博客',
-          description: '记录技术学习和生活感悟的个人博客',
-          keywords: ['博客', '技术', '思源笔记', '个人网站'],
-          author: '博主'
-        },
-        footer: {
-          slogan: '基于思源笔记构建',
-          links: [
-            {
-              text: '关于我',
-              url: '/about',
-              external: false
-            },
-            {
-              text: '思源笔记',
-              url: 'https://github.com/siyuan-note/siyuan',
-              external: true
-            },
-            {
-              text: 'Element Plus',
-              url: 'https://element-plus.org/',
-              external: true
-            }
-          ]
-        }
-      }
-    }
-
-    return defaultConfigs[configKey] || null
-  }
-
-  /**
-   * 获取所有配置文件列表
-   */
-  private getAllConfigKeys(): string[] {
-    return ['about_me', 'social_links', 'tech_stack', 'experience', 'layout_config']
-  }
-
-  /**
-   * 获取所有配置
-   */
-  getAllConfig(): any {
-    const allConfig: { [key: string]: any } = {}
-    
-    for (const configKey of this.getAllConfigKeys()) {
-      allConfig[configKey] = this.readConfig(configKey)
-    }
-    
-    return allConfig
-  }
+  // 默认配置与自动创建逻辑已移除
 
   /**
    * 获取指定配置
@@ -192,7 +105,7 @@ export class FileConfigService {
    * 获取个人信息配置（整合多个配置文件）
    */
   getAboutMeConfig(): any {
-    const aboutMe = this.readConfig('about_me')
+    const aboutMe = this.readConfig('aboutme')
     const socialLinks = this.readConfig('social_links')
     const techStack = this.readConfig('tech_stack')
 
@@ -211,9 +124,9 @@ export class FileConfigService {
    * 更新个人信息
    */
   updateAboutMe(data: { name?: string; avatarUrl?: string; bio?: string }): void {
-    const currentConfig = this.readConfig('about_me')
+    const currentConfig = this.readConfig('aboutme') || {}
     const updatedConfig = { ...currentConfig, ...data }
-    this.writeConfig('about_me', updatedConfig)
+    this.writeConfig('aboutme', updatedConfig)
   }
 
   /**
@@ -223,15 +136,5 @@ export class FileConfigService {
     return fs.existsSync(this.getConfigPath(configKey))
   }
 
-  /**
-   * 初始化所有默认配置文件
-   */
-  initializeAllConfigs(): void {
-    for (const configKey of this.getAllConfigKeys()) {
-      if (!this.configExists(configKey)) {
-        this.createDefaultConfig(configKey)
-      }
-    }
-  }
 
 } 

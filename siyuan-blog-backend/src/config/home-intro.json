@@ -1,0 +1,18 @@
+{
+  "name": "Kim",
+  "avatarUrl": "/assets/image.webp",
+  "bio": "一个小小程序员，专注 iOS / 音视频 / 性能优化等领域",
+  "title": "努力学习 AI 中！",
+  "socialLinks": {
+    "email": "18666269733@163.com",
+    "github": "https://github.com/SourceKim",
+    "website": "https://uiimage.com/"
+  },
+  "blogStats": {
+    "notebookCount": 0,
+    "documentCount": 0,
+    "visitCount": 1,
+    "runningDays": 1
+  }
+}
+

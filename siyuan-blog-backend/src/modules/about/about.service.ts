@@ -8,15 +8,12 @@ import {
   AboutBlogStatsDto 
 } from './about.dto'
 import { FileConfigService } from '../../config/file-config.service'
-import { NoteService } from '../note/note.service'
 
 export class AboutService {
   private fileConfigService: FileConfigService
-  private noteService: NoteService
 
   constructor() {
     this.fileConfigService = new FileConfigService()
-    this.noteService = new NoteService()
   }
 
   /**
@@ -24,17 +21,16 @@ export class AboutService {
    */
   async getAboutPageInfo(): Promise<AboutPageDto> {
     try {
-      const [aboutMe, aboutConfig, blogStats] = await Promise.all([
+      const [aboutMe, blogStats] = await Promise.all([
         this.getAboutMe(),
-        this.getAboutConfig(),
         this.getBlogStats()
       ])
-
+      const aboutAll = this.fileConfigService.getConfig('aboutme') || {}
       return {
         name: aboutMe.name,
         avatarUrl: aboutMe.avatarUrl,
         bio: aboutMe.bio,
-        config: aboutConfig,
+        config: aboutAll.config || {},
         blogStats
       }
     } catch (error) {
@@ -48,8 +44,7 @@ export class AboutService {
    */
   async getAboutMe(): Promise<AboutMeDto> {
     try {
-      const aboutMeConfig = this.fileConfigService.getAboutMeConfig()
-      
+      const aboutMeConfig = this.fileConfigService.getConfig('aboutme') || {}
       return {
         name: aboutMeConfig.name || '博主',
         avatarUrl: aboutMeConfig.avatarUrl || '/default-avatar.png',
@@ -161,23 +156,14 @@ export class AboutService {
    */
   async getBlogStats(): Promise<AboutBlogStatsDto> {
     try {
-      // 获取笔记本数量
-      const notebooks = await this.noteService.getNotebooks()
-      const notebookCount = notebooks.length
-
-      // 获取推荐文档来计算文档总数
-      const docs = await this.noteService.getRecommendedDocs(1000) // 获取大量文档来统计
-      const documentCount = docs.length
-
-      // 这里可以根据实际需求从数据库或其他地方获取真实的访问量和运行天数
-      const visitCount = 1 // 默认值，后续可以接入真实的统计
-      const runningDays = this.calculateRunningDays() // 计算运行天数
-
+      // 直接从 aboutme.json 中读取写死的统计配置
+      const aboutAll = this.fileConfigService.getConfig('aboutme') || {}
+      const stats = aboutAll.blogStats || {}
       return {
-        notebookCount,
-        documentCount,
-        visitCount,
-        runningDays
+        notebookCount: Number(stats.notebookCount ?? 0),
+        documentCount: Number(stats.documentCount ?? 0),
+        visitCount: Number(stats.visitCount ?? 1),
+        runningDays: Number(stats.runningDays ?? 1)
       }
     } catch (error) {
       console.error('获取博客统计失败:', error)

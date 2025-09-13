@@ -107,7 +107,7 @@ export class NoteService {
         name: blogNotebook.name,
         icon: blogNotebook.icon,
         sort: blogNotebook.sort,
-        closed: blogNotebook.closed
+        sortMode: blogNotebook.sortMode ?? 0
       } : null
     } catch (error) {
       this.logSiyuanError(apiPath, error, requestData)

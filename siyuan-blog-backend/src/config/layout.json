@@ -1,0 +1,19 @@
+{
+  "site": {
+    "siteName": "Kim's Blog",
+    "avatarUrl": "/assets/image.webp",
+    "bio": "基于思源笔记构建的个人博客",
+    "description": "记录技术学习和生活感悟的个人博客",
+    "keywords": ["博客", "技术", "思源笔记", "个人网站"],
+    "author": "Kim"
+  },
+  "footer": {
+    "slogan": "基于思源笔记构建",
+    "links": [
+      { "text": "关于我", "url": "/about", "external": false },
+      { "text": "思源笔记", "url": "https://github.com/siyuan-note/siyuan", "external": true },
+      { "text": "Element Plus", "url": "https://element-plus.org/", "external": true }
+    ]
+  }
+}
+

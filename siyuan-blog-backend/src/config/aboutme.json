@@ -1,0 +1,34 @@
+{
+  "name": "Kim",
+  "avatarUrl": "/assets/image.webp",
+  "bio": "一个小小程序员，专注 iOS / 音视频 / 性能优化等领域",
+  "title": "努力学习 AI 中！",
+  "config": {
+    "social": {
+      "email": "18666269733@163.com",
+      "github": "https://github.com/SourceKim",
+      "website": "https://uiimage.com/"
+    },
+    "techStack": [
+      { "name": "iOS", "type": "primary" },
+      { "name": "前端", "type": "success" },
+      { "name": "C++", "type": "warning" },
+      { "name": "音视频", "type": "info" },
+      { "name": "性能优化", "type": "danger" },
+      { "name": "AI", "type": "" }
+    ],
+    "experience": [
+      { "title": "大厂梦", "period": "2021 - 至今", "description": "稀里糊涂混入字节跳动，痛并快乐着。。" },
+      { "title": "败走广州", "period": "2018", "description": "因为家庭原因，不得不离开北京，回到广东。" },
+      { "title": "北漂", "period": "2013 - 2018", "description": "孤身一人，勇闯北京！" },
+      { "title": "诞生！", "period": "1995", "description": "来到这个世界！我的新手村是一个广东沿海小城市~" }
+    ]
+  },
+  "blogStats": {
+    "notebookCount": 0,
+    "documentCount": 0,
+    "visitCount": 1,
+    "runningDays": 1
+  }
+}
+
