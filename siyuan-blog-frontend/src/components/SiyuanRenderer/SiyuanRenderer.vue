@@ -61,6 +61,53 @@ async function enhanceRenderedContent() {
   } catch (err) {
     console.error('Mermaid 渲染失败:', err)
   }
+
+  // 代码块工具栏（语言徽标 + 复制按钮）
+  try {
+    const pres = el.querySelectorAll('pre:not(.render-node)')
+    pres.forEach((pre) => {
+      const parent = pre.parentElement
+      if (!parent) return
+      // 已包装则跳过
+      if (parent.classList.contains('code-block')) return
+
+      const wrapper = document.createElement('div')
+      wrapper.className = 'code-block'
+      parent.replaceChild(wrapper, pre)
+      wrapper.appendChild(pre)
+
+      const codeEl = pre.querySelector('code') as HTMLElement | null
+      const langMatch = codeEl?.className.match(/language-([\w+-]+)/i)
+      const lang = (langMatch?.[1] || 'text').toLowerCase()
+
+      const badge = document.createElement('div')
+      badge.className = 'code-badge'
+
+      const langEl = document.createElement('span')
+      langEl.className = 'code-lang'
+      langEl.textContent = lang
+
+      const btn = document.createElement('button')
+      btn.type = 'button'
+      btn.className = 'code-copy-btn'
+      btn.textContent = '复制'
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        try {
+          const text = codeEl?.innerText || ''
+          await navigator.clipboard.writeText(text)
+          const old = btn.textContent
+          btn.textContent = '已复制'
+          setTimeout(() => { btn.textContent = old || '复制' }, 1200)
+        } catch {}
+      })
+
+      badge.appendChild(langEl)
+      badge.appendChild(btn)
+      wrapper.appendChild(badge)
+    })
+  } catch {}
 }
 
 onMounted(() => {
@@ -76,6 +123,53 @@ watch(semanticHtml, () => {
 .siyuan-renderer {
   /* 交由父容器定义排版；此处只做必要的安全边界 */
   width: 100%;
+}
+
+/* 代码块工具栏样式（与父级深色系相容） */
+:deep(.code-block) {
+  position: relative;
+}
+
+:deep(.code-block) pre {
+  margin-top: 32px; /* 为顶部徽标留出空间 */
+}
+
+:deep(.code-badge) {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: rgba(36, 41, 54, 0.8);
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  padding: 4px 8px;
+  z-index: 1;
+  backdrop-filter: blur(4px);
+}
+
+:deep(.code-lang) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+  opacity: 0.9;
+}
+
+:deep(.code-copy-btn) {
+  border: 1px solid var(--border-primary);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+:deep(.code-copy-btn:hover) {
+  background: var(--bg-secondary);
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
 }
 </style>
 
