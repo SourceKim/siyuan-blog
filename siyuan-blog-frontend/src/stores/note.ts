@@ -91,6 +91,85 @@ export const useNoteStore = defineStore('note', () => {
     }
   }
 
+  // 根据文档 ID 选择文档（用于路由恢复）
+  const selectDocById = async (docId: string) => {
+    try {
+      loading.value = true
+      error.value = null
+
+      // 先获取文档内容
+      const noteContent = await noteApi.getDoc({ id: docId })
+
+      // 在已有的文档树中尝试找到对应的文档元信息
+      const findInTree = (nodes: Doc[]): Doc | null => {
+        for (const n of nodes) {
+          if ((n as Doc).id === docId) return n as Doc
+          if ((n as any).children && Array.isArray((n as any).children)) {
+            const found = findInTree((n as any).children as Doc[])
+            if (found) return found
+          }
+        }
+        return null
+      }
+
+      const foundDoc = findInTree(blogDocumentTree.value)
+
+      // 尝试从内容中提取标题（优先第一个标题块/heading）
+      const extractTitleFromContent = (html: string): string | null => {
+        try {
+          if (!html) return null
+          const container = document.createElement('div')
+          container.innerHTML = html
+          // 优先思源结构的标题块
+          const headingNode = container.querySelector('[data-type="NodeHeading"]') as HTMLElement | null
+          if (headingNode) {
+            const editable = headingNode.querySelector('div[contenteditable="true"]') as HTMLElement | null
+            const text = (editable?.innerText || '').trim()
+            if (text) return text
+          }
+          // 退化：若已有语义化 h1/h2（可能来自后端或其他来源）
+          const h = container.querySelector('h1, h2, h3') as HTMLElement | null
+          if (h) {
+            const text = (h.innerText || '').trim()
+            if (text) return text
+          }
+          return null
+        } catch {
+          return null
+        }
+      }
+
+      const titleFromContent = extractTitleFromContent(noteContent.content)
+
+      // 若未在树中找到，则构造一个占位 Doc
+      const placeholderDoc: Doc = foundDoc || {
+        id: docId,
+        path: noteContent.path || '',
+        // 优先使用内容标题；其次从路径推断文件名；最后给 "未命名"
+        name: titleFromContent 
+          || (noteContent.path ? (noteContent.path.split('/').pop() || '').replace(/\?.*$/, '') : '') 
+          || '未命名',
+        sort: 0,
+        icon: '',
+        mtime: 0,
+        ctime: 0,
+        hMtime: '',
+        hCtime: '',
+        subFileCount: 0
+      }
+
+      currentNote.value = noteContent
+      currentDoc.value = placeholderDoc
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '通过ID获取文档失败'
+      console.error('❌ 通过ID获取文档失败:', err)
+      currentDoc.value = null
+      currentNote.value = null
+    } finally {
+      loading.value = false
+    }
+  }
+
   // 获取推荐文章
   const fetchRecommendedDocs = async (count: number = 10) => {
     try {
@@ -154,6 +233,7 @@ export const useNoteStore = defineStore('note', () => {
     selectDoc,
     fetchRecommendedDocs,
     fetchBlogDocumentTree,
+    selectDocById,
     clearState,
   }
 }) 

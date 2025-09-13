@@ -9,21 +9,30 @@ export const useLayoutStore = defineStore('layout', () => {
   const footerData = ref<FooterData | null>(null)
   const loading = ref(false)
   const error = ref<string | null>(null)
+  const initialized = ref(false)
+  let inflight: Promise<void> | null = null
 
   // 获取 Layout 数据
   const fetchLayoutData = async () => {
-    try {
-      loading.value = true
-      error.value = null
-      const layoutData: LayoutData = await layoutApi.getLayoutData()
-      headerData.value = layoutData.header
-      footerData.value = layoutData.footer
-    } catch (err) {
-      error.value = err instanceof Error ? err.message : '获取Layout数据失败'
-      console.error('获取Layout数据失败:', err)
-    } finally {
-      loading.value = false
-    }
+    if (initialized.value) return
+    if (inflight) return inflight
+    inflight = (async () => {
+      try {
+        loading.value = true
+        error.value = null
+        const layoutData: LayoutData = await layoutApi.getLayoutData()
+        headerData.value = layoutData.header
+        footerData.value = layoutData.footer
+        initialized.value = true
+      } catch (err) {
+        error.value = err instanceof Error ? err.message : '获取Layout数据失败'
+        console.error('获取Layout数据失败:', err)
+      } finally {
+        loading.value = false
+        inflight = null
+      }
+    })()
+    return inflight
   }
 
   // 清除数据
@@ -39,6 +48,7 @@ export const useLayoutStore = defineStore('layout', () => {
     footerData,
     loading,
     error,
+    initialized,
     
     // 方法
     fetchLayoutData,

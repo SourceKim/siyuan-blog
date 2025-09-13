@@ -56,6 +56,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useNoteStore } from '@/stores/note'
 import { storeToRefs } from 'pinia'
 import CollapsibleSidebar from '@/components/Layout/CollapsibleSidebar.vue'
@@ -80,9 +81,13 @@ const refreshDocuments = async () => {
   await noteStore.fetchBlogDocumentTree()
 }
 
+const route = useRoute()
+const router = useRouter()
+
 const handleDocSelected = (doc: Doc) => {
-  // 可以在这里添加文档选择后的逻辑
   console.log('选择的文档:', doc)
+  // 更新地址栏 docId，保持可刷新
+  router.replace({ query: { ...route.query, docId: doc.id } })
 }
 
 const handleSidebarToggle = (isOpen: boolean) => {
@@ -100,8 +105,20 @@ onMounted(async () => {
   try {
     await refreshDocuments()
     console.log('文档树加载完成')
+    // 如果路由上带有 docId，自动加载该文档
+    const qId = (route.query.docId as string) || ''
+    if (qId) {
+      await noteStore.selectDocById(qId)
+    }
   } catch (error) {
     console.error('文档树加载失败:', error)
+  }
+})
+
+// 监听路由 docId 变化，动态切换文档
+watch(() => route.query.docId, async (newId, oldId) => {
+  if (newId && newId !== oldId) {
+    await noteStore.selectDocById(String(newId))
   }
 })
 </script>
@@ -182,7 +199,7 @@ onMounted(async () => {
 
 .notes-outline {
   height: 100%;
-  display: flex;
+  display: block;
 }
 
 /* 响应式设计 */
