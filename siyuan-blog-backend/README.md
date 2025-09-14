@@ -84,44 +84,17 @@ cp env.example .env.development
 PORT=8000
 NODE_ENV=development
 
-# 数据库配置（连接到 Docker MySQL）
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=123456
-DB_NAME=siyuan_blog
-
 # SiYuan 配置（连接到 Docker SiYuan）
 SIYUAN_API_URL=http://127.0.0.1:6806
 SIYUAN_TOKEN=
 
 # CORS 配置（允许前端访问）
 CORS_ORIGIN=http://localhost:3000,http://localhost:5173
-```
-
-**重要说明**：
-- `DB_HOST` 使用 `127.0.0.1` 而不是 `localhost`，避免 IPv6 连接问题
-- `SIYUAN_API_URL` 指向本地 Docker 的思源服务端口 6806
-- 如果 MySQL 端口冲突，可以修改 `docker-compose.yml` 中的端口映射
 
 ### 步骤 3：安装依赖
 
 ```bash
 yarn install
-```
-
-### 步骤 4：配置数据库
-
-```bash
-# 等待 MySQL 服务完全启动（约30秒）
-sleep 30
-
-# 创建数据库（如果使用 Docker MySQL，数据库会自动创建）
-# 如果需要手动创建：
-# mysql -h127.0.0.1 -uroot -p123456 -e "CREATE DATABASE siyuan_blog CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-
-# 运行数据库迁移
-yarn migration:run
 ```
 
 ### 步骤 5：启动开发服务器
