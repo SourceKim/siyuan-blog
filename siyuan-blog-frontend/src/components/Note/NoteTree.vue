@@ -94,11 +94,11 @@ const {
 // Refs
 const docTreeRef = ref<InstanceType<typeof ElTree>>()
 
-// Tree配置
+// Tree配置（Element Plus TreeOptionProps 要求为字段名映射）
 const treeProps = {
   children: 'children',
   label: 'name',
-  isLeaf: (data: Doc) => data.subFileCount === 0
+  isLeaf: 'isLeaf'
 }
 
 // 过滤后的树数据
@@ -113,18 +113,19 @@ const filteredTreeData = computed(() => {
 
 // 递归过滤树数据
 const filterTreeData = (data: Doc[], searchText: string): Doc[] => {
-  return data.filter(item => {
+  const result: Doc[] = []
+  for (const item of data) {
     const nameMatch = item.name.toLowerCase().includes(searchText)
-    const hasChildMatch = item.children && filterTreeData(item.children, searchText).length > 0
-    
+    const filteredChildren = item.children ? filterTreeData(item.children, searchText) : undefined
+    const hasChildMatch = !!(filteredChildren && filteredChildren.length > 0)
     if (nameMatch || hasChildMatch) {
-      return {
+      result.push({
         ...item,
-        children: item.children ? filterTreeData(item.children, searchText) : undefined
-      }
+        children: filteredChildren
+      })
     }
-    return false
-  })
+  }
+  return result
 }
 
 // 懒加载子文档
@@ -143,6 +144,9 @@ const loadSubDocs = async (node: any, resolve: (data: Doc[]) => void) => {
       const subDocs = await noteApi.getDocs({
         path: node.data.path
       })
+
+      // 标注叶子节点，便于 Tree 根据字段判断
+      subDocs.forEach(d => { (d as Doc).isLeaf = d.subFileCount === 0 })
       
       console.log('📁 获取到子文档:', subDocs.length, '个')
       resolve(subDocs)

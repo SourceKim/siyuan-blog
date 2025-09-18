@@ -155,42 +155,7 @@ export class NoteService {
     }
   }
 
-  /**
-   * 获取笔记本信息
-   */
-  async getNotebookInfo(notebook: string = this.blogNotebookId): Promise<{ name: string }> {
-    // 只允许获取博客笔记本信息
-    if (notebook !== this.blogNotebookId) {
-      if (config.nodeEnv === 'development') {
-        console.log(`❌ 只允许获取博客笔记本 ${this.blogNotebookId} 信息，拒绝获取 ${notebook}`)
-      }
-      throw new Error('访问被拒绝：只允许获取博客笔记本信息')
-    }
-
-    const apiPath = '/api/notebook/getNotebookInfo'
-    const requestData = { notebook }
-    
-    try {
-      this.logSiyuanRequest(apiPath, requestData)
-      
-      const response = await axios.post(`${this.siyuanBaseUrl}${apiPath}`, requestData, { 
-        headers: this.getHeaders() 
-      })
-
-      this.logSiyuanResponse(apiPath, response, requestData)
-
-      if (response.data.code !== 0) {
-        throw new Error(response.data.msg || '获取笔记本信息失败')
-      }
-
-      return {
-        name: response.data.data.name
-      }
-    } catch (error) {
-      this.logSiyuanError(apiPath, error, requestData)
-      throw error
-    }
-  }
+  
 
   /**
    * 获取文档内容

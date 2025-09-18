@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express'
 import cors from 'cors'
 import compression from 'compression'
 import path from 'path'
+import fs from 'fs'
 import { config } from './config'
 import { setupRoutes } from './routes'
 import { errorHandler } from './middleware/error-handler'
@@ -25,39 +26,32 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 // 开发环境日志中间件
 app.use(requestLogger)
 
-// 静态文件服务
-const assetsPath = path.join(__dirname, '../assets')
+// 静态文件服务（统一从 dist/assets 提供）
+const assetsPath = path.join(__dirname, 'assets')
 app.use('/assets', express.static(assetsPath, {
-  maxAge: '1d', // 缓存1天
+  maxAge: '1d',
   etag: true,
   lastModified: true,
-  setHeaders: (res, path) => {
-    // 为 WebP 图片设置正确的 MIME 类型
-    if (path.endsWith('.webp')) {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.webp')) {
       res.setHeader('Content-Type', 'image/webp')
     }
   }
 }))
 
-// 静态文件列表路由 (开发环境)
-if (config.nodeEnv === 'development') {
-  app.get('/assets', (req: Request, res: Response) => {
-    const fs = require('fs')
-    try {
-      const files = fs.readdirSync(assetsPath)
-      res.json({
-        message: '静态文件列表',
-        assetsPath,
-        files: files.map((file: string) => ({
-          name: file,
-          url: `/assets/${file}`
-        }))
-      })
-    } catch (error) {
-      res.status(500).json({ error: '无法读取静态文件目录' })
-    }
-  })
-}
+// 静态文件列表路由（统一提供，便于排查）
+app.get('/assets', (req: Request, res: Response) => {
+  try {
+    const files = fs.readdirSync(assetsPath)
+    res.json({
+      message: '静态文件列表',
+      assetsPath,
+      files: files.map((file: string) => ({ name: file, url: `/assets/${file}` }))
+    })
+  } catch (error) {
+    res.status(500).json({ error: '无法读取静态文件目录' })
+  }
+})
 
 // 健康检查
 app.get('/health', (req: Request, res: Response) => {

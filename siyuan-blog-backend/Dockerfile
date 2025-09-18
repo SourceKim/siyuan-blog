@@ -18,9 +18,13 @@ RUN yarn install --frozen-lockfile --production
 # 复制预构建产物（dist 需已存在于构建上下文中）
 COPY dist ./dist
 
+# 将项目 assets 合并到 dist/assets 下（统一由 dist/assets 提供）
+COPY assets ./dist/assets
+
 # 创建非 root 用户并切换
 RUN addgroup -g 1001 -S nodejs \
-  && adduser -S backend -u 1001
+  && adduser -S backend -u 1001 \
+  && chown -R backend:nodejs /app
 USER backend
 
 # 暴露端口（与 PORT 缺省一致）

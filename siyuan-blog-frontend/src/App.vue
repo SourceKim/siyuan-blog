@@ -64,7 +64,6 @@ html, body {
 
 /* 代码高亮样式 */
 .hljs {
-  /* background: var(--el-fill-color) !important; */
   color: var(--el-text-color-primary) !important;
 }
 </style> 

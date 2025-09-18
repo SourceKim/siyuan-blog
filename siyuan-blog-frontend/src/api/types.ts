@@ -27,6 +27,8 @@ export interface Doc {
   hCtime: string
   subFileCount: number
   notebookName?: string // 可选的笔记本名称字段
+  children?: Doc[]
+  isLeaf?: boolean
 }
 
 // 笔记内容类型

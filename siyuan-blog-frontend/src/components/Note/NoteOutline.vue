@@ -308,7 +308,7 @@ onUnmounted(() => {
 .outline-tree {
   display: flex;
   flex-direction: column;
-  /* gap: 4px; */
+  gap: 4px;
 }
 
 /* 滚动条样式 */
