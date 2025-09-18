@@ -54,13 +54,15 @@ interface Props {
   sidebarWidth?: string
   collapsedWidth?: string
   outlineWidth?: string
+  stickyTopOffset?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   defaultOpen: true,
   sidebarWidth: '320px',
   collapsedWidth: '60px',
-  outlineWidth: '320px'
+  outlineWidth: '320px',
+  stickyTopOffset: '0px'
 })
 
 // Emits
@@ -138,6 +140,7 @@ defineExpose({
   --sidebar-width: v-bind('props.sidebarWidth');
   --collapsed-width: v-bind('props.collapsedWidth');
   --outline-width: v-bind('props.outlineWidth');
+  --sticky-top: v-bind('props.stickyTopOffset');
 }
 
 /* 布局容器 */
@@ -159,8 +162,10 @@ defineExpose({
   border-right: 1px solid var(--tech-dark-border);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
-  overflow: visible;
-  position: relative;
+  overflow: hidden;
+  position: sticky;
+  top: var(--sticky-top);
+  height: calc(100vh - var(--sticky-top));
   z-index: 1000;
 }
 
@@ -198,10 +203,10 @@ defineExpose({
 .content {
   flex: 1 1 auto;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  min-height: 100vh;
+  min-height: auto;
   position: relative;
   z-index: 1;
-  overflow-y: auto;
+  overflow: visible;
   /* 适度放宽内容区左右空间 */
   padding: 0 8px;
 }
@@ -212,6 +217,9 @@ defineExpose({
   background: var(--tech-dark-card);
   border-left: 1px solid var(--tech-dark-border);
   flex-shrink: 0;
+  position: sticky;
+  top: var(--sticky-top);
+  height: calc(100vh - var(--sticky-top));
   overflow-y: auto;
   display: flex;
   flex-direction: column;
