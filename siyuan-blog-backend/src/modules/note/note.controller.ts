@@ -47,6 +47,25 @@ export class NoteController {
   }
 
   /**
+   * 获取文档信息（仅返回 IAL）
+   */
+  async getDocInfo(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.body as GetDocRequestDto
+      
+      if (!id || typeof id !== 'string') {
+        res.status(400).json(ApiResponse.error(400, 'id参数必填且必须为字符串'))
+        return
+      }
+
+      const info = await this.noteService.getDocInfo(id)
+      res.json(ApiResponse.success(info, '获取文档信息成功'))
+    } catch (error) {
+      res.status(500).json(ApiResponse.error(1, '获取文档信息失败'))
+    }
+  }
+
+  /**
    * 获取文档大纲
    */
   async getDocOutline(req: Request, res: Response): Promise<void> {

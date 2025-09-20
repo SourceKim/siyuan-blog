@@ -20,6 +20,14 @@ export const noteApi = {
     return result
   },
 
+  // 获取文档信息（IAL）
+  async getDocInfo(params: GetDocRequest): Promise<Record<string, any>> {
+    console.log('🌐 API: 调用 getDocInfo, 参数:', params)
+    const result = await api.post('/doc-info', params) as Record<string, any>
+    console.log('📊 API: getDocInfo 返回结果:', result)
+    return result
+  },
+
   // 获取文档大纲
   async getDocOutline(params: GetOutlineRequest): Promise<OutlineItem[]> {
     console.log('🌐 API: 调用 getDocOutline, 参数:', params)

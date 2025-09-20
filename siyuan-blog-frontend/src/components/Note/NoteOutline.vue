@@ -250,7 +250,6 @@ onUnmounted(() => {
 .note-outline {
   height: 100%;
   background: var(--bg-secondary, #1a1f29);
-  border-radius: 12px;
   overflow: hidden;
   --bg-primary: #0f1419;
   --bg-secondary: #1a1f29;

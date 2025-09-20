@@ -189,6 +189,33 @@ export class NoteService {
   }
 
   /**
+   * 获取文档信息（返回 IAL）
+   */
+  async getDocInfo(id: string): Promise<Record<string, any>> {
+    const apiPath = '/api/block/getDocInfo'
+    const requestData = { id }
+    
+    try {
+      this.logSiyuanRequest(apiPath, requestData)
+      
+      const response = await axios.post(`${this.siyuanBaseUrl}${apiPath}`, requestData, { 
+        headers: this.getHeaders() 
+      })
+
+      this.logSiyuanResponse(apiPath, response, requestData)
+
+      if (response.data.code !== 0) {
+        throw new Error(response.data.msg || '获取文档信息失败')
+      }
+
+      return response.data.data?.ial || {}
+    } catch (error) {
+      this.logSiyuanError(apiPath, error, requestData)
+      throw error
+    }
+  }
+
+  /**
    * 获取文档大纲
    */
   async getDocOutline(id: string, preview: boolean = false): Promise<OutlineItemDto[]> {

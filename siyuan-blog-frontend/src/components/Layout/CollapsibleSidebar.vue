@@ -162,7 +162,7 @@ defineExpose({
   border-right: 1px solid var(--tech-dark-border);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
-  overflow: hidden;
+  overflow: visible;
   position: sticky;
   top: var(--sticky-top);
   height: calc(100vh - var(--sticky-top));

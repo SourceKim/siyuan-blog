@@ -141,25 +141,31 @@ export const useNoteStore = defineStore('note', () => {
 
       const titleFromContent = extractTitleFromContent(noteContent.content)
 
-      // 若未在树中找到，则构造一个占位 Doc
-      const placeholderDoc: Doc = foundDoc || {
-        id: docId,
-        path: noteContent.path || '',
-        // 优先使用内容标题；其次从路径推断文件名；最后给 "未命名"
-        name: titleFromContent 
-          || (noteContent.path ? (noteContent.path.split('/').pop() || '').replace(/\?.*$/, '') : '') 
-          || '未命名',
-        sort: 0,
-        icon: '',
-        mtime: 0,
-        ctime: 0,
-        hMtime: '',
-        hCtime: '',
-        subFileCount: 0
-      }
+      // 构造用于展示的 Doc：
+      // 1) 若树中存在，优先采用内容标题覆盖 name（避免显示文件名/扩展名）
+      // 2) 若不存在，构造占位 Doc，并尽量用内容标题或从路径推断文件名
+      const selectedDoc: Doc = foundDoc 
+        ? { 
+            ...foundDoc, 
+            name: (titleFromContent && titleFromContent.trim()) || foundDoc.name 
+          }
+        : {
+            id: docId,
+            path: noteContent.path || '',
+            name: (titleFromContent && titleFromContent.trim())
+              || (noteContent.path ? (noteContent.path.split('/').pop() || '').replace(/\?.*$/, '') : '')
+              || '未命名',
+            sort: 0,
+            icon: '',
+            mtime: 0,
+            ctime: 0,
+            hMtime: '',
+            hCtime: '',
+            subFileCount: 0
+          }
 
       currentNote.value = noteContent
-      currentDoc.value = placeholderDoc
+      currentDoc.value = selectedDoc
     } catch (err) {
       error.value = err instanceof Error ? err.message : '通过ID获取文档失败'
       console.error('❌ 通过ID获取文档失败:', err)

@@ -28,22 +28,31 @@
             <div class="breadcrumb">
               <span class="breadcrumb-item">{{ currentNotebook?.name || '笔记本' }}</span>
               <span class="breadcrumb-separator">/</span>
-              <span class="breadcrumb-item current">{{ removeFileExtension(currentDoc.name) }}</span>
+              <span class="breadcrumb-item current">{{ docIAL?.title }}</span>
             </div>
             
-            <h1 class="article-title">{{ removeFileExtension(currentDoc.name) }}</h1>
+            <h1 class="article-title">{{ docIAL?.title }}</h1>
             
             <div class="article-meta">
               <span class="meta-item">
                 <el-icon><Clock /></el-icon>
-                更新时间：{{ formatTime(currentDoc.hMtime) }}
+                更新时间：{{ formattedDocUpdated }}
               </span>
-              <span v-if="currentDoc.subFileCount > 0" class="meta-item">
-                <el-icon><FolderOpened /></el-icon>
-                {{ currentDoc.subFileCount }} 个子文档
-              </span>
+              
             </div>
             
+            <!-- IAL 标签展示 -->
+            <div class="article-tags" v-if="docTags.length">
+              <el-tag
+                v-for="tag in docTags"
+                :key="tag"
+                class="tech-tag"
+                round
+                style="margin-right: 8px;"
+              >
+                {{ tag }}
+              </el-tag>
+            </div>
             
           </header>
 
@@ -102,11 +111,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useNoteStore } from '@/stores/note'
 import { storeToRefs } from 'pinia'
 import { SiyuanRenderer } from '@/components/SiyuanRenderer'
+import { noteApi } from '@/api/note'
 import { 
   Document, 
   House, 
@@ -155,12 +165,44 @@ const goHome = () => {
 
 // 已移除手动切换目录按钮与遮罩
 
-const removeFileExtension = (filename: string): string => {
-  return filename.replace(/\.sy$/, '')
-}
+// 已不再需要文件名兜底与原有更新时间格式
 
-const formatTime = (timeStr: string): string => {
-  return timeStr.split(',')[0] || timeStr
+// IAL 数据
+const docIAL = ref<Record<string, any> | null>(null)
+
+// 由 IAL 解析的标签数组（按逗号或分号分隔，去空格过滤空值）
+const docTags = computed<string[]>(() => {
+  const raw = docIAL.value?.tags || ''
+  if (typeof raw !== 'string') return []
+  return raw
+    .split(/[;,]/)
+    .map(s => s.trim())
+    .filter(Boolean)
+})
+
+// IAL 更新时间格式化（若无则返回空字符串）
+const formattedDocUpdated = computed(() => {
+  const updated = docIAL.value?.updated || ''
+  if (!updated || typeof updated !== 'string') return ''
+  // 若是纯数字时间戳（如 20180502033224），可做基本格式化为 YYYY-MM-DD
+  if (/^\d{14}$/.test(updated)) {
+    const y = updated.slice(0, 4)
+    const m = updated.slice(4, 6)
+    const d = updated.slice(6, 8)
+    return `${y}-${m}-${d}`
+  }
+  return updated
+})
+
+// 根据当前文档拉取 IAL
+const fetchDocIAL = async (docId: string) => {
+  try {
+    const ial = await noteApi.getDocInfo({ id: docId })
+    docIAL.value = ial || {}
+  } catch (e) {
+    console.error('获取文档 IAL 失败:', e)
+    docIAL.value = {}
+  }
 }
 
 // 检测屏幕尺寸
@@ -178,10 +220,23 @@ const handleResize = () => {
 onMounted(() => {
   checkMobile()
   window.addEventListener('resize', handleResize)
+  if (currentDoc.value?.id) {
+    fetchDocIAL(currentDoc.value.id)
+  }
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
+})
+
+// 监听当前文档变化，更新 IAL
+watch(() => currentDoc.value?.id, async (newId, oldId) => {
+  if (newId && newId !== oldId) {
+    await fetchDocIAL(newId)
+  }
+  if (!newId) {
+    docIAL.value = null
+  }
 })
 </script>
 
@@ -801,6 +856,25 @@ onUnmounted(() => {
 
 .article-header {
   animation-delay: 0.1s;
+}
+
+.article-tags {
+  margin-top: 16px;
+}
+
+.tech-tag {
+  --tag-bg: linear-gradient(135deg, var(--neon-accent), var(--purple-accent));
+  --tag-border: rgba(88, 166, 255, 0.35);
+  --tag-text: #e6f0ff;
+  background: var(--tag-bg) !important;
+  color: var(--tag-text) !important;
+  border: 1px solid var(--tag-border) !important;
+  box-shadow: 0 0 12px rgba(88, 166, 255, 0.25), inset 0 0 8px rgba(139, 92, 246, 0.2);
+}
+
+.tech-tag:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 0 16px rgba(88, 166, 255, 0.35), inset 0 0 10px rgba(139, 92, 246, 0.3);
 }
 
 .content-body {
