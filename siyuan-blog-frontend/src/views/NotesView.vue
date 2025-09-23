@@ -140,7 +140,6 @@ watch(() => route.query.docId, async (newId, oldId) => {
 
 /* 容器样式 */
 .notes-view-container {
-  position: relative;
   height: 100vh;
   background: transparent;
 }
@@ -152,7 +151,6 @@ watch(() => route.query.docId, async (newId, oldId) => {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  position: relative;
   z-index: 1;
 }
 
@@ -193,7 +191,6 @@ watch(() => route.query.docId, async (newId, oldId) => {
   background: transparent;
   padding: 0;
   margin: 0;
-  position: relative;
   z-index: 1;
 }
 
@@ -218,21 +215,4 @@ watch(() => route.query.docId, async (newId, oldId) => {
   }
 }
 
-/* 自定义滚动条 */
-.notes-sidebar-content::-webkit-scrollbar {
-  width: 6px;
-}
-
-.notes-sidebar-content::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.notes-sidebar-content::-webkit-scrollbar-thumb {
-  background: var(--tech-primary);
-  border-radius: 3px;
-}
-
-.notes-sidebar-content::-webkit-scrollbar-thumb:hover {
-  background: var(--tech-secondary);
-}
 </style> 

@@ -278,14 +278,12 @@ watch(() => currentDoc.value?.id, async (newId, oldId) => {
   max-width: 960px;
   margin: 0 auto;
   padding: 32px 24px;
-  position: relative;
 }
 
 
 .hero-section {
   text-align: center;
   max-width: 640px;
-  position: relative;
   z-index: 1;
 }
 
@@ -332,7 +330,6 @@ watch(() => currentDoc.value?.id, async (newId, oldId) => {
 /* 文档布局 */
 .document-layout {
   display: flex;
-  position: relative;
   width: 100%;
 }
 
@@ -343,11 +340,9 @@ watch(() => currentDoc.value?.id, async (newId, oldId) => {
   padding: 24px 24px;
   max-width: 100%;
   margin: 0;
-  position: relative;
 }
 
 .article-header {
-  position: relative;
   margin-bottom: 32px;
   padding: 24px;
   border-radius: 12px;
@@ -464,7 +459,6 @@ watch(() => currentDoc.value?.id, async (newId, oldId) => {
   font-weight: 700;
   line-height: 1.2;
   color: var(--text-primary);
-  position: relative;
 }
 
 .html-content :deep(h1) { 
@@ -665,36 +659,7 @@ watch(() => currentDoc.value?.id, async (newId, oldId) => {
   z-index: 1;
 }
 
-/* 大纲侧边栏 */
-.outline-sidebar {
-  width: 320px;
-  background: var(--bg-secondary);
-  border-left: 1px solid var(--border-primary);
-  position: fixed;
-  top: 0;
-  right: -320px;
-  height: 100vh;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 100;
-  backdrop-filter: blur(20px);
-  box-shadow: var(--shadow-primary);
-}
-
-.outline-sidebar.outline-visible {
-  right: 0;
-}
-
-/* 大纲遮罩 */
-.outline-mask {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(8px);
-  z-index: 99;
-}
+/* 大纲侧边栏相关样式已移除（使用 CollapsibleSidebar.vue 中的 .outline-panel） */
 
 /* 响应式设计 */
 @media (min-width: 1200px) {
@@ -744,10 +709,7 @@ watch(() => currentDoc.value?.id, async (newId, oldId) => {
   .html-content :deep(h2) { font-size: 20px; }
   .html-content :deep(h3) { font-size: 18px; }
   
-  .outline-sidebar {
-    width: 280px;
-    right: -280px;
-  }
+  /* 移动端不在本组件内控制大纲样式 */
 }
 
 /* 按钮样式增强 */

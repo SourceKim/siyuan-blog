@@ -53,16 +53,12 @@ interface Props {
   defaultOpen?: boolean
   sidebarWidth?: string
   collapsedWidth?: string
-  outlineWidth?: string
-  stickyTopOffset?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   defaultOpen: true,
   sidebarWidth: '320px',
   collapsedWidth: '60px',
-  outlineWidth: '320px',
-  stickyTopOffset: '0px'
 })
 
 // Emits
@@ -139,8 +135,7 @@ defineExpose({
   --tech-glow: 0 0 20px rgba(0, 191, 255, 0.3);
   --sidebar-width: v-bind('props.sidebarWidth');
   --collapsed-width: v-bind('props.collapsedWidth');
-  --outline-width: v-bind('props.outlineWidth');
-  --sticky-top: v-bind('props.stickyTopOffset');
+  --outline-width: 320px;
 }
 
 /* 布局容器 */
@@ -150,7 +145,6 @@ defineExpose({
   min-height: 100vh;
   color: var(--tech-text-light);
   font-family: 'Inter', 'Roboto', 'Nunito Sans', sans-serif;
-  position: relative;
 }
 
 /* 侧边栏 */
@@ -163,9 +157,7 @@ defineExpose({
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
   overflow: visible;
-  position: sticky;
-  top: var(--sticky-top);
-  height: calc(100vh - var(--sticky-top));
+  height: 100vh;
   z-index: 1000;
 }
 
@@ -203,33 +195,32 @@ defineExpose({
 .content {
   flex: 1 1 auto;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  min-height: auto;
   position: relative;
   z-index: 1;
-  overflow: visible;
+  overflow: auto;
   /* 适度放宽内容区左右空间 */
   padding: 0 8px;
+  height: 100vh;
 }
 
 /* 右侧大纲区域 */
 .outline-panel {
-  width: var(--outline-width);
   background: var(--tech-dark-card);
   border-left: 1px solid var(--tech-dark-border);
   flex-shrink: 0;
-  position: sticky;
-  top: var(--sticky-top);
-  height: calc(100vh - var(--sticky-top));
+  width: var(--outline-width);
+  right: 0;
+  height: 100vh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  z-index: 1000;
 }
 
 /* 折叠按钮 */
 .collapse-btn {
-  position: absolute;
-  right: -16px;
-  top: 100px;
+  margin-left: calc(var(--sidebar-width) - 16px);
+  margin-top: 40px;
   width: 32px;
   height: 32px;
   background: var(--tech-gradient);
@@ -244,11 +235,16 @@ defineExpose({
   transition: all 0.3s ease;
   border: none;
   z-index: 1001;
+  position: fixed;
 }
 
 .collapse-btn:hover {
   transform: scale(1.1);
   box-shadow: var(--tech-glow);
+}
+
+.collapse-btn.collapsed {
+  margin-left: calc(var(--collapsed-width) - 16px);
 }
 
 /* 移动端样式 */
@@ -286,6 +282,11 @@ defineExpose({
     display: none;
   }
   
+  /* 移动端内容区域不需要为大纲留白 */
+  .content {
+    margin-right: 0 !important;
+  }
+  
   /* 移动端调整折叠按钮位置 */
   .collapse-btn,
   .collapse-btn.collapsed {
@@ -314,30 +315,4 @@ defineExpose({
   outline-offset: 2px;
 }
 
-/* 动画效果 */
-@media (prefers-reduced-motion: no-preference) {
-  .sidebar,
-  .content,
-  .collapse-btn {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-}
-
-/* 自定义滚动条 */
-.sidebar-content::-webkit-scrollbar {
-  width: 6px;
-}
-
-.sidebar-content::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sidebar-content::-webkit-scrollbar-thumb {
-  background: var(--tech-primary);
-  border-radius: 3px;
-}
-
-.sidebar-content::-webkit-scrollbar-thumb:hover {
-  background: var(--tech-secondary);
-}
 </style>
