@@ -1,0 +1,9 @@
+{
+  "name": "siyuanblog-monorepo",
+  "private": true,
+  "scripts": {
+    "fe:build": "bash scripts/frontend_build.sh",
+    "fe:sync": "bash -lc 'set -a; source .env; set +a; bash scripts/frontend_sync.sh \"$SSH_HOST\" \"$SSH_USER\" \"${SSH_PORT:-22}\" \"$REMOTE_WEB_ROOT\" \"${RSYNC_ARGS:--avz --delete}\" \"${SSH_KEY:-}\" \"${RSYNC_SUDO:-}\"'",
+    "fe:deploy": "bash scripts/frontend_build.sh && bash -lc 'set -a; source .env; set +a; bash scripts/frontend_sync.sh \"$SSH_HOST\" \"$SSH_USER\" \"${SSH_PORT:-22}\" \"$REMOTE_WEB_ROOT\" \"${RSYNC_ARGS:--avz --delete}\" \"${SSH_KEY:-}\" \"${RSYNC_SUDO:-}\"'"
+  }
+}
