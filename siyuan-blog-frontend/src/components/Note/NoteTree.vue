@@ -23,12 +23,12 @@
               <component :is="getNodeIcon(data)" />
             </el-icon>
             <el-tooltip 
-              :content="removeFileExtension(node.label)" 
+              :content="decodeHtml(removeFileExtension(node.label))" 
               placement="right"
-              :disabled="!isTextOverflow(removeFileExtension(node.label))"
+              :disabled="!isTextOverflow(decodeHtml(removeFileExtension(node.label)))"
               :show-after="500"
             >
-              <span class="node-label">{{ removeFileExtension(node.label) }}</span>
+              <span class="node-label">{{ decodeHtml(removeFileExtension(node.label)) }}</span>
             </el-tooltip>
             <div class="node-info" v-if="data.subFileCount > 0">
               <el-tag size="small" type="info">{{ data.subFileCount }}</el-tag>
@@ -62,6 +62,12 @@ import {
   Folder,
 } from '@element-plus/icons-vue'
 import type { ElTree } from 'element-plus'
+// HTML 实体就地反解码（不使用 v-html，保持安全）
+const decodeHtml = (input: string): string => {
+  const div = document.createElement('div')
+  div.innerHTML = input
+  return div.textContent || div.innerText || ''
+}
 
 // Props
 interface Props {

@@ -7,6 +7,7 @@
     "fe:deploy": "bash scripts/frontend_build.sh && bash -lc 'set -a; source .env; set +a; bash scripts/frontend_sync.sh \"$SSH_HOST\" \"$SSH_USER\" \"${SSH_PORT:-22}\" \"$REMOTE_WEB_ROOT\" \"${RSYNC_ARGS:--avz --delete}\" \"${SSH_KEY:-}\" \"${RSYNC_SUDO:-}\"'",
     "be:buildx": "bash -lc 'set -a; source .env; set +a; bash scripts/backend_buildx_push.sh'",
     "be:deploy": "bash -lc 'set -a; source .env; set +a; bash scripts/backend_deploy_remote.sh'",
-    "be:release": "yarn be:buildx && yarn be:deploy"
+    "be:release": "yarn be:buildx && yarn be:deploy",
+    "sy:sync": "bash -lc 'set -a; source .env; set +a; bash scripts/siyuan_sync.sh'"
   }
 }

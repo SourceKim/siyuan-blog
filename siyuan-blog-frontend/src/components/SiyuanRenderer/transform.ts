@@ -21,6 +21,24 @@ function unescapeHtml(escaped: string): string {
     .replace(/&amp;/g, "&")
 }
 
+// 将形如 http(s)://host:port/path?query 的图片地址改写为 /image/path?query
+function rewriteImageSrcToProxy(src: string): string {
+  if (!src) return src
+  try {
+    const u = new URL(src)
+    if (u.protocol === 'http:' || u.protocol === 'https:') {
+      const path = u.pathname || '/'
+      const search = u.search || ''
+      return `/image${path}${search}`
+    }
+  } catch (_) {
+    // 非绝对 URL，继续尝试正则匹配
+  }
+  const m = src.match(/^https?:\/\/[^/]+(\/.*)$/i)
+  if (m) return `/image${m[1]}`
+  return src
+}
+
 function getHeadingLevel(el: Element): number {
   const bySubtype = el.getAttribute("data-subtype")
   if (bySubtype && /^h[1-6]$/.test(bySubtype)) {
@@ -56,7 +74,8 @@ function renderInline(nodes: NodeListOf<ChildNode> | ChildNode[]): string {
         // 处理内联图片：SiYuan 会在段落内用 span[data-type=img] 包裹 img
         const img = el.querySelector('img') as HTMLImageElement | null
         if (img) {
-          const src = img.getAttribute('data-src') || img.getAttribute('src') || ""
+          const rawSrc = img.getAttribute('data-src') || img.getAttribute('src') || ""
+          const src = rewriteImageSrcToProxy(rawSrc)
           const alt = img.getAttribute('alt') || ""
           const title = img.getAttribute('title') || ""
           html += `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}" title="${escapeHtml(title)}">`
@@ -163,7 +182,8 @@ function renderImage(el: Element): string {
   // 思源图片结构较复杂，这里兼容常见形式：寻找 img 元素
   const img = el.querySelector('img') as HTMLImageElement | null
   if (img) {
-    const src = img.getAttribute('data-src') || img.getAttribute('src') || ""
+    const rawSrc = img.getAttribute('data-src') || img.getAttribute('src') || ""
+    const src = rewriteImageSrcToProxy(rawSrc)
     const title = img.getAttribute('title') || ""
     const style = img.getAttribute('style') || ""
     return `<img src="${escapeHtml(src)}" title="${escapeHtml(title)}" style="${escapeHtml(style)}">`
