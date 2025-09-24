@@ -171,10 +171,7 @@ watch(() => route.query.docId, async (newId, oldId) => {
   letter-spacing: 0.02em;
 }
 
-.header-actions {
-  display: flex;
-  gap: 8px;
-}
+/* 已移除：未使用的 .header-actions 样式 */
 
 .search-box {
   padding: 0 24px 16px;

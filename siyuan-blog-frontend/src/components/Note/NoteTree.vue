@@ -60,8 +60,6 @@ import type { Doc } from '@/api/types'
 import {
   Document,
   Folder,
-  ArrowLeft,
-  ArrowRight
 } from '@element-plus/icons-vue'
 import type { ElTree } from 'element-plus'
 
@@ -302,9 +300,6 @@ watch(() => props.searchText, () => {
   color: var(--tech-text-light);
 }
 
-:deep(.el-tree-node) {
-  position: relative;
-}
 
 :deep(.el-tree-node__content) {
   background: transparent;

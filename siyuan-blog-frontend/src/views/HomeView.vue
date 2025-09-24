@@ -212,13 +212,10 @@ import { useNoteStore } from '@/stores/note'
 import { useHomeStore } from '@/stores/home'
 import { storeToRefs } from 'pinia'
 import {
-  User,
   Document,
   Star,
   FolderOpened,
   Clock,
-  Edit,
-  View,
   Message,
   Link,
   Position,

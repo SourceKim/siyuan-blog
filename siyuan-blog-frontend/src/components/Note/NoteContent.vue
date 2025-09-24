@@ -111,7 +111,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useNoteStore } from '@/stores/note'
 import { storeToRefs } from 'pinia'
@@ -120,8 +120,7 @@ import { noteApi } from '@/api/note'
 import { 
   Document, 
   House, 
-  Clock, 
-  FolderOpened
+  Clock
 } from '@element-plus/icons-vue'
 
 // Router
@@ -137,16 +136,7 @@ const {
   error
 } = storeToRefs(noteStore)
 
-// 响应式状态（已移除大纲相关显隐）
-const isMobile = ref(false)
-
-// 清理HTML内容（暂时直接返回内容，后续可添加DOMPurify）
-const sanitizedContent = computed(() => {
-  if (!currentNote.value?.content) return ''
-  
-  // TODO: 后续可以添加DOMPurify来清理HTML内容，防止XSS攻击
-  return currentNote.value.content
-})
+// 已移除：与大纲相关的显隐控制与内容清理占位
 
 // 已移除上一篇/下一篇导航
 
@@ -205,28 +195,13 @@ const fetchDocIAL = async (docId: string) => {
   }
 }
 
-// 检测屏幕尺寸
-const checkMobile = () => {
-  isMobile.value = window.innerWidth <= 768
-  // 已移除：桌面端默认显示大纲逻辑
-}
-
-// 监听窗口尺寸变化
-const handleResize = () => {
-  checkMobile()
-}
+// 已移除：移动端尺寸检测与监听
 
 // 生命周期
 onMounted(() => {
-  checkMobile()
-  window.addEventListener('resize', handleResize)
   if (currentDoc.value?.id) {
     fetchDocIAL(currentDoc.value.id)
   }
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', handleResize)
 })
 
 // 监听当前文档变化，更新 IAL
@@ -350,13 +325,7 @@ watch(() => currentDoc.value?.id, async (newId, oldId) => {
   border: 1px solid var(--border-color);
 }
 
-.content-actions {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 8px;
-}
+/* 已移除：未使用的 .content-actions 样式 */
 
 .breadcrumb {
   font-size: 14px;
@@ -580,84 +549,7 @@ watch(() => currentDoc.value?.id, async (newId, oldId) => {
   font-weight: 600;
 }
 
-/* 文章导航 */
-.article-footer {
-  margin-top: 64px;
-  padding: 32px;
-  border-radius: 16px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-primary);
-  box-shadow: var(--shadow-secondary);
-}
-
-.article-nav {
-  display: flex;
-  justify-content: space-between;
-  gap: 24px;
-}
-
-.nav-prev,
-.nav-next {
-  flex: 1;
-}
-
-.nav-next {
-  text-align: right;
-}
-
-.nav-link {
-  display: block;
-  padding: 20px;
-  background: var(--bg-tertiary);
-  border-radius: 12px;
-  color: var(--text-secondary);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  border: 1px solid var(--border-primary);
-  position: relative;
-  overflow: hidden;
-}
-
-.nav-link::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(88, 166, 255, 0.1), transparent);
-  transition: left 0.5s ease;
-}
-
-.nav-link:hover::before {
-  left: 100%;
-}
-
-.nav-link:hover {
-  color: var(--accent-primary);
-  background: var(--bg-secondary);
-  border-color: var(--accent-primary);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-secondary);
-}
-
-.nav-direction {
-  display: block;
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 600;
-}
-
-.nav-title {
-  display: block;
-  font-weight: 600;
-  font-size: 16px;
-  position: relative;
-  z-index: 1;
-}
+/* 已移除：文章导航相关样式（未使用） */
 
 /* 大纲侧边栏相关样式已移除（使用 CollapsibleSidebar.vue 中的 .outline-panel） */
 
@@ -691,11 +583,7 @@ watch(() => currentDoc.value?.id, async (newId, oldId) => {
     padding-right: 0;
   }
   
-  .content-actions {
-    position: static;
-    margin-top: 16px;
-    text-align: left;
-  }
+  /* 已移除：未使用的 .content-actions 媒体查询覆盖 */
   
   .article-nav {
     flex-direction: column;
@@ -811,8 +699,7 @@ watch(() => currentDoc.value?.id, async (newId, oldId) => {
 }
 
 .article-header,
-.content-body,
-.article-footer {
+.content-body {
   animation: fadeInUp 0.6s ease-out;
 }
 
@@ -843,9 +730,7 @@ watch(() => currentDoc.value?.id, async (newId, oldId) => {
   animation-delay: 0.2s;
 }
 
-.article-footer {
-  animation-delay: 0.3s;
-}
+/* 已移除：.article-footer 动画延迟（未使用） */
 
 /* 焦点可访问性 */
 .nav-link:focus-visible {
