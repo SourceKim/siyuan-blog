@@ -10,7 +10,6 @@
             </el-icon>
           </div>
           <h1 class="hero-title">笔记浏览器</h1>
-          <p class="hero-subtitle">浏览和阅读你的思源笔记</p>
           <div class="hero-actions">
             <el-button @click="goHome" type="primary" :icon="House" size="large">
               返回首页
@@ -278,13 +277,6 @@ watch(() => currentDoc.value?.id, async (newId, oldId) => {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   letter-spacing: -0.02em;
-}
-
-.hero-subtitle {
-  font-size: 20px;
-  color: var(--text-secondary);
-  margin: 0 0 40px;
-  line-height: 1.6;
 }
 
 .hero-actions {
