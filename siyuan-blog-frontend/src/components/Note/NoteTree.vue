@@ -69,6 +69,61 @@ const decodeHtml = (input: string): string => {
   return div.textContent || div.innerText || ''
 }
 
+// 解析后端返回的 path 为 id 列表
+const parsePathToIds = (path: string): string[] => {
+  if (!path) return []
+  return path.split('/').filter(Boolean).map(seg => seg.replace(/\.sy$/i, ''))
+}
+
+// 等待树中出现指定节点（重试若干次）
+const waitForNode = async (id: string, retries = 20, intervalMs = 50): Promise<any | null> => {
+  for (let i = 0; i < retries; i++) {
+    const node = docTreeRef.value?.getNode(id) || null
+    if (node) return node
+    await new Promise(r => setTimeout(r, intervalMs))
+  }
+  return null
+}
+
+
+
+// 按 path 逐级展开并选中目标文档
+const expandPathAndSelect = async (path: string, targetId: string) => {
+  try {
+    const ids = parsePathToIds(path)
+    if (!ids.length) {
+      // 仅设置高亮
+      docTreeRef.value?.setCurrentKey(targetId)
+      return
+    }
+
+    // 逐级展开到倒数第二级（父链）
+    const parentIds = ids.slice(0, -1)
+    for (const pid of parentIds) {
+      // 若节点尚未渲染，尝试等待（lazy 展开后才会出现子节点）
+      let node = await waitForNode(pid)
+      if (!node) {
+        // 顶层节点可能尚未渲染完成，稍后再试
+        node = await waitForNode(pid)
+      }
+      if (!node) continue
+      // 展开父节点，触发懒加载
+      node.expand()
+      // 等待 DOM 渲染完成（下一帧）
+      await nextTick()
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
+    }
+
+    // 最终选中目标节点
+    // 确保目标节点已渲染（其父已展开）
+    await waitForNode(targetId)
+    docTreeRef.value?.setCurrentKey(targetId)
+  } catch (e) {
+    console.warn('expandPathAndSelect 失败:', e)
+    docTreeRef.value?.setCurrentKey(targetId)
+  }
+}
+
 // Props
 interface Props {
   searchText?: string
@@ -201,11 +256,17 @@ const isTextOverflow = (text: string): boolean => {
 }
 
 // 监听当前文档变化，高亮对应节点
-watch(currentDoc, (newDoc) => {
+watch(currentDoc, async (newDoc) => {
   if (newDoc && docTreeRef.value) {
-    nextTick(() => {
+    await nextTick()
+    const path = (newDoc as any).path || ''
+    if (path) {
+      console.info('[NoteTree] 将根据 path 展开并选中: path=', path, ' id=', newDoc.id)
+      await expandPathAndSelect(path, newDoc.id)
+    } else {
+      console.info('[NoteTree] 直接选中当前文档，无 path: id=', newDoc.id)
       docTreeRef.value?.setCurrentKey(newDoc.id)
-    })
+    }
   }
 }, { immediate: true })
 
